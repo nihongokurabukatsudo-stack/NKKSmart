@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { formatDateIndo, formatTime } from '../lib/utils'
 import {
@@ -21,7 +22,6 @@ interface DashboardStats {
   anggota: number
   pengurus: number
   pertemuan: number
-  hadirHariIni: number
 }
 
 interface TodayMeeting {
@@ -45,52 +45,125 @@ interface AttendanceRow {
   scan_time?: string
 }
 
+interface MeetingAttendance {
+  id: number
+  nama_pertemuan: string
+  pertemuan_ke: number
+  tanggal: string
+  jam_mulai_scan: string
+  jam_akhir_scan: string
+  manual_active: boolean
+  is_libur: boolean
+  hadir: number
+}
+
+const jakartaToday = () => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]))
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+const jakartaClock = () => new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+}).format(new Date())
+
+const getMeetingSummary = (meetings: MeetingAttendance[], totalActive: number) => {
+  const eligible = meetings.filter((meeting) => !meeting.is_libur)
+  const averageCount = eligible.length ? Math.round(eligible.reduce((sum, meeting) => sum + meeting.hadir, 0) / eligible.length) : 0
+  const averagePercent = totalActive && eligible.length
+    ? Math.round(eligible.reduce((sum, meeting) => sum + meeting.hadir, 0) / (eligible.length * totalActive) * 100)
+    : 0
+  return { averageCount, averagePercent }
+}
+
 export const DashboardPage: React.FC = () => {
+  const queryClient = useQueryClient()
   const [stats, setStats] = useState<DashboardStats>({
     anggota: 0,
     pengurus: 0,
     pertemuan: 0,
-    hadirHariIni: 0,
   })
   const [todayMeeting, setTodayMeeting] = useState<TodayMeeting | null>(null)
   const [hadirList, setHadirList] = useState<AttendanceRow[]>([])
   const [tidakHadirList, setTidakHadirList] = useState<AttendanceRow[]>([])
-  const [chartData, setChartData] = useState<Array<{ date: string; count: number }>>([])
+  const [meetingLimit, setMeetingLimit] = useState<5 | 8 | 12>(() => {
+    const saved = Number(localStorage.getItem('nkk-dashboard-meeting-limit'))
+    return saved === 5 || saved === 8 || saved === 12 ? saved : 8
+  })
+  const [todayInJakarta, setTodayInJakarta] = useState(jakartaToday)
+  const [clockInJakarta, setClockInJakarta] = useState(jakartaClock)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null)
+
+  useEffect(() => {
+    localStorage.setItem('nkk-dashboard-meeting-limit', String(meetingLimit))
+  }, [meetingLimit])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setTodayInJakarta(jakartaToday())
+      setClockInJakarta(jakartaClock())
+    }, 30_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  const meetingAttendanceQuery = useQuery({
+    queryKey: ['dashboard', 'meeting-attendance', meetingLimit],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data: meetings, error: meetingError } = await supabase
+        .from('pertemuan')
+        .select('id,nama_pertemuan,pertemuan_ke,tanggal,jam_mulai_scan,jam_akhir_scan,manual_active,is_libur')
+        .lte('tanggal', jakartaToday())
+        .order('tanggal', { ascending: false })
+        .order('pertemuan_ke', { ascending: false })
+        .limit(meetingLimit)
+
+      if (meetingError) throw meetingError
+      if (!meetings?.length) return [] as MeetingAttendance[]
+
+      const { data: attendance, error: attendanceError } = await supabase
+        .from('absensi')
+        .select('pertemuan_id,anggota_id,anggota:anggota_id!inner(status,is_deleted)')
+        .in('pertemuan_id', meetings.map((meeting) => meeting.id))
+        .eq('status', 'hadir')
+        .eq('anggota.status', 'Aktif')
+        .eq('anggota.is_deleted', false)
+
+      if (attendanceError) throw attendanceError
+      const counts = new Map<number, number>()
+      attendance?.forEach(({ pertemuan_id }) => counts.set(pertemuan_id, (counts.get(pertemuan_id) || 0) + 1))
+      return meetings
+        .map((meeting) => ({ ...meeting, hadir: counts.get(meeting.id) || 0 }))
+        .reverse()
+    },
+  })
 
   const loadDashboardData = async () => {
     setIsLoading(true)
     try {
       // 1. Fetch Stats
       const [anggotaRes, pengurusRes, pertemuanRes] = await Promise.all([
-        supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('is_deleted', false).eq('jabatan', 'Anggota'),
-        supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('is_deleted', false).eq('jabatan', 'Pengurus'),
+        supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('is_deleted', false).eq('status', 'Aktif').eq('jabatan', 'Anggota'),
+        supabase.from('anggota').select('*', { count: 'exact', head: true }).eq('is_deleted', false).eq('status', 'Aktif').eq('jabatan', 'Pengurus'),
         supabase.from('pertemuan').select('*', { count: 'exact', head: true }),
       ])
-
-      // Hadir hari ini (WIB)
-      const todayStr = new Date().toISOString().split('T')[0]
-      const { count: hadirTodayCount } = await supabase
-        .from('absensi')
-        .select('*', { count: 'exact', head: true })
-        .gte('scan_time', `${todayStr}T00:00:00+07:00`)
-        .lte('scan_time', `${todayStr}T23:59:59+07:00`)
-        .eq('status', 'hadir')
 
       setStats({
         anggota: anggotaRes.count || 0,
         pengurus: pengurusRes.count || 0,
         pertemuan: pertemuanRes.count || 0,
-        hadirHariIni: hadirTodayCount || 0,
       })
 
       // 2. Fetch Pertemuan Hari Ini atau Pertemuan Aktif Terakhir
       const { data: meetings } = await supabase
         .from('pertemuan')
         .select('*')
-        .order('manual_active', { ascending: false })
+        .lte('tanggal', jakartaToday())
         .order('tanggal', { ascending: false })
+        .order('pertemuan_ke', { ascending: false })
         .order('jam_mulai_scan', { ascending: false })
         .limit(1)
 
@@ -164,36 +237,6 @@ export const DashboardPage: React.FC = () => {
         }
       }
 
-      // 3. Activity Chart (7 Hari Terakhir)
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
-      const startDateStr = sevenDaysAgo.toISOString().split('T')[0]
-
-      const { data: recentAbsensi } = await supabase
-        .from('absensi')
-        .select('scan_time')
-        .gte('scan_time', `${startDateStr}T00:00:00+07:00`)
-        .eq('status', 'hadir')
-
-      const countsByDate: Record<string, number> = {}
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        countsByDate[d.toISOString().split('T')[0]] = 0
-      }
-
-      if (recentAbsensi) {
-        recentAbsensi.forEach((r) => {
-          const datePart = r.scan_time.slice(0, 10)
-          if (countsByDate[datePart] !== undefined) {
-            countsByDate[datePart]++
-          }
-        })
-      }
-
-      setChartData(
-        Object.entries(countsByDate).map(([date, count]) => ({ date, count }))
-      )
     } catch (err) {
       console.error('Error loading dashboard data:', err)
     } finally {
@@ -241,6 +284,7 @@ export const DashboardPage: React.FC = () => {
       }
 
       await loadDashboardData()
+      await queryClient.invalidateQueries({ queryKey: ['dashboard', 'meeting-attendance'] })
     } catch (err) {
       console.error('Toggle attendance error:', err)
     } finally {
@@ -248,7 +292,13 @@ export const DashboardPage: React.FC = () => {
     }
   }
 
-  const maxChartCount = Math.max(1, ...chartData.map((c) => c.count))
+  const meetingChartData = meetingAttendanceQuery.data || []
+  const totalActive = stats.anggota + stats.pengurus
+  const { averageCount, averagePercent } = getMeetingSummary(meetingChartData, totalActive)
+  const latestMeeting = meetingChartData.at(-1)
+  const latestIsLive = Boolean(latestMeeting && latestMeeting.tanggal === todayInJakarta && !latestMeeting.is_libur && (
+    latestMeeting.manual_active || (clockInJakarta >= latestMeeting.jam_mulai_scan.slice(0, 5) && clockInJakarta <= latestMeeting.jam_akhir_scan.slice(0, 5))
+  ))
 
   return (
     <div className="space-y-6">
@@ -266,6 +316,7 @@ export const DashboardPage: React.FC = () => {
         <Link
           to="/scan"
           target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-md shadow-emerald-900/30 transition"
         >
           <QrCode className="w-4 h-4" />
@@ -317,54 +368,64 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Card 4: Hadir Hari Ini */}
+        {/* Card 4: Pertemuan Terakhir */}
         <div className="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-slate-400">Kehadiran Hari Ini</p>
-            <p className="text-2xl font-bold text-white mt-1">{stats.hadirHariIni}</p>
-            <span className="text-[11px] text-emerald-400 flex items-center gap-1 mt-1">
-              Presensi tercatat
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-medium text-slate-400">Pertemuan Terakhir</p>
+              {latestIsLive && <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">Berlangsung</span>}
+            </div>
+            <p className="text-2xl font-bold text-white mt-1">{latestMeeting?.is_libur ? 'Libur' : latestMeeting ? `${latestMeeting.hadir}/${totalActive}` : '—'}</p>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              {latestMeeting ? `${latestMeeting.nama_pertemuan} · ${formatDateIndo(latestMeeting.tanggal)}${latestMeeting.is_libur ? ' · Libur' : ` · ${totalActive ? Math.round(latestMeeting.hadir / totalActive * 100) : 0}%`}` : 'Belum ada pertemuan yang berlangsung'}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
       </div>
 
-      {/* Activity Chart Bar */}
+      {/* Kehadiran per Pertemuan */}
       <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-sm font-semibold text-white">Tren Kehadiran (7 Hari Terakhir)</h2>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Kehadiran per Pertemuan</h2>
+              <p className="text-xs text-slate-400">Hadir per pertemuan · rata-rata {averageCount} orang ({averagePercent}%)</p>
+            </div>
           </div>
-          <span className="text-xs text-slate-400">Total presensi per hari</span>
+          <div className="inline-flex w-fit rounded-lg border border-slate-700 bg-slate-900/70 p-1" aria-label="Jumlah pertemuan pada grafik">
+            {([5, 8, 12] as const).map((count) => <button key={count} type="button" onClick={() => setMeetingLimit(count)} aria-pressed={meetingLimit === count} className={`min-h-9 min-w-10 rounded-md px-2 text-xs font-semibold transition ${meetingLimit === count ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}>{count}</button>)}
+          </div>
         </div>
 
-        <div className="h-40 flex items-end gap-2 sm:gap-4 pt-6 px-2">
-          {chartData.map((item) => {
-            const heightPercent = Math.round((item.count / maxChartCount) * 100)
-            const dateLabel = new Date(item.date).toLocaleDateString('id-ID', {
-              weekday: 'short',
-              day: 'numeric',
-            })
-            return (
-              <div key={item.date} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                <span className="text-[11px] text-slate-400 opacity-0 group-hover:opacity-100 transition font-medium">
-                  {item.count}
-                </span>
-                <div
-                  style={{ height: `${Math.max(8, heightPercent)}%` }}
-                  className="w-full max-w-[48px] bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-lg transition-all duration-300 group-hover:brightness-125 shadow-lg shadow-emerald-950/20"
-                />
-                <span className="text-[10px] text-slate-400 truncate w-full text-center">
-                  {dateLabel}
-                </span>
+        {meetingAttendanceQuery.isLoading ? <div className="h-52 animate-pulse rounded-xl bg-slate-700/40" aria-label="Memuat grafik kehadiran" />
+          : meetingAttendanceQuery.isError ? <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-300">Gagal memuat statistik pertemuan.</div>
+          : meetingChartData.length === 0 ? <div className="flex min-h-44 flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 text-center"><CalendarDays className="mb-2 h-8 w-8 text-slate-500"/><p className="text-sm text-slate-300">Belum ada pertemuan yang berlangsung</p></div>
+          : <div className="overflow-x-auto pb-2">
+              <div className="relative h-52 min-w-full" style={{ minWidth: meetingChartData.length > 8 ? `${meetingChartData.length * 58}px` : undefined }}>
+                <div className="pointer-events-none absolute inset-x-0 top-3 bottom-10 flex flex-col justify-between text-[10px] text-slate-500">
+                  {[totalActive, Math.round(totalActive / 2), 0].map((tick, index) => <div key={index} className="flex items-center gap-2"><span className="w-8 text-right">{tick}</span><span className="h-px flex-1 bg-slate-700/60" /></div>)}
+                </div>
+                <div className="absolute top-3 bottom-10 left-11 right-1 flex items-end justify-around gap-2 sm:gap-3">
+                  {meetingChartData.map((meeting) => {
+                    const percent = totalActive ? Math.round(meeting.hadir / totalActive * 100) : 0
+                    const height = totalActive ? Math.max(meeting.hadir ? 2 : 0, meeting.hadir / totalActive * 100) : 0
+                    const fullDate = formatDateIndo(meeting.tanggal)
+                    return <Link key={meeting.id} to={`/pertemuan/${meeting.id}`} title={`${meeting.nama_pertemuan} · ${fullDate} · ${meeting.is_libur ? 'Libur' : `Hadir ${meeting.hadir} dari ${totalActive} (${percent}%)`}`} aria-label={`${meeting.nama_pertemuan}, ${fullDate}, ${meeting.is_libur ? 'Libur' : `${meeting.hadir} hadir dari ${totalActive}, ${percent} persen`}`} className="group flex h-full min-w-8 flex-1 flex-col items-center justify-end gap-1 text-center focus-visible:rounded-md">
+                      <span className="h-4 text-[11px] font-bold text-white">{meeting.is_libur ? '—' : meeting.hadir}</span>
+                      <div className={`relative w-full max-w-12 overflow-hidden rounded-t-md transition group-hover:brightness-125 ${meeting.is_libur ? 'border border-slate-500/70 bg-[repeating-linear-gradient(135deg,transparent,transparent_5px,#94a3b822_5px,#94a3b822_9px)]' : 'bg-gradient-to-t from-emerald-700 to-teal-400'}`} style={{ height: `${height}%`, minHeight: meeting.is_libur ? '18px' : meeting.hadir ? '3px' : '0px' }} />
+                      <span className={`h-4 text-[10px] font-semibold ${meeting.is_libur ? 'text-slate-400' : 'text-emerald-300'}`}>{meeting.is_libur ? 'Libur' : `${percent}%`}</span>
+                    </Link>
+                  })}
+                </div>
+                <div className="absolute bottom-0 left-11 right-1 flex justify-around gap-2 sm:gap-3">
+                  {meetingChartData.map((meeting) => <Link key={meeting.id} to={`/pertemuan/${meeting.id}`} className="flex min-w-8 flex-1 flex-col items-center text-[10px] leading-tight text-slate-400 hover:text-white"><span className="whitespace-nowrap">Pert. {meeting.pertemuan_ke}</span><span className="whitespace-nowrap">{new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' }).format(new Date(`${meeting.tanggal}T12:00:00+07:00`))}</span></Link>)}
+                </div>
               </div>
-            )
-          })}
-        </div>
+            </div>}
       </div>
 
       {/* Pertemuan Terkini & Live Attendance Panel */}
