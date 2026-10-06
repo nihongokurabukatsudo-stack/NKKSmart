@@ -86,8 +86,9 @@ export const RekapPage: React.FC = () => {
       // 2. Ambil absensi pada pertemuan ini
       const { data: absensiRows } = await supabase
         .from('absensi')
-        .select('anggota_id, scan_time')
+        .select('anggota_id, scan_time, status')
         .eq('pertemuan_id', pertemuanId)
+        .eq('status', 'hadir')
 
       const attendedMap = new Map<number, string>()
       if (absensiRows) {
@@ -441,4 +442,3 @@ export const RekapPage: React.FC = () => {
     </div>
   )
 }
-

@@ -143,24 +143,30 @@ export interface Database {
           pertemuan_id: number
           anggota_id: number
           barcode_id: number
-          status: 'hadir'
-          scan_time: string
+          status: 'hadir' | 'izin' | 'sakit' | 'alpha'
+          scan_time: string | null
+          waktu_scan: string | null
+          catatan: string | null
         }
         Insert: {
           id?: number
           pertemuan_id: number
           anggota_id: number
           barcode_id: number
-          status?: 'hadir'
-          scan_time?: string
+          status?: 'hadir' | 'izin' | 'sakit' | 'alpha'
+          scan_time?: string | null
+          waktu_scan?: string | null
+          catatan?: string | null
         }
         Update: {
           id?: number
           pertemuan_id?: number
           anggota_id?: number
           barcode_id?: number
-          status?: 'hadir'
-          scan_time?: string
+          status?: 'hadir' | 'izin' | 'sakit' | 'alpha'
+          scan_time?: string | null
+          waktu_scan?: string | null
+          catatan?: string | null
         }
       }
       geofence_settings: {
@@ -242,4 +248,3 @@ export interface Database {
     }
   }
 }
-

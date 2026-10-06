@@ -129,8 +129,9 @@ export const RekapBulananPage: React.FC = () => {
       if (meetingIds.length > 0) {
         const { data: absensiData } = await supabase
           .from('absensi')
-          .select('pertemuan_id, anggota_id')
+          .select('pertemuan_id, anggota_id, status')
           .in('pertemuan_id', meetingIds)
+          .eq('status', 'hadir')
 
         if (absensiData) {
           absensiData.forEach((a) => {
@@ -493,4 +494,3 @@ export const RekapBulananPage: React.FC = () => {
     </div>
   )
 }
-

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDateIndo, formatTime } from '../lib/utils'
 import {
@@ -52,6 +52,7 @@ interface AbsensiRecord {
 }
 
 export const PertemuanPage: React.FC = () => {
+  const navigate = useNavigate()
   const [pertemuanList, setPertemuanList] = useState<PertemuanItem[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   
@@ -260,6 +261,9 @@ export const PertemuanPage: React.FC = () => {
   }
 
   const openDetail = async (item: PertemuanItem) => {
+    navigate(`/pertemuan/${item.id}`)
+    return
+    /* Legacy modal remains as a fallback reference while the detail route is in use.
     setSelectedMeeting(item)
     setIsDetailOpen(true)
     setDetailLoading(true)
@@ -293,6 +297,7 @@ export const PertemuanPage: React.FC = () => {
     } finally {
       setDetailLoading(false)
     }
+    */
   }
 
   // Calculate missing members

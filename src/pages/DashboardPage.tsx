@@ -76,6 +76,7 @@ export const DashboardPage: React.FC = () => {
         .select('*', { count: 'exact', head: true })
         .gte('scan_time', `${todayStr}T00:00:00+07:00`)
         .lte('scan_time', `${todayStr}T23:59:59+07:00`)
+        .eq('status', 'hadir')
 
       setStats({
         anggota: anggotaRes.count || 0,
@@ -102,6 +103,7 @@ export const DashboardPage: React.FC = () => {
           .from('absensi')
           .select(`
             scan_time,
+            status,
             anggota:anggota_id (
               id,
               nama_lengkap,
@@ -114,6 +116,7 @@ export const DashboardPage: React.FC = () => {
             )
           `)
           .eq('pertemuan_id', activeMeeting.id)
+          .eq('status', 'hadir')
 
         const attended: AttendanceRow[] = []
         const attendedIds = new Set<number>()
@@ -170,6 +173,7 @@ export const DashboardPage: React.FC = () => {
         .from('absensi')
         .select('scan_time')
         .gte('scan_time', `${startDateStr}T00:00:00+07:00`)
+        .eq('status', 'hadir')
 
       const countsByDate: Record<string, number> = {}
       for (let i = 6; i >= 0; i--) {
@@ -502,4 +506,3 @@ export const DashboardPage: React.FC = () => {
     </div>
   )
 }
-

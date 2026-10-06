@@ -12,6 +12,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { AnggotaPage } from './pages/AnggotaPage'
 import { PengurusPage } from './pages/PengurusPage'
 import { PertemuanPage } from './pages/PertemuanPage'
+import { PertemuanDetailPage } from './pages/PertemuanDetailPage'
 import { LokasiPage } from './pages/LokasiPage'
 import { KartuPage } from './pages/KartuPage'
 import { RekapPage } from './pages/RekapPage'
@@ -50,6 +51,7 @@ export const App: React.FC = () => {
               <Route path="anggota" element={<AnggotaPage />} />
               <Route path="pengurus" element={<PengurusPage />} />
               <Route path="pertemuan" element={<PertemuanPage />} />
+              <Route path="pertemuan/:id" element={<PertemuanDetailPage />} />
               <Route path="lokasi" element={<LokasiPage />} />
               <Route path="kartu" element={<KartuPage />} />
               <Route path="rekap" element={<RekapPage />} />
