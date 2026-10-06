@@ -29,6 +29,7 @@ const navItems = [
   { path: '/kartu', label: 'Cetak Kartu', icon: CreditCard },
   { path: '/rekap', label: 'Rekap Absensi', icon: FileSpreadsheet },
   { path: '/rekap-bulanan', label: 'Rekap Bulanan', icon: CalendarRange },
+  { path: '/rekap-semester', label: 'Rekap Semester', icon: CalendarRange },
   { path: '/pengaturan', label: 'Pengaturan', icon: Settings },
 ]
 

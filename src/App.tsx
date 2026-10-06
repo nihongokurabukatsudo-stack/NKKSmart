@@ -17,6 +17,7 @@ import { LokasiPage } from './pages/LokasiPage'
 import { KartuPage } from './pages/KartuPage'
 import { RekapPage } from './pages/RekapPage'
 import { RekapBulananPage } from './pages/RekapBulananPage'
+import { RekapSemesterPage } from './pages/RekapSemesterPage'
 import { SettingsPage } from './pages/SettingsPage'
 
 const queryClient = new QueryClient({
@@ -56,6 +57,7 @@ export const App: React.FC = () => {
               <Route path="kartu" element={<KartuPage />} />
               <Route path="rekap" element={<RekapPage />} />
               <Route path="rekap-bulanan" element={<RekapBulananPage />} />
+              <Route path="rekap-semester" element={<RekapSemesterPage />} />
               <Route path="pengaturan" element={<SettingsPage />} />
             </Route>
 
