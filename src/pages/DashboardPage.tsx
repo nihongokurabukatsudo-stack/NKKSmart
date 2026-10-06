@@ -124,17 +124,24 @@ export const DashboardPage: React.FC = () => {
       if (meetingError) throw meetingError
       if (!meetings?.length) return [] as MeetingAttendance[]
 
-      const { data: attendance, error: attendanceError } = await supabase
-        .from('absensi')
-        .select('pertemuan_id,anggota_id,anggota:anggota_id!inner(status,is_deleted)')
-        .in('pertemuan_id', meetings.map((meeting) => meeting.id))
-        .eq('status', 'hadir')
-        .eq('anggota.status', 'Aktif')
-        .eq('anggota.is_deleted', false)
+      const attendance: Array<{ pertemuan_id: number; anggota_id: number }> = []
+      const pageSize = 1000
+      for (let from = 0; ; from += pageSize) {
+        const { data, error: attendanceError } = await supabase
+          .from('absensi')
+          .select('pertemuan_id,anggota_id,anggota:anggota_id!inner(status,is_deleted)')
+          .in('pertemuan_id', meetings.map((meeting) => meeting.id))
+          .eq('status', 'hadir')
+          .eq('anggota.status', 'Aktif')
+          .eq('anggota.is_deleted', false)
+          .range(from, from + pageSize - 1)
 
-      if (attendanceError) throw attendanceError
+        if (attendanceError) throw attendanceError
+        attendance.push(...(data || []))
+        if (!data || data.length < pageSize) break
+      }
       const counts = new Map<number, number>()
-      attendance?.forEach(({ pertemuan_id }) => counts.set(pertemuan_id, (counts.get(pertemuan_id) || 0) + 1))
+      attendance.forEach(({ pertemuan_id }) => counts.set(pertemuan_id, (counts.get(pertemuan_id) || 0) + 1))
       return meetings
         .map((meeting) => ({ ...meeting, hadir: counts.get(meeting.id) || 0 }))
         .reverse()
