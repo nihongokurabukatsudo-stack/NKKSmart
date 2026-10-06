@@ -714,7 +714,7 @@ export const ScanPage: React.FC = () => {
             aria-live="polite"
             aria-atomic="true"
             onClick={(event) => event.stopPropagation()}
-            className={`popup-card-enter relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl border p-5 text-center shadow-2xl sm:p-7 ${
+            className={`popup-card-enter relative max-h-[90dvh] w-full max-w-lg rounded-3xl border p-5 text-center shadow-2xl sm:p-7 ${
               popup.success
                 ? 'mt-[min(18dvh,120px)] bg-gradient-to-b from-slate-900 to-slate-950 border-pink-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)] pt-[min(23dvh,150px)]'
                 : popupWarning ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-400/40 shadow-[0_0_40px_rgba(244,63,94,0.15)]' : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
