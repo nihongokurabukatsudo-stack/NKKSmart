@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Html5Qrcode, type Html5QrcodeCameraScanConfig } from 'html5-qrcode'
+import type { Html5Qrcode, Html5QrcodeCameraScanConfig } from 'html5-qrcode'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Send,
   ArrowLeft,
+  Flashlight,
 } from 'lucide-react'
 
 interface MeetingStatus {
@@ -74,6 +75,13 @@ export const ScanPage: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false)
   const [isMirrored, setIsMirrored] = useState<boolean>(false)
   const [scanType, setScanType] = useState<'auto' | 'anggota' | 'pengurus'>('auto')
+  const [cameraError, setCameraError] = useState('')
+  const [isStatusLoading, setIsStatusLoading] = useState(true)
+  const [manualSheetOpen, setManualSheetOpen] = useState(false)
+  const [historySheetOpen, setHistorySheetOpen] = useState(false)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [torchSupported, setTorchSupported] = useState(false)
+  const [torchOn, setTorchOn] = useState(false)
 
   // Meeting & Geo State
   const [meetingStatus, setMeetingStatus] = useState<MeetingStatus | null>(null)
@@ -94,7 +102,9 @@ export const ScanPage: React.FC = () => {
   // Refs
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null)
   const lastCodeRef = useRef<string>('')
+  const lastScannedAtRef = useRef<Map<string, number>>(new Map())
   const lockRef = useRef<boolean>(false)
+  const requestInFlightRef = useRef(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   // Init notification audio
@@ -103,6 +113,20 @@ export const ScanPage: React.FC = () => {
     audio.preload = 'auto'
     audioRef.current = audio
   }, [])
+
+  useEffect(() => {
+    const online = () => setIsOnline(true)
+    const offline = () => setIsOnline(false)
+    window.addEventListener('online', online)
+    window.addEventListener('offline', offline)
+    return () => { window.removeEventListener('online', online); window.removeEventListener('offline', offline) }
+  }, [])
+
+  useEffect(() => {
+    if (!popup.show) return
+    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), 2000)
+    return () => window.clearTimeout(timer)
+  }, [popup.show, popup.message])
 
   const playNotificationSound = (success: boolean) => {
     if (audioRef.current && success) {
@@ -122,6 +146,8 @@ export const ScanPage: React.FC = () => {
       }
     } catch (e) {
       console.error('Error fetching meeting status:', e)
+    } finally {
+      setIsStatusLoading(false)
     }
   }
 
@@ -153,7 +179,7 @@ export const ScanPage: React.FC = () => {
     }
 
     if (!navigator.geolocation) {
-      setGeoError('GPS tidak didukung oleh browser Anda')
+        setGeoError('Browser tidak mendukung GPS.')
       return
     }
 
@@ -170,7 +196,7 @@ export const ScanPage: React.FC = () => {
       },
       (err) => {
         console.warn('Geolocation warning:', err.message)
-        setGeoError('Gagal mengakses GPS. Pastikan izin lokasi aktif.')
+        setGeoError('Izinkan akses lokasi di pengaturan browser.')
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
     )
@@ -180,24 +206,38 @@ export const ScanPage: React.FC = () => {
 
   // Get Camera Devices
   useEffect(() => {
-    Html5Qrcode.getCameras()
+    if (!window.isSecureContext && location.hostname !== 'localhost') {
+      setCameraError('Kamera memerlukan koneksi HTTPS yang aman.')
+      return
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError('Browser ini tidak mendukung akses kamera. Coba gunakan Chrome atau Safari versi terbaru.')
+      return
+    }
+    navigator.mediaDevices.enumerateDevices()
       .then((devices) => {
-        if (devices && devices.length > 0) {
-          setCameras(devices)
+        const camerasFound = devices.filter((device) => device.kind === 'videoinput').map((device) => ({ id: device.deviceId, label: device.label }))
+        if (camerasFound.length > 0) {
+          setCameras(camerasFound)
           // Default to back camera if available
-          const backCam = devices.find((d) => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('belakang'))
-          setSelectedCameraId(backCam ? backCam.id : devices[0].id)
+          const backCam = camerasFound.find((d) => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('belakang'))
+          setSelectedCameraId(backCam ? backCam.id : '')
+        } else {
+          setCameraError('Kamera tidak ditemukan pada perangkat ini.')
         }
       })
       .catch((err) => {
         console.warn('Tidak dapat menemukan kamera:', err)
+        if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+          setCameraError('Izin kamera ditolak. Aktifkan izin kamera di pengaturan browser, lalu muat ulang halaman.')
+        }
       })
   }, [])
 
   // Submit Scan ke RPC Supabase
   const handleProcessScan = async (rawCode: string, mode: 'camera' | 'manual' = 'camera') => {
     const code = rawCode.trim()
-    if (!code) return
+    if (!code || requestInFlightRef.current) return
 
     // Cek Geofence jika kamera
     if (mode === 'camera' && geofence?.configured && !isInsideFence) {
@@ -210,6 +250,7 @@ export const ScanPage: React.FC = () => {
       return
     }
 
+    requestInFlightRef.current = true
     try {
       const { data, error } = await (supabase.rpc as any)('submit_scan', {
         kode: code,
@@ -238,6 +279,7 @@ export const ScanPage: React.FC = () => {
       }
 
       playNotificationSound(res.ok)
+      if (typeof navigator.vibrate === 'function') navigator.vibrate(res.ok ? [60, 30, 60] : 100)
 
       if (res.ok) {
         setPopup({
@@ -273,6 +315,8 @@ export const ScanPage: React.FC = () => {
       const msg = err instanceof Error ? err.message : 'Kesalahan jaringan/server'
       setPopup({ show: true, success: false, message: msg })
       addLog({ status: 'error', message: msg })
+    } finally {
+      requestInFlightRef.current = false
     }
   }
 
@@ -287,9 +331,18 @@ export const ScanPage: React.FC = () => {
 
   // Start Scanner
   const startScanner = async () => {
-    if (!selectedCameraId) return
+    setCameraError('')
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError('Browser ini tidak mendukung kamera. Coba gunakan browser versi terbaru.')
+      return
+    }
+    if (!window.isSecureContext && location.hostname !== 'localhost') {
+      setCameraError('Kamera hanya berfungsi melalui HTTPS. Buka tautan situs yang aman.')
+      return
+    }
 
     try {
+      const { Html5Qrcode } = await import('html5-qrcode')
       const html5QrCode = new Html5Qrcode('qr-reader')
       html5QrCodeRef.current = html5QrCode
 
@@ -300,22 +353,20 @@ export const ScanPage: React.FC = () => {
       }
 
       await html5QrCode.start(
-        selectedCameraId,
+        selectedCameraId || { facingMode: 'environment' },
         config,
         (decodedText) => {
+          const now = Date.now()
           if (lockRef.current) return
-          if (decodedText === lastCodeRef.current) return
+          const lastAt = lastScannedAtRef.current.get(decodedText) || 0
+          if (decodedText === lastCodeRef.current && now - lastAt < 5000) return
 
           lockRef.current = true
           lastCodeRef.current = decodedText
-
-          handleProcessScan(decodedText, 'camera')
-
-          // Unlock after 3 seconds for next scan
-          setTimeout(() => {
-            lockRef.current = false
-            lastCodeRef.current = ''
-          }, 3000)
+          lastScannedAtRef.current.set(decodedText, now)
+          void handleProcessScan(decodedText, 'camera').finally(() => {
+            window.setTimeout(() => { lockRef.current = false }, 1500)
+          })
         },
         () => {
           // ignore scan error per frame
@@ -323,9 +374,29 @@ export const ScanPage: React.FC = () => {
       )
 
       setIsScanning(true)
+      const video = document.querySelector('#qr-reader video') as HTMLVideoElement | null
+      const track = (video?.srcObject as MediaStream | null)?.getVideoTracks()[0]
+      const capabilities = track?.getCapabilities?.() as (MediaTrackCapabilities & { torch?: boolean }) | undefined
+      setTorchSupported(Boolean(capabilities?.torch))
+      const videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === 'videoinput')
+      setCameras(videoDevices.map((device) => ({ id: device.deviceId, label: device.label })))
+      const activeDeviceId = track?.getSettings().deviceId
+      const backCamera = videoDevices.find((device) => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('belakang'))
+      if (!selectedCameraId && (activeDeviceId || backCamera?.deviceId)) setSelectedCameraId(activeDeviceId || backCamera!.deviceId)
     } catch (err) {
       console.error('Gagal memulai kamera:', err)
-      alert('Gagal mengakses kamera. Pastikan izin kamera telah diberikan di browser.')
+      const name = (err as DOMException)?.name
+      const detail = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase()
+      const message = name === 'NotAllowedError' || name === 'PermissionDeniedError' || detail.includes('notallowederror') || detail.includes('permission denied')
+        ? 'Izin kamera ditolak. Buka pengaturan situs di browser dan izinkan kamera.'
+        : name === 'NotFoundError' || detail.includes('notfounderror') || detail.includes('no camera')
+          ? 'Kamera tidak ditemukan pada perangkat ini.'
+          : name === 'NotReadableError' || detail.includes('notreadableerror')
+            ? 'Kamera sedang digunakan aplikasi lain. Tutup aplikasi tersebut lalu coba lagi.'
+            : name === 'SecurityError' || detail.includes('secure context')
+              ? 'Kamera memerlukan koneksi HTTPS yang aman.'
+              : 'Kamera gagal dimulai. Periksa izin kamera di browser lalu coba kembali.'
+      setCameraError(message)
     }
   }
 
@@ -340,6 +411,19 @@ export const ScanPage: React.FC = () => {
       }
     }
     setIsScanning(false)
+    setTorchOn(false)
+    setTorchSupported(false)
+  }
+
+  const toggleTorch = async () => {
+    if (!html5QrCodeRef.current || !torchSupported) return
+    const next = !torchOn
+    try {
+      await html5QrCodeRef.current.applyVideoConstraints({ advanced: [{ torch: next } as MediaTrackConstraintSet] } as MediaTrackConstraints)
+      setTorchOn(next)
+    } catch (error) {
+      setCameraError('Senter tidak dapat diubah pada kamera ini.')
+    }
   }
 
   // Cleanup on unmount
@@ -362,40 +446,46 @@ export const ScanPage: React.FC = () => {
     setIsSubmittingManual(false)
   }
 
+  const popupWarning = popup.message.toLowerCase().includes('sudah absen')
+  const hasLocationFix = Boolean(userLocation)
+  const locationBadge = geoError ? 'GPS Error' : hasLocationFix ? (isInsideFence ? 'GPS OK' : 'Di luar radius') : 'GPS…'
+
   return (
-    <div className="scan-page flex flex-col text-slate-100">
+    <div className={`scan-page flex flex-col text-slate-100 ${isScanning ? 'is-scanning' : 'is-idle'}`}>
       <div className="flex-1 flex flex-col">
         
         {/* Top Header */}
-        <header className="bg-slate-950/40 border-b border-white/5 p-4 sticky top-0 z-30 backdrop-blur-md shadow-lg">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/" className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/10 transition-colors">
+        <header className="scan-topbar border-b border-white/10 bg-slate-950/45 px-3 py-2.5 backdrop-blur-xl shadow-lg">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+              <Link to="/" aria-label="Kembali" className="hidden p-2 text-slate-300 hover:text-white rounded-full hover:bg-white/10 transition-colors sm:inline-flex">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-slate-900/80 border border-white/10 p-1 flex items-center justify-center shadow-inner">
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="h-9 w-9 shrink-0 rounded-full bg-slate-900/80 border border-white/10 p-1 flex items-center justify-center shadow-inner">
                   <img src="/img/nkk.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">NKKSmart Scan</h1>
+                  <h1 className="font-bold text-sm sm:text-lg bg-gradient-to-r from-emerald-300 to-pink-300 bg-clip-text text-transparent">NKKSmart Scan</h1>
+                  <p className="hidden text-[10px] text-slate-300 sm:block">Absensi ekstrakurikuler</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-md ${isAdmin ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-slate-800/50 border-white/10 text-slate-300'}`}>
-                {isAdmin ? 'Admin Mode' : 'Mode Publik'}
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${meetingStatus?.active ? 'border-emerald-400/40 bg-emerald-500/20 text-emerald-200' : meetingStatus?.status === 'libur' ? 'border-slate-300/30 bg-slate-500/20 text-slate-100' : 'border-amber-300/40 bg-amber-500/20 text-amber-100'}`}>
+                {isStatusLoading ? 'Memuat…' : meetingStatus?.active ? 'Aktif' : meetingStatus?.status === 'libur' ? 'Libur' : 'Di luar jadwal'}
               </span>
+              {geofence?.configured && <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${hasLocationFix && isInsideFence ? 'border-emerald-400/40 bg-emerald-500/20 text-emerald-100' : hasLocationFix || geoError ? 'border-rose-300/50 bg-rose-500/25 text-rose-100' : 'border-white/20 bg-slate-500/30 text-slate-100'}`}>{locationBadge}</span>}
             </div>
           </div>
         </header>
 
         {/* Main Container */}
-        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5 lg:mr-8 lg:ml-auto lg:max-w-[min(54vw,760px)]">
+        <main className="scan-main mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto px-3 py-3 sm:gap-5 sm:p-6 lg:mr-8 lg:ml-auto lg:max-w-[min(54vw,760px)]">
           
           {/* Status Meeting Banner */}
           <div
-            className={`p-4 rounded-2xl border backdrop-blur-md flex items-center justify-between text-sm shadow-lg transition-all duration-300 ${
+            className={`scan-meeting-status order-1 rounded-xl border px-3 py-2.5 backdrop-blur-md flex items-center justify-between text-sm shadow-lg transition-all duration-300 sm:p-4 sm:rounded-2xl ${
               meetingStatus?.active
                 ? 'bg-gradient-to-r from-emerald-950/60 to-emerald-900/40 border-emerald-500/40 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
                 : meetingStatus?.status === 'libur'
@@ -414,16 +504,14 @@ export const ScanPage: React.FC = () => {
                 )}
               </div>
               <div>
-                <p className="font-semibold text-white text-base">
-                  {meetingStatus?.meeting?.nama_pertemuan || 'Tidak Ada Pertemuan Aktif'}
-                </p>
-                <p className="text-xs opacity-80 mt-0.5">{meetingStatus?.message}</p>
+                {isStatusLoading ? <div className="h-4 w-40 animate-pulse rounded bg-white/15" aria-label="Memuat status pertemuan" /> : <p className="font-semibold text-white text-sm sm:text-base">{meetingStatus?.meeting?.nama_pertemuan || 'Tidak Ada Pertemuan Aktif'}</p>}
+                {!isStatusLoading && <p className="mt-0.5 text-xs opacity-90">{meetingStatus?.message || 'Status pertemuan belum tersedia.'}</p>}
               </div>
             </div>
             <button
               onClick={fetchMeetingStatus}
               title="Refresh Status"
-              className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white"
+              className="min-h-12 min-w-12 p-2 hover:bg-white/10 rounded-full transition-colors text-slate-300 hover:text-white"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -432,33 +520,34 @@ export const ScanPage: React.FC = () => {
           {/* Geofence Status Banner */}
           {geofence?.configured && (
             <div
-              className={`p-3.5 rounded-2xl border backdrop-blur-md flex items-center gap-3 text-sm shadow-lg transition-colors ${
-                isInsideFence
+              className={`scan-geofence-status order-2 rounded-xl border px-3 py-2 backdrop-blur-md flex items-center gap-2 text-xs shadow-lg transition-colors sm:p-3.5 sm:gap-3 sm:text-sm sm:rounded-2xl ${
+                hasLocationFix && isInsideFence
                   ? 'bg-teal-950/40 border-teal-500/30 text-teal-100'
-                  : 'bg-rose-950/40 border-rose-500/30 text-rose-100 shadow-[0_0_15px_rgba(244,63,94,0.15)]'
+                  : hasLocationFix || geoError ? 'bg-rose-950/40 border-rose-500/30 text-rose-100 shadow-[0_0_15px_rgba(244,63,94,0.15)]' : 'bg-slate-900/50 border-white/10 text-slate-200'
               }`}
             >
-              <div className={`p-2 rounded-full ${isInsideFence ? 'bg-teal-500/20' : 'bg-rose-500/20'}`}>
-                <MapPin className={`w-4 h-4 shrink-0 ${isInsideFence ? 'text-teal-400' : 'text-rose-400'}`} />
+              <div className={`p-2 rounded-full ${hasLocationFix && isInsideFence ? 'bg-teal-500/20' : hasLocationFix || geoError ? 'bg-rose-500/20' : 'bg-white/5'}`}>
+                <MapPin className={`w-4 h-4 shrink-0 ${hasLocationFix && isInsideFence ? 'text-teal-400' : hasLocationFix || geoError ? 'text-rose-300' : 'text-slate-300'}`} />
               </div>
               <div className="flex-1">
                 <span className="font-medium text-white">
-                  {isInsideFence ? 'Lokasi Valid' : 'Di Luar Radius Sekolah'}:
+                  {hasLocationFix ? (isInsideFence ? 'Lokasi Valid' : 'Di Luar Radius Sekolah') : 'Memeriksa GPS'}:
                 </span>{' '}
-                <span className="opacity-90">{distance !== null ? `Jarak ${distance}m (Maksimal ${geofence.radius}m)` : 'Memeriksa GPS...'}</span>
+                <span className="opacity-90">{distance !== null ? `Jarak ${distance}m (Maksimal ${geofence.radius}m)` : 'Menunggu izin lokasi perangkat.'}</span>
                 {geoError && <span className="block text-rose-400 mt-1 text-xs font-medium bg-rose-950/50 p-1.5 rounded-md">{geoError}</span>}
               </div>
             </div>
           )}
 
           {/* Controls Toolbar */}
-          <div className="bg-slate-900/40 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-4">
+          <div className="scan-controls order-4 bg-slate-900/65 backdrop-blur-xl border border-white/15 p-3 rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-2 sm:p-4 sm:gap-4">
             {/* Target Filter */}
             <div className="flex items-center gap-3">
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Target</span>
               <select
                 value={scanType}
                 onChange={(e) => setScanType(e.target.value as 'auto' | 'anggota' | 'pengurus')}
+                aria-label="Target scan"
                 className="bg-slate-950/50 border border-white/10 rounded-full px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer"
               >
                 <option value="auto">Semua (Auto)</option>
@@ -469,13 +558,15 @@ export const ScanPage: React.FC = () => {
 
             {/* Camera Selection */}
             {cameras.length > 0 && (
-              <div className="flex items-center gap-3">
+              <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
                 <select
                   value={selectedCameraId}
                   disabled={isScanning}
                   onChange={(e) => setSelectedCameraId(e.target.value)}
-                  className="bg-slate-950/50 border border-white/10 rounded-full px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer max-w-[200px] truncate disabled:opacity-50"
+                  aria-label="Ganti kamera"
+                  className="min-h-12 min-w-0 flex-1 bg-slate-950/70 border border-white/15 rounded-full px-3 py-2 text-base text-slate-100 focus:outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer sm:max-w-[200px] sm:flex-none disabled:opacity-50"
                 >
+                  {!selectedCameraId && <option value="">Otomatis</option>}
                   {cameras.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.label || `Kamera ${c.id.slice(0, 5)}`}
@@ -486,11 +577,12 @@ export const ScanPage: React.FC = () => {
             )}
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex w-full items-center justify-center gap-2 sm:ml-auto sm:w-auto sm:justify-end sm:gap-3">
               <button
                 onClick={() => setIsMirrored(!isMirrored)}
                 title="Mirror Video"
-                className={`p-2.5 rounded-full border transition-all duration-300 shadow-md ${
+                aria-label={isMirrored ? 'Matikan mirror kamera' : 'Aktifkan mirror kamera'}
+                className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border transition-all duration-300 shadow-md ${
                   isMirrored
                     ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
                     : 'bg-slate-800/50 border-white/10 text-slate-300 hover:text-white hover:bg-slate-700/50'
@@ -498,13 +590,14 @@ export const ScanPage: React.FC = () => {
               >
                 <FlipHorizontal className="w-4 h-4" />
               </button>
+              {torchSupported && <button type="button" onClick={toggleTorch} aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'} className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border ${torchOn ? 'border-amber-300 bg-amber-400/20 text-amber-200' : 'border-white/15 bg-slate-800/80 text-slate-200'}`}><Flashlight className="h-5 w-5"/></button>}
               {isScanning ? (
                 <button
                   onClick={stopScanner}
                   className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(225,29,72,0.3)] transition-all hover:scale-105 active:scale-95"
                 >
                   <CameraOff className="w-4 h-4" />
-                  <span>Stop Scanner</span>
+                    <span>Hentikan Scan</span>
                 </button>
               ) : (
                 <button
@@ -512,14 +605,14 @@ export const ScanPage: React.FC = () => {
                   className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-95"
                 >
                   <Camera className="w-4 h-4" />
-                  <span>Mulai Scan</span>
+                    <span>{cameraError ? 'Coba lagi' : 'Mulai Scan'}</span>
                 </button>
               )}
             </div>
           </div>
 
           {/* Video Scanner Viewport */}
-          <div className="relative bg-slate-950/80 border border-white/10 rounded-3xl overflow-hidden shadow-2xl aspect-square sm:aspect-video flex items-center justify-center backdrop-blur-sm">
+          <div className="scan-camera-window order-3 relative mx-auto w-full overflow-hidden rounded-3xl border border-white/20 bg-slate-950/85 shadow-2xl flex items-center justify-center backdrop-blur-sm">
             {/* Reader HTML5 Target Element */}
             <div
               id="qr-reader"
@@ -528,30 +621,24 @@ export const ScanPage: React.FC = () => {
 
             {/* Idle Placeholder */}
             {!isScanning && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 p-6 text-center bg-slate-950/60 backdrop-blur-sm">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 p-4 text-center bg-slate-950/25 backdrop-blur-[2px] sm:gap-5 sm:p-6">
                 <img src="/img/nkk.png" alt="Watermark" className="absolute inset-0 m-auto w-48 h-48 opacity-5 object-contain pointer-events-none" />
-                <div className="w-20 h-20 rounded-full bg-slate-900/80 border border-white/10 flex items-center justify-center text-slate-400 shadow-xl z-10">
-                  <Camera className="w-10 h-10" />
+                <div className="z-10 flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-slate-900/70 text-slate-100 shadow-xl sm:h-20 sm:w-20 sm:text-slate-400">
+                  <Camera className="h-7 w-7 sm:h-10 sm:w-10" />
                 </div>
                 <div className="z-10">
-                  <p className="font-bold text-lg text-white tracking-wide">Kamera Nonaktif</p>
-                  <p className="text-sm text-slate-400 mt-2 max-w-xs mx-auto">
-                    Arahkan kartu NKKSmart Anda ke kamera setelah menekan tombol di bawah.
+                  <p className="font-bold text-lg text-white tracking-wide">{cameraError ? 'Kamera belum siap' : 'Kamera Nonaktif'}</p>
+                  <p className="mx-auto mt-2 max-w-xs text-sm text-slate-200">
+                    {cameraError || 'Arahkan kartu NKKSmart Anda ke kamera setelah menekan tombol di bawah.'}
                   </p>
                 </div>
-                <button
-                  onClick={startScanner}
-                  className="mt-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white rounded-full text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all hover:scale-105 active:scale-95 z-10"
-                >
-                  Aktifkan Kamera Sekarang
-                </button>
               </div>
             )}
 
             {/* Target Scan Box Animation */}
             {isScanning && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
-                <div className="w-64 h-64 border-[1px] border-emerald-500/20 rounded-3xl relative shadow-[0_0_0_9999px_rgba(2,6,23,0.7)] backdrop-blur-[2px]">
+                <div className="scan-target-frame relative aspect-[3/4] w-[72%] max-h-[90%] rounded-3xl border border-emerald-500/30 shadow-[0_0_0_9999px_rgba(2,6,23,0.28)] backdrop-blur-[1px]">
                   {/* Glowing Corners */}
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-3xl shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
                   <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-3xl shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
@@ -565,89 +652,34 @@ export const ScanPage: React.FC = () => {
           </div>
 
           {/* Manual Code Input (Hanya jika admin login) */}
-          {isAdmin && (
-            <div className="bg-slate-900/40 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-xl">
-              <div className="flex items-center gap-2 mb-3 text-sm text-slate-200 font-semibold">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                <span>Input Manual (Admin Only)</span>
-              </div>
-              <form onSubmit={handleManualSubmit} className="flex gap-3">
-                <input
-                  type="text"
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
-                  placeholder="Masukkan Kode Unik (mis. NKKP-0001)"
-                  className="flex-1 bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmittingManual || !manualCode.trim()}
-                  className="px-6 py-3 bg-slate-800 hover:bg-emerald-600 disabled:opacity-50 disabled:hover:bg-slate-800 text-white rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors border border-white/10"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Kirim</span>
-                </button>
-              </form>
-            </div>
-          )}
+          {isAdmin && <button type="button" onClick={() => setManualSheetOpen(true)} className="scan-sheet-trigger order-5 min-h-12 rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><ShieldCheck className="mr-2 inline h-4 w-4 text-emerald-300"/>Input manual</button>}
 
           {/* Scan History Log */}
-          <div className="bg-slate-900/40 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-xl flex-1 flex flex-col min-h-[250px]">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
-                <History className="w-5 h-5 text-emerald-400" />
-                <span>Log Absensi Terkini</span>
-              </div>
-              <span className="text-xs bg-white/5 px-2.5 py-1 rounded-full text-slate-400 border border-white/5">{logs.length} entri</span>
-            </div>
-
-            <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-              {logs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-slate-500 opacity-60">
-                  <History className="w-12 h-12 mb-2" />
-                  <p className="text-sm">Belum ada scan yang dilakukan.</p>
-                </div>
-              ) : (
-                logs.map((log) => (
-                  <div
-                    key={log.id}
-                    className={`flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-white/5 shadow-sm border-l-4 ${
-                      log.status === 'success'
-                        ? 'border-l-emerald-500'
-                        : log.status === 'warning'
-                        ? 'border-l-amber-500'
-                        : 'border-l-rose-500'
-                    }`}
-                  >
-                    <div className="flex flex-col gap-0.5 truncate pr-4">
-                      <span className="text-slate-200 text-sm font-medium truncate">{log.message}</span>
-                      {log.nama && <span className="text-slate-400 text-xs truncate">{log.nama} {log.kelas ? `- ${log.kelas}` : ''}</span>}
-                    </div>
-                    <span className="text-slate-500 text-xs font-mono shrink-0 bg-slate-900/80 px-2 py-1 rounded-md">{log.time}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <button type="button" onClick={() => setHistorySheetOpen(true)} className="scan-sheet-trigger order-6 flex min-h-12 items-center justify-between rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><span><History className="mr-2 inline h-4 w-4 text-emerald-300"/>Riwayat scan</span><span className="text-xs text-slate-300">{logs.length} entri</span></button>
         </main>
+        {!isOnline && <div className="fixed left-3 right-3 top-16 z-40 rounded-xl border border-amber-300/40 bg-amber-950/90 p-3 text-center text-sm text-amber-100 shadow-xl">Tidak ada koneksi internet. Scan memerlukan koneksi untuk tersimpan.</div>}
+        {manualSheetOpen && isAdmin && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setManualSheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Input manual" className="scan-glass w-full max-w-lg rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Input manual · Admin</h2><button type="button" onClick={() => setManualSheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">×</button></div><form onSubmit={(event) => { void handleManualSubmit(event); setManualSheetOpen(false) }} className="flex gap-2"><input type="text" value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Masukkan kode unik" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/20 bg-slate-950/75 px-4 text-base text-white placeholder-slate-400"/><button type="submit" disabled={isSubmittingManual || !manualCode.trim()} className="min-h-12 rounded-xl bg-emerald-600 px-4 font-semibold text-white disabled:opacity-50"><Send className="mr-1 inline h-4 w-4"/>Kirim</button></form></section></div>}
+        {historySheetOpen && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setHistorySheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Riwayat scan" className="scan-glass max-h-[70dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold"><History className="mr-2 inline h-5 w-5 text-emerald-300"/>Riwayat scan</h2><button type="button" onClick={() => setHistorySheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">Tutup</button></div>{logs.length === 0 ? <p className="py-8 text-center text-sm text-slate-300">Belum ada scan yang dilakukan.</p> : <div className="space-y-2">{logs.map((log) => <div key={log.id} className={`flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 p-3 ${log.status === 'success' ? 'border-l-4 border-l-emerald-500' : log.status === 'warning' ? 'border-l-4 border-l-amber-400' : 'border-l-4 border-l-rose-500'}`}><span className="min-w-0 text-sm text-white">{log.message}</span><time className="shrink-0 text-xs text-slate-300">{log.time}</time></div>)}</div>}</section></div>}
       </div>
 
       {/* Scan Result Popup Modal */}
       {popup.show && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
+        <div role="presentation" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/65 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm animate-in fade-in duration-200 sm:items-center sm:p-4">
           <div
-            className={`w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl border ${
+            role="status"
+            onClick={(event) => event.stopPropagation()}
+            className={`w-full max-w-lg rounded-3xl rounded-b-xl p-5 text-center shadow-2xl border sm:rounded-3xl sm:p-8 ${
               popup.success
                 ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.15)]'
-                : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
+                : popupWarning ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-amber-400/40 shadow-[0_0_40px_rgba(245,158,11,0.15)]' : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
             }`}
           >
             <div
-              className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-5 shadow-inner ${
-                popup.success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+              className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full shadow-inner sm:mb-5 sm:h-20 sm:w-20 ${
+                popup.success ? 'bg-emerald-500/20 text-emerald-400' : popupWarning ? 'bg-amber-400/20 text-amber-300' : 'bg-rose-500/20 text-rose-400'
               }`}
             >
-              {popup.success ? <CheckCircle2 className="w-12 h-12 animate-in zoom-in duration-300" /> : <XCircle className="w-12 h-12 animate-in zoom-in duration-300" />}
+              {popup.success ? <CheckCircle2 className="h-9 w-9 animate-in zoom-in duration-300 sm:h-12 sm:w-12" /> : popupWarning ? <AlertTriangle className="h-9 w-9 sm:h-12 sm:w-12" /> : <XCircle className="h-9 w-9 animate-in zoom-in duration-300 sm:h-12 sm:w-12" />}
             </div>
 
             <h3 className="text-xl font-bold text-white mb-2">{popup.message}</h3>
@@ -666,11 +698,11 @@ export const ScanPage: React.FC = () => {
             )}
 
             <button
-              onClick={() => setPopup({ ...popup, show: false })}
-              className={`mt-6 w-full py-3.5 rounded-2xl text-sm font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-95 text-white ${
+              onClick={() => setPopup((current) => ({ ...current, show: false }))}
+              className={`mt-4 min-h-12 w-full rounded-2xl py-3.5 text-sm font-bold shadow-lg text-white sm:mt-6 ${
                 popup.success 
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400' 
-                  : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
+                  : popupWarning ? 'bg-amber-600 hover:bg-amber-500' : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
               }`}
             >
               Tutup & Lanjutkan
