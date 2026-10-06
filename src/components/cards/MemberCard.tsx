@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
-import { Download, Printer } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 interface MemberCardProps {
   id: number
@@ -12,9 +12,11 @@ interface MemberCardProps {
   qrValue: string
   jabatan: string
   showActions?: boolean
+  onPrintSingle?: () => void
 }
 
 export const MemberCard: React.FC<MemberCardProps> = ({
+  id,
   nama,
   kelas,
   jurusan,
@@ -24,126 +26,61 @@ export const MemberCard: React.FC<MemberCardProps> = ({
   jabatan,
   showActions = false,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const cardRef = useRef<HTMLDivElement | null>(null)
-  const [qrDataUrl, setQrDataUrl] = useState<string>('')
+  const [qrDataUrl, setQrDataUrl] = useState('')
 
   useEffect(() => {
-    const rawVal = qrValue || `NKKSMART|MEMBER|${kodeUnik}`
-    QRCode.toDataURL(rawVal, {
-      width: 180,
-      margin: 1,
-      color: {
-        dark: '#0f172a',
-        light: '#ffffff',
-      },
-    })
-      .then((url) => {
-        setQrDataUrl(url)
-      })
-      .catch((err) => {
-        console.error('Error generating QR code:', err)
-      })
+    let active = true
+    QRCode.toDataURL(qrValue || `NKKSMART|MEMBER|${kodeUnik}`, {
+      width: 480,
+      margin: 4,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#000000', light: '#ffffff' },
+    }).then((url) => {
+      if (active) setQrDataUrl(url)
+    }).catch((err) => console.error('Error generating QR code:', err))
+    return () => { active = false }
   }, [qrValue, kodeUnik])
 
-  const handlePrintSingle = () => {
-    window.print()
-  }
+  const nameFontSize = Math.min(8, Math.max(3.5, Math.floor((440 / Math.max(nama.length, 1)) * 10) / 10))
 
   return (
-    <div className="flex flex-col items-center gap-2 member-card-wrapper">
-      {/* Kartu Fisik Preview */}
-      <div
-        ref={cardRef}
-        className="w-[330px] h-[200px] rounded-2xl relative overflow-hidden border border-slate-700/80 shadow-xl flex flex-col justify-between p-4 text-white select-none bg-slate-900"
-        style={{
-          backgroundImage: "url('/img/kartu_bgs.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] pointer-events-none" />
-
-        {/* Top Header */}
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/img/nkk.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow" />
-            <div>
-              <h4 className="text-xs font-bold tracking-wider text-pink-300 drop-shadow">NKK SMART</h4>
-              <p className="text-[9px] text-slate-200 drop-shadow">KARTU ABSENSI RESMI</p>
+    <div className="member-card-wrapper flex flex-col items-center gap-2" data-print-ready={qrDataUrl ? 'true' : 'false'}>
+      <article data-member-card-id={id} className="member-card relative h-[85.6mm] w-[54mm] shrink-0 overflow-hidden rounded-[2.5mm] bg-slate-950 text-slate-950 print-color">
+        <img src="/img/kartu_bgs_print.jpg" onError={(event) => { event.currentTarget.src = '/img/kartu_bgs.jpg' }} alt="" aria-hidden="true" width={1200} height={2132} className="absolute inset-0 h-full w-full object-cover object-[center_46%]" />
+        <div className="relative z-10 flex h-full flex-col p-[3mm]">
+          <header className="flex min-h-[11mm] items-center justify-between gap-[1mm] rounded-[2mm] bg-white/[0.94] px-[1.5mm] py-[1mm]">
+            <div className="flex min-w-0 items-center gap-[1.5mm]">
+              <img src="/img/nkk.png" alt="Logo NKK" width={80} height={80} className="h-[7mm] w-[7mm] shrink-0 object-contain" />
+              <div className="min-w-0 leading-tight">
+                <p className="text-[7pt] font-extrabold tracking-wide text-rose-800">NKK Bahasa Jepang</p>
+                <p className="text-[5.5pt] font-semibold text-slate-700">KARTU ANGGOTA</p>
+              </div>
             </div>
-          </div>
-          <span
-            className={`text-[9px] uppercase px-2 py-0.5 rounded-full font-bold tracking-wider shadow ${
-              jabatan === 'Pengurus'
-                ? 'bg-pink-500/80 text-white'
-                : 'bg-rose-600/80 text-white'
-            }`}
-          >
-            {jabatan}
-          </span>
-        </div>
+            <span className={`shrink-0 rounded-full px-[1.5mm] py-[.7mm] text-[5.5pt] font-extrabold text-white ${jabatan === 'Pengurus' ? 'bg-pink-600' : 'bg-rose-700'}`}>
+              {jabatan === 'Pengurus' ? 'PENGURUS' : 'ANGGOTA'}
+            </span>
+          </header>
 
-        {/* Center Content: Info & QR Code */}
-        <div className="relative z-10 flex items-center justify-between gap-3">
-          {/* Member Details */}
-          <div className="flex-1 min-w-0 pr-1">
-            <p className="text-sm font-bold text-white drop-shadow truncate leading-tight">
-              {nama}
-            </p>
-            <p className="text-xs text-pink-200 font-medium drop-shadow mt-0.5">
-              {kelas} - {jurusan}
-            </p>
-            {nis && (
-              <p className="text-[10px] text-slate-300 drop-shadow mt-0.5">
-                NIS: <span className="font-mono font-semibold">{nis}</span>
-              </p>
-            )}
-            <div className="mt-2 inline-block px-2 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] font-mono font-semibold text-pink-300 tracking-wider">
-              {kodeUnik}
+          <section className="mt-[2mm] rounded-[2mm] bg-white/[0.94] px-[2mm] py-[1.5mm] leading-tight">
+            <h2 className="member-card-name line-clamp-2 break-words font-extrabold text-slate-950" style={{ fontSize: `${nameFontSize}pt` }}>{nama}</h2>
+            <p className="mt-[.7mm] line-clamp-1 text-[6pt] font-semibold text-rose-800">{kelas}{jurusan ? ` · ${jurusan}` : ''}</p>
+            {nis && <p className="mt-[.5mm] text-[5.5pt] font-medium text-slate-700">NIS: {nis}</p>}
+          </section>
+
+          <div className="mt-auto flex flex-col items-center pb-[1mm]">
+            <div className="rounded-[2mm] bg-white p-[1mm] shadow-lg">
+              {qrDataUrl ? <img src={qrDataUrl} alt={`QR presensi ${nama}`} width={480} height={480} className="h-[25mm] w-[25mm] object-contain" /> : <div aria-label="QR sedang disiapkan" className="h-[25mm] w-[25mm] animate-pulse bg-slate-200" />}
             </div>
-          </div>
-
-          {/* QR Code Container */}
-          <div className="w-[84px] h-[84px] bg-white p-1 rounded-xl shadow-md shrink-0 flex items-center justify-center">
-            {qrDataUrl ? (
-              <img src={qrDataUrl} alt="QR Code" className="w-full h-full object-contain" />
-            ) : (
-              <canvas ref={canvasRef} className="w-full h-full" />
-            )}
+            <p className="mt-[1mm] rounded-full bg-white/[0.94] px-[2mm] py-[.6mm] font-mono text-[6pt] font-bold tracking-wide text-rose-900">{kodeUnik}</p>
           </div>
         </div>
+      </article>
 
-        {/* Footer Bar */}
-        <div className="relative z-10 flex items-center justify-between text-[9px] text-slate-300/80 pt-1 border-t border-white/20">
-          <span>Ekstrakurikuler Bahasa Jepang</span>
-          <span>Scan untuk presensi</span>
-        </div>
-      </div>
-
-      {/* Action Buttons (Download / Print) */}
-      {showActions && (
-        <div className="flex items-center gap-2 no-print mt-1">
-          {qrDataUrl && (
-            <a
-              href={qrDataUrl}
-              download={`QR_${kodeUnik}_${nama.replace(/\s+/g, '_')}.png`}
-              className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs transition"
-              title="Unduh QR Code PNG"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>QR PNG</span>
-            </a>
-          )}
-          <button
-            onClick={handlePrintSingle}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-pink-700 hover:bg-pink-600 text-white rounded-lg text-xs transition"
-            title="Cetak Kartu"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Cetak</span>
-          </button>
+      {showActions && qrDataUrl && (
+        <div className="no-print flex items-center gap-2">
+          <a href={qrDataUrl} download={`QR_${kodeUnik}_${nama.replace(/\s+/g, '_')}.png`} className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-slate-800 px-3 text-xs text-slate-100 hover:bg-slate-700" title="Unduh QR Code PNG">
+            <Download className="h-3.5 w-3.5" /><span>QR PNG</span>
+          </a>
         </div>
       )}
     </div>

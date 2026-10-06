@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { MemberCard } from '../components/cards/MemberCard'
+import { PrintTips } from '../components/print/PrintSheet'
+import { printWhenReady } from '../lib/print'
 import {
   CreditCard,
   Printer,
@@ -10,6 +12,7 @@ import {
   Square,
   Loader2,
   AlertCircle,
+  Scissors,
 } from 'lucide-react'
 
 interface AnggotaCardData {
@@ -30,6 +33,12 @@ export const KartuPage: React.FC = () => {
   const [filterKelas, setFilterKelas] = useState<string>('all')
   const [filterJabatan, setFilterJabatan] = useState<string>('all')
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [printIdsOverride, setPrintIdsOverride] = useState<number[] | null>(null)
+  const [singleCardPages, setSingleCardPages] = useState(false)
+  const [cropMarks, setCropMarks] = useState(false)
+  const [cutLines, setCutLines] = useState(false)
+  const [isPrinting, setIsPrinting] = useState(false)
+  const [printError, setPrintError] = useState('')
 
   const fetchMembers = async () => {
     setIsLoading(true)
@@ -100,11 +109,11 @@ export const KartuPage: React.FC = () => {
   }, [members, filterKelas, filterJabatan, searchTerm])
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredMembers.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(filteredMembers.map((m) => m.id)))
-    }
+    const visibleIds = filteredMembers.map((member) => member.id)
+    const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+    const next = new Set(selectedIds)
+    visibleIds.forEach((id) => allVisibleSelected ? next.delete(id) : next.add(id))
+    setSelectedIds(next)
   }
 
   const toggleSelectOne = (id: number) => {
@@ -117,13 +126,41 @@ export const KartuPage: React.FC = () => {
     setSelectedIds(updated)
   }
 
-  const handlePrintSelected = () => {
-    window.print()
+  const printMembers = printIdsOverride === null
+    ? filteredMembers
+    : filteredMembers.filter((member) => printIdsOverride.includes(member.id))
+
+  const startPrint = async (ids: number[], oneCardPerPage = singleCardPages) => {
+    if (!ids.length) return
+    setPrintError('')
+    setPrintIdsOverride(ids)
+    setSingleCardPages(oneCardPerPage)
+    setIsPrinting(true)
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    try {
+      await printWhenReady()
+    } catch (error) {
+      setPrintError(error instanceof Error ? error.message : 'Kartu belum siap dicetak.')
+    } finally {
+      setIsPrinting(false)
+      setPrintIdsOverride(null)
+    }
   }
 
-  const membersToPrint = selectedIds.size > 0
-    ? filteredMembers.filter((m) => selectedIds.has(m.id))
-    : filteredMembers
+  useEffect(() => {
+    const clearPrintOverride = () => {
+      setPrintIdsOverride(null)
+      setIsPrinting(false)
+    }
+    window.addEventListener('afterprint', clearPrintOverride)
+    return () => window.removeEventListener('afterprint', clearPrintOverride)
+  }, [])
+
+  const pageSize = singleCardPages ? 1 : 9
+  const cardPages = Array.from({ length: Math.ceil(printMembers.length / pageSize) }, (_, index) => printMembers.slice(index * pageSize, (index + 1) * pageSize))
+  const filteredSelectedCount = filteredMembers.filter((member) => selectedIds.has(member.id)).length
+  const allFilteredSelected = filteredMembers.length > 0 && filteredMembers.every((member) => selectedIds.has(member.id))
+  const countForPrint = filteredSelectedCount || filteredMembers.length
 
   return (
     <div className="space-y-6">
@@ -139,12 +176,12 @@ export const KartuPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={toggleSelectAll}
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700 transition"
           >
-            {selectedIds.size === filteredMembers.length && filteredMembers.length > 0 ? (
+            {allFilteredSelected ? (
               <>
                 <Square className="w-4 h-4" />
                 <span>Batal Pilih Semua</span>
@@ -157,16 +194,26 @@ export const KartuPage: React.FC = () => {
             )}
           </button>
           <button
-            onClick={handlePrintSelected}
+            onClick={() => void startPrint(filteredMembers.filter((member) => selectedIds.has(member.id)).map((member) => member.id))}
+            disabled={filteredSelectedCount === 0 || isPrinting}
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>
-              Cetak {selectedIds.size > 0 ? `(${selectedIds.size} Terpilih)` : 'Semua'}
-            </span>
+            <span>{isPrinting ? 'Menyiapkan…' : `Cetak Terpilih (${filteredSelectedCount})`}</span>
           </button>
+          <button type="button" disabled={isPrinting} onClick={() => void startPrint(filteredMembers.map((member) => member.id))} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-slate-600 bg-slate-800 px-4 text-xs font-semibold text-slate-100 hover:bg-slate-700 disabled:opacity-50"><Printer className="h-4 w-4"/>Cetak Semua</button>
+          <button type="button" disabled={isPrinting || filteredMembers.length === 0} onClick={() => { const first = filteredMembers.find((member) => selectedIds.has(member.id)) || filteredMembers[0]; void startPrint([first.id], true) }} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-slate-600 bg-slate-800 px-4 text-xs font-semibold text-slate-100 hover:bg-slate-700 disabled:opacity-50"><Printer className="h-4 w-4"/>Cetak 1 Kartu</button>
         </div>
       </div>
+
+      <div className="no-print flex flex-wrap items-center gap-4 rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-xs text-slate-200">
+        <label className="flex min-h-11 items-center gap-2"><input type="checkbox" checked={singleCardPages} onChange={(event) => setSingleCardPages(event.target.checked)} className="accent-pink-500"/>Satu kartu per halaman</label>
+        <label className="flex min-h-11 items-center gap-2"><input type="checkbox" checked={cropMarks} onChange={(event) => setCropMarks(event.target.checked)} className="accent-pink-500"/><Scissors className="h-4 w-4"/>Tanda potong</label>
+        <label className="flex min-h-11 items-center gap-2"><input type="checkbox" checked={cutLines} onChange={(event) => setCutLines(event.target.checked)} className="accent-pink-500"/>Garis potong 0,2 mm</label>
+        <span className="ml-auto">{countForPrint} kartu · {singleCardPages ? countForPrint : Math.ceil(countForPrint / 9)} halaman A4</span>
+      </div>
+      <PrintTips card />
+      {printError && <p role="alert" className="no-print rounded-xl border border-rose-500/30 bg-rose-950/50 p-3 text-sm text-rose-200">{printError}</p>}
 
       {/* Filter and Search Toolbar - Hidden on Print */}
       <div className="bg-slate-800/60 border border-slate-700/60 p-4 rounded-xl flex flex-wrap items-center justify-between gap-3 text-sm no-print">
@@ -205,7 +252,7 @@ export const KartuPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Card Grid */}
+      {/* A4 card sheets */}
       {isLoading ? (
         <div className="p-16 flex flex-col items-center justify-center gap-3 text-slate-400 no-print">
           <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
@@ -217,46 +264,22 @@ export const KartuPage: React.FC = () => {
           <p className="text-sm">Tidak ada kartu anggota yang cocok dengan filter.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 card-print-container">
-          {membersToPrint.map((item) => {
-            const isSelected = selectedIds.has(item.id)
-            return (
-              <div
-                key={item.id}
-                className="flex flex-col items-center p-3 rounded-2xl bg-slate-800/40 border border-slate-700/50 hover:border-slate-600 transition relative"
-              >
-                {/* Select Checkbox (No-Print) */}
-                <div className="w-full flex items-center justify-between pb-2 mb-2 border-b border-slate-700/40 no-print">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => toggleSelectOne(item.id)}
-                      className="rounded bg-slate-800 border-slate-700 text-pink-500 focus:ring-0"
-                    />
-                    <span>Pilih untuk dicetak</span>
-                  </label>
-                  <span className="text-[11px] font-mono text-slate-400">{item.kode_unik}</span>
+        <div className={`print-area card-print-area ${cropMarks ? 'crop-marks' : ''} ${cutLines ? 'cut-lines' : ''} ${singleCardPages ? 'single-card-pages' : ''}`}>
+          {cardPages.map((page, pageIndex) => (
+            <section key={pageIndex} className={`card-print-page ${pageIndex === cardPages.length - 1 ? 'is-last' : ''}`} aria-label={`Halaman kartu ${pageIndex + 1}`}>
+              {page.map((item) => (
+                <div key={item.id} className="card-crop-wrap">
+                  <div className="no-print flex min-h-11 items-center gap-2 px-2 text-xs text-slate-200">
+                    <input aria-label={`Pilih kartu ${item.nama_lengkap}`} type="checkbox" checked={selectedIds.has(item.id)} onChange={() => toggleSelectOne(item.id)} className="accent-pink-500" />
+                    <span>Pilih {item.kode_unik}</span>
+                  </div>
+                  <MemberCard id={item.id} nama={item.nama_lengkap} kelas={item.kelas} jurusan={item.jurusan} nis={item.nis} kodeUnik={item.kode_unik} qrValue={item.qr_value} jabatan={item.jabatan} showActions />
                 </div>
-
-                {/* Member Card Component */}
-                <MemberCard
-                  id={item.id}
-                  nama={item.nama_lengkap}
-                  kelas={item.kelas}
-                  jurusan={item.jurusan}
-                  nis={item.nis}
-                  kodeUnik={item.kode_unik}
-                  qrValue={item.qr_value}
-                  jabatan={item.jabatan}
-                  showActions={true}
-                />
-              </div>
-            )
-          })}
+              ))}
+            </section>
+          ))}
         </div>
       )}
     </div>
   )
 }
-

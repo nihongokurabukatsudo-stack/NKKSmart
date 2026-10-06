@@ -1,0 +1,73 @@
+@page { size: A4 portrait; margin: 8mm; @bottom-right { content: "Halaman " counter(page) " dari " counter(pages); font: 8pt sans-serif; color: #555; } }
+@page print-landscape { size: A4 landscape; margin: 10mm; @bottom-right { content: "Halaman " counter(page) " dari " counter(pages); font: 8pt sans-serif; color: #555; } }
+@page print-cards { size: A4 portrait; margin: 8mm; @bottom-right { content: "Halaman " counter(page) " dari " counter(pages); font: 8pt sans-serif; color: #555; } }
+
+.print-area { min-width: 0; }
+.print-paper { background: #fff; color: #111; }
+.print-tips { max-width: 720px; }
+
+@media screen and (max-width: 639px) {
+  .responsive-table-wrap table[data-responsive-cards], .responsive-table-wrap table[data-responsive-cards] tbody { display: block; width: 100%; }
+  .responsive-table-wrap table[data-responsive-cards] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  .responsive-table-wrap table[data-responsive-cards] tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin: 8px; padding: 8px; border: 1px solid #393038; border-radius: 12px; }
+  .responsive-table-wrap table[data-responsive-cards] tbody td { display: block; min-width: 0; padding: 6px 4px; overflow-wrap: anywhere; }
+  .responsive-table-wrap table[data-responsive-cards] tbody td[data-label]::before { display: block; margin-bottom: 2px; color: #a1aaba; content: attr(data-label); font-size: 10px; font-weight: 600; }
+}
+
+@media screen {
+  .print-area:not(.card-print-area) { overflow-x: auto; }
+  .print-paper { box-sizing: border-box; border: 1px solid #393038; border-radius: 12px; padding: 10mm; box-shadow: 0 16px 38px #0003; }
+  .print-landscape > .print-paper { width: 277mm; min-height: 190mm; margin: 0 auto; }
+  .print-portrait > .print-paper { width: 194mm; min-height: 281mm; margin: 0 auto; }
+  .print-paper :where(h1,h2,h3,h4,p,th,td,span,strong,label) { color: #151217; }
+  .print-paper :where(table) { background: #fff; }
+  .print-paper :where(thead) { background: #fce7f3; }
+  .card-print-area { overflow-x: auto; padding: 4mm 0; }
+  .card-print-page { box-sizing: border-box; display: grid; grid-template-columns: repeat(3, 54mm); grid-auto-rows: max-content; justify-content: center; align-content: start; gap: 5mm; width: 194mm; min-height: 281mm; margin: 0 auto 8mm; padding: 7.1mm 0; border: 1px solid #d1d5db; background: #fff; }
+  .card-print-area.single-card-pages .card-print-page { grid-template-columns: 54mm; align-content: center; }
+  .card-crop-wrap { position: relative; width: 54mm; height: 85.6mm; overflow: visible; }
+  .card-crop-wrap > .no-print { position: absolute; z-index: 30; top: 1mm; left: 1mm; min-height: 0; border-radius: 1.5mm; background: #100d12dc; padding: 1mm 1.5mm; }
+  .card-crop-wrap .member-card-wrapper { gap: 0; }
+}
+
+@media print {
+  html, body, #root { width: auto !important; min-height: 0 !important; height: auto !important; margin: 0 !important; background: #fff !important; color: #111 !important; }
+  body * { visibility: hidden !important; }
+  .print-area, .print-area * { visibility: visible !important; }
+  .print-area { position: absolute !important; inset: 0 auto auto 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; page: auto; }
+  .print-landscape { page: print-landscape; }
+  .print-portrait { page: auto; }
+  .print-paper { width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; color: #111 !important; box-shadow: none !important; backdrop-filter: none !important; filter: none !important; overflow: visible !important; }
+  .no-print, .admin-sidebar, .print-tips { display: none !important; }
+  .print-only { display: block !important; }
+  .surface-card { border-color: #bbb !important; border-radius: 0 !important; background: #fff !important; color: #111 !important; box-shadow: none !important; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, img, .print-keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+  h1, h2, h3, h4, .print-group-heading { break-after: avoid !important; page-break-after: avoid !important; }
+  * { box-shadow: none !important; backdrop-filter: none !important; filter: none !important; }
+  .print-color, .print-color * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  .print-landscape table { font-size: 7pt; }
+  .print-landscape :where(th,td) { padding: 1.2mm 1mm !important; border: .2mm solid #777 !important; color: #111 !important; }
+  .print-landscape thead { background: #fce7f3 !important; }
+  .card-print-area { page: print-cards; }
+  .card-print-page { box-sizing: border-box; display: grid !important; grid-template-columns: repeat(3, 54mm); grid-auto-rows: 85.6mm; justify-content: center; align-content: start; gap: 5mm; width: 194mm; height: 281mm; min-height: 281mm; margin: 0; padding: 7.1mm 0; break-after: page; page-break-after: always; overflow: visible !important; }
+  .card-print-page.is-last { break-after: auto; page-break-after: auto; }
+  .single-card-pages .card-print-page { grid-template-columns: 54mm; align-content: center; }
+  .card-crop-wrap { position: relative; box-sizing: border-box; width: 54mm; height: 85.6mm; overflow: visible; break-inside: avoid; }
+  .card-crop-wrap .member-card-wrapper { display: block !important; width: 54mm; height: 85.6mm; }
+  .card-crop-wrap .member-card { width: 54mm !important; height: 85.6mm !important; border-radius: 2.5mm !important; }
+  .card-print-area.cut-lines .member-card { outline: .2mm solid #777; outline-offset: .1mm; }
+  .card-print-area.crop-marks .card-crop-wrap::before { content: ''; position: absolute; inset: -4mm; pointer-events: none; background: linear-gradient(#222,#222) left top/4mm .2mm,linear-gradient(#222,#222) left top/.2mm 4mm,linear-gradient(#222,#222) right top/4mm .2mm,linear-gradient(#222,#222) right top/.2mm 4mm,linear-gradient(#222,#222) left bottom/4mm .2mm,linear-gradient(#222,#222) left bottom/.2mm 4mm,linear-gradient(#222,#222) right bottom/4mm .2mm,linear-gradient(#222,#222) right bottom/.2mm 4mm; background-repeat: no-repeat; }
+  .card-print-area .member-card { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .print-area:not(.card-print-area) :where(th,td) { border: .2mm solid #777 !important; background-color: #fff !important; color: #111 !important; }
+  .print-area:not(.card-print-area) :where(.bg-slate-800,.bg-slate-800\/60,.bg-slate-900,.bg-slate-900\/80,.bg-slate-700) { background-color: #fff !important; color: #111 !important; }
+  .print-area:not(.card-print-area) :where(.bg-pink-100,.bg-pink-50) { background-color: #fce7f3 !important; color: #111 !important; }
+  .print-area:not(.card-print-area) :where(.text-white,.text-slate-100,.text-slate-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-pink-300,.text-pink-400,.text-rose-300,.text-rose-400) { color: #111 !important; }
+  .semester-matrix { table-layout: fixed; }
+  .semester-matrix thead th { background: #fce7f3 !important; print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  .semester-matrix .holiday-column { background: repeating-linear-gradient(135deg,#e5e7eb,#e5e7eb 1mm,#fff 1mm,#fff 2mm) !important; print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  .semester-matrix .semester-group-row { break-after: avoid !important; page-break-after: avoid !important; }
+  .semester-month-block.print-new-page { break-before: page; page-break-before: always; }
+}

@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import Papa from 'papaparse'
 import { supabase } from '../lib/supabase'
 import { formatDateIndo, formatTime } from '../lib/utils'
+import { PrintSheet, PrintTips } from '../components/print/PrintSheet'
+import { printWhenReady } from '../lib/print'
 import {
   FileSpreadsheet,
   Download,
@@ -52,6 +54,12 @@ export const RekapPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [filterKelas, setFilterKelas] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [isPrinting, setIsPrinting] = useState(false)
+
+  const handlePrint = async () => {
+    setIsPrinting(true)
+    try { await printWhenReady() } finally { setIsPrinting(false) }
+  }
 
   // Fetch daftar pertemuan
   useEffect(() => {
@@ -269,11 +277,11 @@ export const RekapPage: React.FC = () => {
             <span>Export CSV</span>
           </button>
           <button
-            onClick={() => window.print()}
+            onClick={() => void handlePrint()}
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Cetak Rekap</span>
+            <span>{isPrinting ? 'Menyiapkan…' : 'Cetak Rekap'}</span>
           </button>
         </div>
       </div>
@@ -308,14 +316,17 @@ export const RekapPage: React.FC = () => {
         )}
       </div>
 
+      <PrintSheet orientation="landscape" className="mt-4">
       {/* Print Header Visible Only on Print */}
       {selectedPertemuan && (
         <div className="hidden print-only mb-4 text-center">
+          <img src="/img/nkk.png" alt="Logo NKK" width={64} height={64} className="mx-auto mb-2 h-12 w-12 object-contain" />
           <h2 className="text-lg font-bold">REKAP ABSENSI EKSTRAKURIKULER BAHASA JEPANG</h2>
           <h3 className="text-sm font-semibold">{selectedPertemuan.nama_pertemuan} (Pertemuan Ke-{selectedPertemuan.pertemuan_ke})</h3>
           <p className="text-xs mt-1">
             Tanggal: {formatDateIndo(selectedPertemuan.tanggal)} &bull; Waktu: {formatTime(selectedPertemuan.jam_mulai_scan)} - {formatTime(selectedPertemuan.jam_akhir_scan)} WIB
           </p>
+          <p className="mt-1 text-[9pt]">Dicetak: {new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'long' }).format(new Date())}</p>
           <p className="text-xs mt-0.5">
             Total Hadir: {totalHadir} orang &bull; Tidak Hadir: {totalTidakHadir} orang
           </p>
@@ -439,6 +450,8 @@ export const RekapPage: React.FC = () => {
           </div>
         )}
       </div>
+      </PrintSheet>
+      <PrintTips />
     </div>
   )
 }

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Papa from 'papaparse'
 import { supabase } from '../lib/supabase'
 import { formatDateIndo } from '../lib/utils'
+import { PrintSheet, PrintTips } from '../components/print/PrintSheet'
+import { printWhenReady } from '../lib/print'
 import {
   CalendarRange,
   Download,
@@ -65,6 +67,12 @@ export const RekapBulananPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [filterKelas, setFilterKelas] = useState<string>('all')
   const [filterJabatan, setFilterJabatan] = useState<string>('all')
+  const [isPrinting, setIsPrinting] = useState(false)
+
+  const handlePrint = async () => {
+    setIsPrinting(true)
+    try { await printWhenReady() } finally { setIsPrinting(false) }
+  }
 
   // Ambil tahun yang tersedia dari tabel pertemuan
   useEffect(() => {
@@ -294,11 +302,11 @@ export const RekapBulananPage: React.FC = () => {
             <span>Export CSV</span>
           </button>
           <button
-            onClick={() => window.print()}
+            onClick={() => void handlePrint()}
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Cetak Matriks</span>
+            <span>{isPrinting ? 'Menyiapkan…' : 'Cetak Matriks'}</span>
           </button>
         </div>
       </div>
@@ -345,12 +353,15 @@ export const RekapBulananPage: React.FC = () => {
         </div>
       </div>
 
+      <PrintSheet orientation="landscape" className="mt-4">
       {/* Print Title */}
       <div className="hidden print-only mb-4 text-center">
+        <img src="/img/nkk.png" alt="Logo NKK" width={64} height={64} className="mx-auto mb-2 h-12 w-12 object-contain" />
         <h2 className="text-lg font-bold">MATRIKS REKAPITULASI KEHADIRAN BULANAN</h2>
         <p className="text-xs">
           Bulan: {MONTH_NAMES[selectedMonth - 1]} {selectedYear} &bull; Ekstrakurikuler Bahasa Jepang
         </p>
+        <p className="mt-1 text-[9pt]">Dicetak: {new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'long' }).format(new Date())}</p>
       </div>
 
       {/* Filter and Search Bar - No Print */}
@@ -491,6 +502,8 @@ export const RekapBulananPage: React.FC = () => {
           </div>
         )}
       </div>
+      </PrintSheet>
+      <PrintTips />
     </div>
   )
 }
