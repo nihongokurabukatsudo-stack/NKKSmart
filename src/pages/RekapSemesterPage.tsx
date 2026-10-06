@@ -5,13 +5,13 @@ import { supabase } from '../lib/supabase'
 import { PrintSheet, PrintTips } from '../components/print/PrintSheet'
 import { printWhenReady } from '../lib/print'
 
-type AttendanceStatus = 'hadir' | 'izin' | 'sakit' | 'alpha'
-interface SemesterMeeting { id: number; nama_pertemuan: string; pertemuan_ke: number; tanggal: string; is_libur: boolean }
-interface SemesterMember { id: number; nama_lengkap: string; kelas: string; jurusan: string; nis: string | null; jabatan: string; attendance: Record<string, AttendanceStatus> }
+type AttendanceStatus = 'hadir' | 'tidak_hadir'
+interface SemesterMeeting { id: string; nama_pertemuan: string; pertemuan_ke: number; tanggal: string; is_libur: boolean }
+interface SemesterMember { id: string; nama_lengkap: string; kelas: string; jurusan: string; nis: string | null; jabatan: string; attendance: Record<string, AttendanceStatus> }
 interface SemesterReport { meetings: SemesterMeeting[]; members: SemesterMember[] }
 
 const MONTH_NAMES = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-const STATUS_LETTER: Record<AttendanceStatus, string> = { hadir: 'H', izin: 'I', sakit: 'S', alpha: 'A' }
+const STATUS_LETTER: Record<AttendanceStatus, string> = { hadir: 'H', tidak_hadir: 'T' }
 const getJakartaToday = () => {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date())
   const part = (name: string) => parts.find((item) => item.type === name)?.value || '01'
@@ -229,7 +229,7 @@ export const RekapSemesterPage: React.FC = () => {
               </section>
             })}
 
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-400 pt-2 text-[8pt]"><b>Legenda:</b><span>H Hadir</span><span>I Izin</span><span>S Sakit</span><span>A Alpha</span><span>- Belum ada data</span><span>Libur tidak dihitung</span></div>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-400 pt-2 text-[8pt]"><b>Legenda:</b><span>H Hadir</span><span>T Tidak hadir</span><span>- Belum ada data</span><span>Libur tidak dihitung</span></div>
             <footer className="mt-8 grid grid-cols-2 gap-10 text-center text-xs">
               <div><p>Mengetahui,</p><p>Pembina Ekstrakurikuler</p><div className="h-16"/><label className="no-print mx-auto block max-w-64 text-left">Nama Pembina<input value={advisor} onChange={(event) => setAdvisor(event.target.value)} className="mt-1 min-h-10 w-full rounded border border-slate-400 px-2"/></label><p className="print-only font-bold underline">{advisor || ' '}</p></div>
               <div><p>Ketua NKK</p><div className="h-[5.25rem]"/><label className="no-print mx-auto block max-w-64 text-left">Nama Ketua<input value={chair} onChange={(event) => setChair(event.target.value)} className="mt-1 min-h-10 w-full rounded border border-slate-400 px-2"/></label><p className="print-only font-bold underline">{chair || ' '}</p></div>

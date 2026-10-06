@@ -17,7 +17,9 @@ button,a { -webkit-tap-highlight-color:transparent }
 .admin-sidebar { background:var(--surface); border-color:var(--line) }
 .admin-main { max-width:1600px; width:100%; margin:0 auto }
 .surface-card { background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 24px #1018280a }
-.scan-page { height:100dvh; min-height:100dvh; color:#fff; background:#100d12; position:relative; isolation:isolate; overflow:hidden; padding-bottom:env(safe-area-inset-bottom) }
+.scan-page { height:auto; min-height:100dvh; color:#fff; background:#100d12; position:relative; isolation:isolate; overflow-x:hidden; overflow-y:auto; padding-bottom:env(safe-area-inset-bottom) }
+.scan-page > .flex-1 { flex:0 0 auto; }
+.scan-main { flex:0 0 auto; overflow:visible; touch-action:pan-y; }
 .scan-page:before { content:''; position:absolute; inset:-12px; z-index:-2; background:url('/img/background.jpg') center top/cover no-repeat; filter:brightness(.68); }
 .scan-page:after { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,#100d1220 0%,#100d126e 54%,#100d12df 100%) }
 .scan-glass { background:#171217cc; border:1px solid #ffffff30; backdrop-filter:blur(16px); box-shadow:0 20px 60px #08060850 }
