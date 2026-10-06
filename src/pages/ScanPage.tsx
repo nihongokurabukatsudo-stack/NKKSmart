@@ -243,36 +243,6 @@ export const ScanPage: React.FC = () => {
     return () => navigator.geolocation.clearWatch(watchId)
   }, [geofence])
 
-  // Get Camera Devices
-  useEffect(() => {
-    if (!window.isSecureContext && location.hostname !== 'localhost') {
-      setCameraError('Kamera memerlukan koneksi HTTPS yang aman.')
-      return
-    }
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCameraError('Browser ini tidak mendukung akses kamera. Coba gunakan Chrome atau Safari versi terbaru.')
-      return
-    }
-    navigator.mediaDevices.enumerateDevices()
-      .then((devices) => {
-        const camerasFound = devices.filter((device) => device.kind === 'videoinput').map((device) => ({ id: device.deviceId, label: device.label }))
-        if (camerasFound.length > 0) {
-          setCameras(camerasFound)
-          // Default to back camera if available
-          const backCam = camerasFound.find((d) => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('belakang'))
-          setSelectedCameraId(backCam ? backCam.id : '')
-        } else {
-          setCameraError('Kamera tidak ditemukan pada perangkat ini.')
-        }
-      })
-      .catch((err) => {
-        console.warn('Tidak dapat menemukan kamera:', err)
-        if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
-          setCameraError('Izin kamera ditolak. Aktifkan izin kamera di pengaturan browser, lalu muat ulang halaman.')
-        }
-      })
-  }, [])
-
   // Submit Scan ke RPC Supabase
   const handleProcessScan = async (rawCode: string, mode: 'camera' | 'manual' = 'camera') => {
     const code = rawCode.trim()
@@ -374,7 +344,7 @@ export const ScanPage: React.FC = () => {
   }
 
   // Start Scanner
-  const startScanner = async () => {
+  const startScanner = async (cameraId = selectedCameraId) => {
     setCameraError('')
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraError('Browser ini tidak mendukung kamera. Coba gunakan browser versi terbaru.')
@@ -386,6 +356,19 @@ export const ScanPage: React.FC = () => {
     }
 
     try {
+      // Request permission from the user's click before enumerating devices;
+      // browsers hide camera labels until permission is granted.
+      const permissionStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: cameraId ? { deviceId: { exact: cameraId } } : { facingMode: { ideal: 'environment' } },
+      })
+      permissionStream.getTracks().forEach((track) => track.stop())
+
+      const videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === 'videoinput')
+      const discoveredCameras = videoDevices.map((device, index) => ({ id: device.deviceId, label: device.label || `Kamera ${index + 1}` }))
+      setCameras(discoveredCameras)
+      if (discoveredCameras.length === 0) throw new DOMException('No camera found', 'NotFoundError')
+
       const { Html5Qrcode } = await import('html5-qrcode')
       const html5QrCode = new Html5Qrcode('qr-reader')
       html5QrCodeRef.current = html5QrCode
@@ -397,7 +380,7 @@ export const ScanPage: React.FC = () => {
       }
 
       await html5QrCode.start(
-        selectedCameraId || { facingMode: 'environment' },
+        cameraId || { facingMode: 'environment' },
         config,
         (decodedText) => {
           const now = Date.now()
@@ -422,11 +405,10 @@ export const ScanPage: React.FC = () => {
       const track = (video?.srcObject as MediaStream | null)?.getVideoTracks()[0]
       const capabilities = track?.getCapabilities?.() as (MediaTrackCapabilities & { torch?: boolean }) | undefined
       setTorchSupported(Boolean(capabilities?.torch))
-      const videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === 'videoinput')
-      setCameras(videoDevices.map((device) => ({ id: device.deviceId, label: device.label })))
       const activeDeviceId = track?.getSettings().deviceId
-      const backCamera = videoDevices.find((device) => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('belakang'))
-      if (!selectedCameraId && (activeDeviceId || backCamera?.deviceId)) setSelectedCameraId(activeDeviceId || backCamera!.deviceId)
+      const backCamera = discoveredCameras.find((device) => /back|rear|environment|belakang/i.test(device.label))
+      const defaultCameraId = cameraId || activeDeviceId || backCamera?.id || ''
+      if (defaultCameraId) setSelectedCameraId(defaultCameraId)
     } catch (err) {
       console.error('Gagal memulai kamera:', err)
       const name = (err as DOMException)?.name
@@ -446,7 +428,7 @@ export const ScanPage: React.FC = () => {
 
   // Stop Scanner
   const stopScanner = async () => {
-    if (html5QrCodeRef.current && isScanning) {
+    if (html5QrCodeRef.current) {
       try {
         await html5QrCodeRef.current.stop()
         html5QrCodeRef.current = null
@@ -457,6 +439,13 @@ export const ScanPage: React.FC = () => {
     setIsScanning(false)
     setTorchOn(false)
     setTorchSupported(false)
+  }
+
+  const handleCameraChange = async (cameraId: string) => {
+    setSelectedCameraId(cameraId)
+    if (!isScanning) return
+    await stopScanner()
+    await startScanner(cameraId)
   }
 
   const toggleTorch = async () => {
@@ -605,8 +594,7 @@ export const ScanPage: React.FC = () => {
               <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
                 <select
                   value={selectedCameraId}
-                  disabled={isScanning}
-                  onChange={(e) => setSelectedCameraId(e.target.value)}
+                  onChange={(e) => { void handleCameraChange(e.target.value) }}
                   aria-label="Ganti kamera"
                   className="min-h-12 min-w-0 flex-1 bg-slate-950/70 border border-white/15 rounded-full px-3 py-2 text-base text-slate-100 focus:outline-none focus:border-pink-500 transition-all appearance-none cursor-pointer sm:max-w-[200px] sm:flex-none disabled:opacity-50"
                 >
@@ -645,7 +633,7 @@ export const ScanPage: React.FC = () => {
                 </button>
               ) : (
                 <button
-                  onClick={startScanner}
+                  onClick={() => { void startScanner() }}
                   className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all hover:scale-105 active:scale-95"
                 >
                   <Camera className="w-4 h-4" />

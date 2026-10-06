@@ -343,7 +343,7 @@ export const PertemuanPage: React.FC = () => {
       {/* Pertemuan Cards Grid */}
       <div className="relative z-10">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-pink-400/80">
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-pink-300">
             <Loader2 className="w-10 h-10 animate-spin" />
             <p className="text-sm font-medium">Memuat jadwal pertemuan...</p>
           </div>
@@ -515,7 +515,7 @@ export const PertemuanPage: React.FC = () => {
             {/* Modal Content */}
             <div className="flex-1 overflow-hidden flex flex-col bg-slate-900/50">
               {detailLoading ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-pink-400/80 gap-3">
+                <div className="flex-1 flex flex-col items-center justify-center text-pink-300 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin" />
                   <p className="text-sm">Memuat detail absensi...</p>
                 </div>
@@ -529,7 +529,7 @@ export const PertemuanPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-2xl font-bold text-pink-400">{absensiList.length}</div>
-                        <div className="text-xs text-pink-400/70 uppercase tracking-wider font-semibold">Anggota Hadir</div>
+                        <div className="text-xs text-pink-300 uppercase tracking-wider font-semibold">Anggota Hadir</div>
                       </div>
                     </div>
                     <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 flex items-center gap-4">
@@ -538,7 +538,7 @@ export const PertemuanPage: React.FC = () => {
                       </div>
                       <div>
                         <div className="text-2xl font-bold text-rose-400">{missingMembers.length}</div>
-                        <div className="text-xs text-rose-400/70 uppercase tracking-wider font-semibold">Tidak Hadir</div>
+                        <div className="text-xs text-rose-300 uppercase tracking-wider font-semibold">Tidak Hadir</div>
                       </div>
                     </div>
                   </div>
@@ -633,7 +633,7 @@ export const PertemuanPage: React.FC = () => {
                                 </div>
                               </div>
                               <div className="text-right shrink-0">
-                                <div className="text-[10px] font-medium text-rose-400/80 uppercase tracking-wider flex items-center gap-1">
+                                <div className="text-xs font-medium text-rose-300 uppercase tracking-wider flex items-center gap-1">
                                   <UserX className="w-3 h-3" /> Absent
                                 </div>
                               </div>
