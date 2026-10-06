@@ -88,7 +88,7 @@ export const PertemuanPage: React.FC = () => {
         .from('pertemuan')
         .select(`
           *,
-          absensi:absensi(count)
+          absensi:absensi(status)
         `)
         .order('tanggal', { ascending: false })
         .order('pertemuan_ke', { ascending: false })
@@ -96,7 +96,7 @@ export const PertemuanPage: React.FC = () => {
       if (!error && data) {
         const formatted = data.map((p: any) => ({
           ...p,
-          absensi_count: p.absensi?.[0]?.count || 0,
+          absensi_count: p.absensi?.filter((record: { status: string }) => record.status === 'hadir').length || 0,
         }))
         setPertemuanList(formatted)
       }
