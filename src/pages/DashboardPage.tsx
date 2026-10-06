@@ -324,7 +324,7 @@ export const DashboardPage: React.FC = () => {
           to="/scan"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-md shadow-emerald-900/30 transition"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-semibold shadow-md shadow-pink-900/30 transition"
         >
           <QrCode className="w-4 h-4" />
           <span>Buka Scanner Kamera</span>
@@ -338,11 +338,11 @@ export const DashboardPage: React.FC = () => {
           <div>
             <p className="text-xs font-medium text-slate-400">Total Anggota</p>
             <p className="text-2xl font-bold text-white mt-1">{stats.anggota}</p>
-            <span className="text-[11px] text-emerald-400 flex items-center gap-1 mt-1">
+            <span className="text-[11px] text-pink-400 flex items-center gap-1 mt-1">
               Kelas X & XI aktif
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-pink-500/15 text-pink-400 flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -352,11 +352,11 @@ export const DashboardPage: React.FC = () => {
           <div>
             <p className="text-xs font-medium text-slate-400">Total Pengurus</p>
             <p className="text-2xl font-bold text-white mt-1">{stats.pengurus}</p>
-            <span className="text-[11px] text-teal-400 flex items-center gap-1 mt-1">
+            <span className="text-[11px] text-rose-400 flex items-center gap-1 mt-1">
               Pengurus inti & divisi
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center">
             <UserCheck className="w-6 h-6" />
           </div>
         </div>
@@ -366,11 +366,11 @@ export const DashboardPage: React.FC = () => {
           <div>
             <p className="text-xs font-medium text-slate-400">Total Pertemuan</p>
             <p className="text-2xl font-bold text-white mt-1">{stats.pertemuan}</p>
-            <span className="text-[11px] text-amber-400 flex items-center gap-1 mt-1">
+            <span className="text-[11px] text-rose-400 flex items-center gap-1 mt-1">
               Jadwal terdaftar
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center">
             <CalendarDays className="w-6 h-6" />
           </div>
         </div>
@@ -380,14 +380,14 @@ export const DashboardPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <p className="text-xs font-medium text-slate-400">Pertemuan Terakhir</p>
-              {latestIsLive && <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">Berlangsung</span>}
+              {latestIsLive && <span className="rounded-full bg-pink-500/15 px-2 py-0.5 text-[10px] font-semibold text-pink-400">Berlangsung</span>}
             </div>
             <p className="text-2xl font-bold text-white mt-1">{latestMeeting?.is_libur ? 'Libur' : latestMeeting ? `${latestMeeting.hadir}/${totalActive}` : '—'}</p>
             <span className="text-[11px] text-slate-400 mt-1 block">
               {latestMeeting ? `${latestMeeting.nama_pertemuan} · ${formatDateIndo(latestMeeting.tanggal)}${latestMeeting.is_libur ? ' · Libur' : ` · ${totalActive ? Math.round(latestMeeting.hadir / totalActive * 100) : 0}%`}` : 'Belum ada pertemuan yang berlangsung'}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-pink-500/15 text-pink-400 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
@@ -397,14 +397,14 @@ export const DashboardPage: React.FC = () => {
       <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <TrendingUp className="w-5 h-5 text-pink-400" />
             <div>
               <h2 className="text-sm font-semibold text-white">Kehadiran per Pertemuan</h2>
               <p className="text-xs text-slate-400">Hadir per pertemuan · rata-rata {averageCount} orang ({averagePercent}%)</p>
             </div>
           </div>
           <div className="inline-flex w-fit rounded-lg border border-slate-700 bg-slate-900/70 p-1" aria-label="Jumlah pertemuan pada grafik">
-            {([5, 8, 12] as const).map((count) => <button key={count} type="button" onClick={() => setMeetingLimit(count)} aria-pressed={meetingLimit === count} className={`min-h-9 min-w-10 rounded-md px-2 text-xs font-semibold transition ${meetingLimit === count ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}>{count}</button>)}
+            {([5, 8, 12] as const).map((count) => <button key={count} type="button" onClick={() => setMeetingLimit(count)} aria-pressed={meetingLimit === count} className={`min-h-9 min-w-10 rounded-md px-2 text-xs font-semibold transition ${meetingLimit === count ? 'bg-pink-600 text-white' : 'text-slate-400 hover:text-white'}`}>{count}</button>)}
           </div>
         </div>
 
@@ -423,8 +423,8 @@ export const DashboardPage: React.FC = () => {
                     const fullDate = formatDateIndo(meeting.tanggal)
                     return <Link key={meeting.id} to={`/pertemuan/${meeting.id}`} title={`${meeting.nama_pertemuan} · ${fullDate} · ${meeting.is_libur ? 'Libur' : `Hadir ${meeting.hadir} dari ${totalActive} (${percent}%)`}`} aria-label={`${meeting.nama_pertemuan}, ${fullDate}, ${meeting.is_libur ? 'Libur' : `${meeting.hadir} hadir dari ${totalActive}, ${percent} persen`}`} className="group flex h-full min-w-8 flex-1 flex-col items-center justify-end gap-1 text-center focus-visible:rounded-md">
                       <span className="h-4 text-[11px] font-bold text-white">{meeting.is_libur ? '—' : meeting.hadir}</span>
-                      <div className={`relative w-full max-w-12 overflow-hidden rounded-t-md transition group-hover:brightness-125 ${meeting.is_libur ? 'border border-slate-500/70 bg-[repeating-linear-gradient(135deg,transparent,transparent_5px,#94a3b822_5px,#94a3b822_9px)]' : 'bg-gradient-to-t from-emerald-700 to-teal-400'}`} style={{ height: `${height}%`, minHeight: meeting.is_libur ? '18px' : meeting.hadir ? '3px' : '0px' }} />
-                      <span className={`h-4 text-[10px] font-semibold ${meeting.is_libur ? 'text-slate-400' : 'text-emerald-300'}`}>{meeting.is_libur ? 'Libur' : `${percent}%`}</span>
+                      <div className={`relative w-full max-w-12 overflow-hidden rounded-t-md transition group-hover:brightness-125 ${meeting.is_libur ? 'border border-slate-500/70 bg-[repeating-linear-gradient(135deg,transparent,transparent_5px,#94a3b822_5px,#94a3b822_9px)]' : 'bg-gradient-to-t from-pink-700 to-rose-400'}`} style={{ height: `${height}%`, minHeight: meeting.is_libur ? '18px' : meeting.hadir ? '3px' : '0px' }} />
+                      <span className={`h-4 text-[10px] font-semibold ${meeting.is_libur ? 'text-slate-400' : 'text-pink-300'}`}>{meeting.is_libur ? 'Libur' : `${percent}%`}</span>
                     </Link>
                   })}
                 </div>
@@ -451,7 +451,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           {todayMeeting && (
             <div className="flex items-center gap-2">
-              <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+              <span className="text-xs px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 font-semibold border border-pink-500/30">
                 Hadir: {hadirList.length}
               </span>
               <span className="text-xs px-3 py-1 rounded-full bg-slate-700 text-slate-300 font-semibold">
@@ -466,7 +466,7 @@ export const DashboardPage: React.FC = () => {
             {/* Hadir Column */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Sudah Absen ({hadirList.length})</span>
                 </h3>
@@ -490,7 +490,7 @@ export const DashboardPage: React.FC = () => {
                           <td className="p-2.5 font-medium text-slate-200">
                             <div>{row.nama_lengkap}</div>
                             {row.jabatan === 'Pengurus' && (
-                              <span className="text-[10px] text-teal-400 font-normal">Pengurus</span>
+                              <span className="text-[10px] text-rose-400 font-normal">Pengurus</span>
                             )}
                           </td>
                           <td className="p-2.5 text-slate-400">
@@ -527,7 +527,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="border border-slate-700/60 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
                 {tidakHadirList.length === 0 ? (
-                  <p className="p-4 text-xs text-emerald-400 text-center">Semua anggota telah hadir!</p>
+                  <p className="p-4 text-xs text-pink-400 text-center">Semua anggota telah hadir!</p>
                 ) : (
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-800 text-slate-400 border-b border-slate-700 sticky top-0">
@@ -551,7 +551,7 @@ export const DashboardPage: React.FC = () => {
                               onClick={() => handleToggleAttendance(row.anggota_id, true)}
                               disabled={actionLoadingId === row.anggota_id}
                               title="Tandai Hadir Manual"
-                              className="px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded text-[11px] transition"
+                              className="px-2 py-1 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 rounded text-[11px] transition"
                             >
                               Hadir
                             </button>

@@ -453,7 +453,7 @@ export const ScanPage: React.FC = () => {
   return (
     <div className={`scan-page flex flex-col text-slate-100 ${isScanning ? 'is-scanning' : 'is-idle'}`}>
       <div className="flex-1 flex flex-col">
-        
+
         {/* Top Header */}
         <header className="scan-topbar border-b border-white/10 bg-slate-950/45 px-3 py-2.5 backdrop-blur-xl shadow-lg">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2">
@@ -466,39 +466,39 @@ export const ScanPage: React.FC = () => {
                   <img src="/img/nkk.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-sm sm:text-lg bg-gradient-to-r from-emerald-300 to-pink-300 bg-clip-text text-transparent">NKKSmart Scan</h1>
+                  <h1 className="font-bold text-sm sm:text-lg bg-gradient-to-r from-pink-300 to-pink-300 bg-clip-text text-transparent">NKKSmart Scan</h1>
                   <p className="hidden text-[10px] text-slate-300 sm:block">Absensi ekstrakurikuler</p>
                 </div>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${meetingStatus?.active ? 'border-emerald-400/40 bg-emerald-500/20 text-emerald-200' : meetingStatus?.status === 'libur' ? 'border-slate-300/30 bg-slate-500/20 text-slate-100' : 'border-amber-300/40 bg-amber-500/20 text-amber-100'}`}>
+              <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${meetingStatus?.active ? 'border-pink-400/40 bg-pink-500/20 text-pink-200' : meetingStatus?.status === 'libur' ? 'border-slate-300/30 bg-slate-500/20 text-slate-100' : 'border-rose-300/40 bg-rose-500/20 text-rose-100'}`}>
                 {isStatusLoading ? 'Memuat…' : meetingStatus?.active ? 'Aktif' : meetingStatus?.status === 'libur' ? 'Libur' : 'Di luar jadwal'}
               </span>
-              {geofence?.configured && <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${hasLocationFix && isInsideFence ? 'border-emerald-400/40 bg-emerald-500/20 text-emerald-100' : hasLocationFix || geoError ? 'border-rose-300/50 bg-rose-500/25 text-rose-100' : 'border-white/20 bg-slate-500/30 text-slate-100'}`}>{locationBadge}</span>}
+              {geofence?.configured && <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${hasLocationFix && isInsideFence ? 'border-pink-400/40 bg-pink-500/20 text-pink-100' : hasLocationFix || geoError ? 'border-rose-300/50 bg-rose-500/25 text-rose-100' : 'border-white/20 bg-slate-500/30 text-slate-100'}`}>{locationBadge}</span>}
             </div>
           </div>
         </header>
 
         {/* Main Container */}
         <main className="scan-main mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto px-3 py-3 sm:gap-5 sm:p-6 lg:mr-8 lg:ml-auto lg:max-w-[min(54vw,760px)]">
-          
+
           {/* Status Meeting Banner */}
           <div
             className={`scan-meeting-status order-1 rounded-xl border px-3 py-2.5 backdrop-blur-md flex items-center justify-between text-sm shadow-lg transition-all duration-300 sm:p-4 sm:rounded-2xl ${
               meetingStatus?.active
-                ? 'bg-gradient-to-r from-emerald-950/60 to-emerald-900/40 border-emerald-500/40 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                ? 'bg-gradient-to-r from-pink-950/60 to-pink-900/40 border-pink-500/40 text-pink-100 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
                 : meetingStatus?.status === 'libur'
-                ? 'bg-gradient-to-r from-amber-950/60 to-amber-900/40 border-amber-500/40 text-amber-100 shadow-[0_0_20px_rgba(245,158,11,0.1)]'
+                ? 'bg-gradient-to-r from-rose-950/60 to-rose-900/40 border-rose-500/40 text-rose-100 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
                 : 'bg-slate-900/50 border-white/10 text-slate-300'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full flex items-center justify-center ${meetingStatus?.active ? 'bg-emerald-500/20' : meetingStatus?.status === 'libur' ? 'bg-amber-500/20' : 'bg-white/5'}`}>
+              <div className={`p-2 rounded-full flex items-center justify-center ${meetingStatus?.active ? 'bg-pink-500/20' : meetingStatus?.status === 'libur' ? 'bg-rose-500/20' : 'bg-white/5'}`}>
                 {meetingStatus?.active ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-pink-400 shrink-0" />
                 ) : meetingStatus?.status === 'libur' ? (
-                  <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                  <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                 ) : (
                   <XCircle className="w-5 h-5 text-slate-500 shrink-0" />
                 )}
@@ -522,12 +522,12 @@ export const ScanPage: React.FC = () => {
             <div
               className={`scan-geofence-status order-2 rounded-xl border px-3 py-2 backdrop-blur-md flex items-center gap-2 text-xs shadow-lg transition-colors sm:p-3.5 sm:gap-3 sm:text-sm sm:rounded-2xl ${
                 hasLocationFix && isInsideFence
-                  ? 'bg-teal-950/40 border-teal-500/30 text-teal-100'
+                  ? 'bg-rose-950/40 border-rose-500/30 text-rose-100'
                   : hasLocationFix || geoError ? 'bg-rose-950/40 border-rose-500/30 text-rose-100 shadow-[0_0_15px_rgba(244,63,94,0.15)]' : 'bg-slate-900/50 border-white/10 text-slate-200'
               }`}
             >
-              <div className={`p-2 rounded-full ${hasLocationFix && isInsideFence ? 'bg-teal-500/20' : hasLocationFix || geoError ? 'bg-rose-500/20' : 'bg-white/5'}`}>
-                <MapPin className={`w-4 h-4 shrink-0 ${hasLocationFix && isInsideFence ? 'text-teal-400' : hasLocationFix || geoError ? 'text-rose-300' : 'text-slate-300'}`} />
+              <div className={`p-2 rounded-full ${hasLocationFix && isInsideFence ? 'bg-rose-500/20' : hasLocationFix || geoError ? 'bg-rose-500/20' : 'bg-white/5'}`}>
+                <MapPin className={`w-4 h-4 shrink-0 ${hasLocationFix && isInsideFence ? 'text-rose-400' : hasLocationFix || geoError ? 'text-rose-300' : 'text-slate-300'}`} />
               </div>
               <div className="flex-1">
                 <span className="font-medium text-white">
@@ -548,7 +548,7 @@ export const ScanPage: React.FC = () => {
                 value={scanType}
                 onChange={(e) => setScanType(e.target.value as 'auto' | 'anggota' | 'pengurus')}
                 aria-label="Target scan"
-                className="bg-slate-950/50 border border-white/10 rounded-full px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer"
+                className="bg-slate-950/50 border border-white/10 rounded-full px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all appearance-none cursor-pointer"
               >
                 <option value="auto">Semua (Auto)</option>
                 <option value="anggota">Khusus Anggota</option>
@@ -564,7 +564,7 @@ export const ScanPage: React.FC = () => {
                   disabled={isScanning}
                   onChange={(e) => setSelectedCameraId(e.target.value)}
                   aria-label="Ganti kamera"
-                  className="min-h-12 min-w-0 flex-1 bg-slate-950/70 border border-white/15 rounded-full px-3 py-2 text-base text-slate-100 focus:outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer sm:max-w-[200px] sm:flex-none disabled:opacity-50"
+                  className="min-h-12 min-w-0 flex-1 bg-slate-950/70 border border-white/15 rounded-full px-3 py-2 text-base text-slate-100 focus:outline-none focus:border-pink-500 transition-all appearance-none cursor-pointer sm:max-w-[200px] sm:flex-none disabled:opacity-50"
                 >
                   {!selectedCameraId && <option value="">Otomatis</option>}
                   {cameras.map((c) => (
@@ -584,13 +584,13 @@ export const ScanPage: React.FC = () => {
                 aria-label={isMirrored ? 'Matikan mirror kamera' : 'Aktifkan mirror kamera'}
                 className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border transition-all duration-300 shadow-md ${
                   isMirrored
-                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                    ? 'bg-pink-500/20 border-pink-500/50 text-pink-400'
                     : 'bg-slate-800/50 border-white/10 text-slate-300 hover:text-white hover:bg-slate-700/50'
                 }`}
               >
                 <FlipHorizontal className="w-4 h-4" />
               </button>
-              {torchSupported && <button type="button" onClick={toggleTorch} aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'} className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border ${torchOn ? 'border-amber-300 bg-amber-400/20 text-amber-200' : 'border-white/15 bg-slate-800/80 text-slate-200'}`}><Flashlight className="h-5 w-5"/></button>}
+              {torchSupported && <button type="button" onClick={toggleTorch} aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'} className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border ${torchOn ? 'border-rose-300 bg-rose-400/20 text-rose-200' : 'border-white/15 bg-slate-800/80 text-slate-200'}`}><Flashlight className="h-5 w-5"/></button>}
               {isScanning ? (
                 <button
                   onClick={stopScanner}
@@ -602,7 +602,7 @@ export const ScanPage: React.FC = () => {
               ) : (
                 <button
                   onClick={startScanner}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-95"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all hover:scale-105 active:scale-95"
                 >
                   <Camera className="w-4 h-4" />
                     <span>{cameraError ? 'Coba lagi' : 'Mulai Scan'}</span>
@@ -638,28 +638,28 @@ export const ScanPage: React.FC = () => {
             {/* Target Scan Box Animation */}
             {isScanning && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-20">
-                <div className="scan-target-frame relative aspect-[3/4] w-[72%] max-h-[90%] rounded-3xl border border-emerald-500/30 shadow-[0_0_0_9999px_rgba(2,6,23,0.28)] backdrop-blur-[1px]">
+                <div className="scan-target-frame relative aspect-[3/4] w-[72%] max-h-[90%] rounded-3xl border border-pink-500/30 shadow-[0_0_0_9999px_rgba(2,6,23,0.28)] backdrop-blur-[1px]">
                   {/* Glowing Corners */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-3xl shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-3xl shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-3xl shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-3xl shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-pink-400 rounded-tl-3xl shadow-[0_0_10px_rgba(244,114,182,0.5)]" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-pink-400 rounded-tr-3xl shadow-[0_0_10px_rgba(244,114,182,0.5)]" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-pink-400 rounded-bl-3xl shadow-[0_0_10px_rgba(244,114,182,0.5)]" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-pink-400 rounded-br-3xl shadow-[0_0_10px_rgba(244,114,182,0.5)]" />
                   {/* Scanning Line */}
-                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-scan absolute top-0 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-pink-400 to-transparent animate-scan absolute top-0 shadow-[0_0_8px_rgba(244,114,182,0.8)]" />
                 </div>
               </div>
             )}
           </div>
 
           {/* Manual Code Input (Hanya jika admin login) */}
-          {isAdmin && <button type="button" onClick={() => setManualSheetOpen(true)} className="scan-sheet-trigger order-5 min-h-12 rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><ShieldCheck className="mr-2 inline h-4 w-4 text-emerald-300"/>Input manual</button>}
+          {isAdmin && <button type="button" onClick={() => setManualSheetOpen(true)} className="scan-sheet-trigger order-5 min-h-12 rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><ShieldCheck className="mr-2 inline h-4 w-4 text-pink-300"/>Input manual</button>}
 
           {/* Scan History Log */}
-          <button type="button" onClick={() => setHistorySheetOpen(true)} className="scan-sheet-trigger order-6 flex min-h-12 items-center justify-between rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><span><History className="mr-2 inline h-4 w-4 text-emerald-300"/>Riwayat scan</span><span className="text-xs text-slate-300">{logs.length} entri</span></button>
+          <button type="button" onClick={() => setHistorySheetOpen(true)} className="scan-sheet-trigger order-6 flex min-h-12 items-center justify-between rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><span><History className="mr-2 inline h-4 w-4 text-pink-300"/>Riwayat scan</span><span className="text-xs text-slate-300">{logs.length} entri</span></button>
         </main>
-        {!isOnline && <div className="fixed left-3 right-3 top-16 z-40 rounded-xl border border-amber-300/40 bg-amber-950/90 p-3 text-center text-sm text-amber-100 shadow-xl">Tidak ada koneksi internet. Scan memerlukan koneksi untuk tersimpan.</div>}
-        {manualSheetOpen && isAdmin && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setManualSheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Input manual" className="scan-glass w-full max-w-lg rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Input manual · Admin</h2><button type="button" onClick={() => setManualSheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">×</button></div><form onSubmit={(event) => { void handleManualSubmit(event); setManualSheetOpen(false) }} className="flex gap-2"><input type="text" value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Masukkan kode unik" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/20 bg-slate-950/75 px-4 text-base text-white placeholder-slate-400"/><button type="submit" disabled={isSubmittingManual || !manualCode.trim()} className="min-h-12 rounded-xl bg-emerald-600 px-4 font-semibold text-white disabled:opacity-50"><Send className="mr-1 inline h-4 w-4"/>Kirim</button></form></section></div>}
-        {historySheetOpen && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setHistorySheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Riwayat scan" className="scan-glass max-h-[70dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold"><History className="mr-2 inline h-5 w-5 text-emerald-300"/>Riwayat scan</h2><button type="button" onClick={() => setHistorySheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">Tutup</button></div>{logs.length === 0 ? <p className="py-8 text-center text-sm text-slate-300">Belum ada scan yang dilakukan.</p> : <div className="space-y-2">{logs.map((log) => <div key={log.id} className={`flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 p-3 ${log.status === 'success' ? 'border-l-4 border-l-emerald-500' : log.status === 'warning' ? 'border-l-4 border-l-amber-400' : 'border-l-4 border-l-rose-500'}`}><span className="min-w-0 text-sm text-white">{log.message}</span><time className="shrink-0 text-xs text-slate-300">{log.time}</time></div>)}</div>}</section></div>}
+        {!isOnline && <div className="fixed left-3 right-3 top-16 z-40 rounded-xl border border-rose-300/40 bg-rose-950/90 p-3 text-center text-sm text-rose-100 shadow-xl">Tidak ada koneksi internet. Scan memerlukan koneksi untuk tersimpan.</div>}
+        {manualSheetOpen && isAdmin && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setManualSheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Input manual" className="scan-glass w-full max-w-lg rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Input manual · Admin</h2><button type="button" onClick={() => setManualSheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">×</button></div><form onSubmit={(event) => { void handleManualSubmit(event); setManualSheetOpen(false) }} className="flex gap-2"><input type="text" value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Masukkan kode unik" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/20 bg-slate-950/75 px-4 text-base text-white placeholder-slate-400"/><button type="submit" disabled={isSubmittingManual || !manualCode.trim()} className="min-h-12 rounded-xl bg-pink-600 px-4 font-semibold text-white disabled:opacity-50"><Send className="mr-1 inline h-4 w-4"/>Kirim</button></form></section></div>}
+        {historySheetOpen && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setHistorySheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Riwayat scan" className="scan-glass max-h-[70dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold"><History className="mr-2 inline h-5 w-5 text-pink-300"/>Riwayat scan</h2><button type="button" onClick={() => setHistorySheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">Tutup</button></div>{logs.length === 0 ? <p className="py-8 text-center text-sm text-slate-300">Belum ada scan yang dilakukan.</p> : <div className="space-y-2">{logs.map((log) => <div key={log.id} className={`flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 p-3 ${log.status === 'success' ? 'border-l-4 border-l-pink-500' : log.status === 'warning' ? 'border-l-4 border-l-rose-400' : 'border-l-4 border-l-rose-500'}`}><span className="min-w-0 text-sm text-white">{log.message}</span><time className="shrink-0 text-xs text-slate-300">{log.time}</time></div>)}</div>}</section></div>}
       </div>
 
       {/* Scan Result Popup Modal */}
@@ -670,13 +670,13 @@ export const ScanPage: React.FC = () => {
             onClick={(event) => event.stopPropagation()}
             className={`w-full max-w-lg rounded-3xl rounded-b-xl p-5 text-center shadow-2xl border sm:rounded-3xl sm:p-8 ${
               popup.success
-                ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.15)]'
-                : popupWarning ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-amber-400/40 shadow-[0_0_40px_rgba(245,158,11,0.15)]' : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
+                ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-pink-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
+                : popupWarning ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-400/40 shadow-[0_0_40px_rgba(244,63,94,0.15)]' : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
             }`}
           >
             <div
               className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full shadow-inner sm:mb-5 sm:h-20 sm:w-20 ${
-                popup.success ? 'bg-emerald-500/20 text-emerald-400' : popupWarning ? 'bg-amber-400/20 text-amber-300' : 'bg-rose-500/20 text-rose-400'
+                popup.success ? 'bg-pink-500/20 text-pink-400' : popupWarning ? 'bg-rose-400/20 text-rose-300' : 'bg-rose-500/20 text-rose-400'
               }`}
             >
               {popup.success ? <CheckCircle2 className="h-9 w-9 animate-in zoom-in duration-300 sm:h-12 sm:w-12" /> : popupWarning ? <AlertTriangle className="h-9 w-9 sm:h-12 sm:w-12" /> : <XCircle className="h-9 w-9 animate-in zoom-in duration-300 sm:h-12 sm:w-12" />}
@@ -686,7 +686,7 @@ export const ScanPage: React.FC = () => {
 
             {popup.nama && (
               <div className="mt-4 p-4 bg-slate-950/60 rounded-2xl border border-white/5 text-sm shadow-inner">
-                <p className="font-bold text-emerald-400 text-lg">{popup.nama}</p>
+                <p className="font-bold text-pink-400 text-lg">{popup.nama}</p>
                 {popup.kelas && <p className="text-slate-300 mt-1">{popup.kelas}</p>}
                 {popup.jabatan && (
                   <span className="inline-block mt-2 px-3 py-1 text-xs rounded-full bg-slate-800 border border-slate-700 text-slate-200 font-medium tracking-wide">
@@ -700,9 +700,9 @@ export const ScanPage: React.FC = () => {
             <button
               onClick={() => setPopup((current) => ({ ...current, show: false }))}
               className={`mt-4 min-h-12 w-full rounded-2xl py-3.5 text-sm font-bold shadow-lg text-white sm:mt-6 ${
-                popup.success 
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400' 
-                  : popupWarning ? 'bg-amber-600 hover:bg-amber-500' : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
+                popup.success
+                  ? 'bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400'
+                  : popupWarning ? 'bg-rose-600 hover:bg-rose-500' : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
               }`}
             >
               Tutup & Lanjutkan
@@ -710,7 +710,7 @@ export const ScanPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Custom Scan Line Animation Style */}
       <style>{`
         @keyframes scan {

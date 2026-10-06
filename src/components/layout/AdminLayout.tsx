@@ -59,7 +59,7 @@ export const AdminLayout: React.FC = () => {
       <header className="md:hidden flex items-center justify-between p-4 bg-slate-800/80 backdrop-blur border-b border-slate-700/50 sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <img src="/img/nkk.png" alt="NKK" className="w-8 h-8 object-contain" />
-          <span className="font-bold text-lg tracking-wider text-emerald-400">NKKSmart</span>
+          <span className="font-bold text-lg tracking-wider text-pink-400">NKKSmart</span>
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -79,7 +79,7 @@ export const AdminLayout: React.FC = () => {
         <div className="p-5 flex items-center gap-3 border-b border-slate-700/50">
           <img src="/img/nkk.png" alt="NKK" className="w-9 h-9 object-contain" />
           <div>
-            <h1 className="font-bold text-lg text-emerald-400 leading-tight">NKKSmart</h1>
+            <h1 className="font-bold text-lg text-pink-400 leading-tight">NKKSmart</h1>
             <p className="text-xs text-slate-400">Absensi Ekstrakurikuler</p>
           </div>
         </div>
@@ -90,7 +90,7 @@ export const AdminLayout: React.FC = () => {
             to="/scan"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl shadow-lg shadow-emerald-900/30 text-sm font-semibold transition"
+            className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white rounded-xl shadow-lg shadow-pink-900/30 text-sm font-semibold transition"
           >
             <div className="flex items-center gap-2">
               <QrCode className="w-4 h-4" />
@@ -112,11 +112,11 @@ export const AdminLayout: React.FC = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
                   active
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    ? 'bg-pink-500/15 text-pink-400 border border-pink-500/30'
                     : 'text-slate-300 hover:text-white hover:bg-slate-700/40'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? 'text-emerald-400' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 ${active ? 'text-pink-400' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
               </Link>
             )
