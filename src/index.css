@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 :root { font-family: 'Plus Jakarta Sans Variable', sans-serif; color-scheme: light; --brand:#c8102e; --ink:#18212f; --muted:#667085; --surface:#fff; --canvas:#f5f6fa; --line:#e4e7ec; --accent:#e11d48; }
-:root.dark { color-scheme:dark; --ink:#f3f4f6; --muted:#a1aaba; --surface:#171923; --canvas:#10121a; --line:#303240; }
+:root.dark { color-scheme:dark; --ink:#f3f4f6; --muted:#a1aaba; --surface:#171217; --canvas:#100d12; --line:#393038; }
 :root.dark body { background:var(--canvas); color:var(--ink) }
 * { box-sizing:border-box }
 html,body,#root { min-height:100%; margin:0 }
@@ -24,6 +24,11 @@ button,a { -webkit-tap-highlight-color:transparent }
 .scan-topbar { padding-top:max(.625rem,env(safe-area-inset-top)) }
 .scan-main { overscroll-behavior:contain; scrollbar-width:thin; }
 .scan-camera-window { height:clamp(210px,44dvh,410px); }
+.popup-card-enter { animation:popup-card-enter .38s cubic-bezier(.2,1.35,.45,1) both; }
+.popup-auto-progress { animation:popup-progress 2.5s linear both; }
+@keyframes popup-card-enter { from { opacity:0; transform:translateY(12px) scale(.92) } to { opacity:1; transform:translateY(0) scale(1) } }
+@keyframes popup-progress { from { transform:scaleX(1) } to { transform:scaleX(0) } }
+@media (prefers-reduced-motion:reduce) { .popup-card-enter,.popup-auto-progress { animation:none!important } }
 .scan-page.is-idle .scan-camera-window { background-color:#09080b55; }
 .scan-page.is-idle .scan-camera-window > div.absolute.z-10 { background:linear-gradient(180deg,#02061700 0%,#02061705 30%,#020617b8 100%); justify-content:flex-end; }
 .scan-camera-window #qr-reader { position:absolute; inset:0; width:100%; height:100%; }

@@ -323,7 +323,7 @@ export const PertemuanPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <CalendarDays className="w-7 h-7 text-emerald-400" />
+            <CalendarDays className="w-7 h-7 text-pink-400" />
             <span>Jadwal Pertemuan</span>
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -333,7 +333,7 @@ export const PertemuanPage: React.FC = () => {
 
         <button
           onClick={openAddModal}
-          className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-900/40 transition-all hover:-translate-y-0.5 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-400 hover:to-pink-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-pink-900/40 transition-all hover:-translate-y-0.5 cursor-pointer"
         >
           <Plus className="w-5 h-5" />
           <span>Tambah Pertemuan</span>
@@ -343,7 +343,7 @@ export const PertemuanPage: React.FC = () => {
       {/* Pertemuan Cards Grid */}
       <div className="relative z-10">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-emerald-400/80">
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-pink-400/80">
             <Loader2 className="w-10 h-10 animate-spin" />
             <p className="text-sm font-medium">Memuat jadwal pertemuan...</p>
           </div>
@@ -359,15 +359,15 @@ export const PertemuanPage: React.FC = () => {
               <div 
                 key={item.id} 
                 onClick={() => openDetail(item)}
-                className="group relative bg-slate-800/60 backdrop-blur-md border border-slate-700 hover:border-emerald-500/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] cursor-pointer flex flex-col h-full"
+                className="group relative bg-slate-800/60 backdrop-blur-md border border-slate-700 hover:border-pink-500/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)] cursor-pointer flex flex-col h-full"
               >
                 {/* Card Header */}
                 <div className="px-5 py-4 border-b border-slate-700/50 flex justify-between items-start bg-slate-800/80">
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 font-bold text-xs mb-2 border border-emerald-500/20">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-pink-500/10 text-pink-400 font-bold text-xs mb-2 border border-pink-500/20">
                       P{item.pertemuan_ke}
                     </div>
-                    <h3 className="font-bold text-base text-white line-clamp-1 group-hover:text-emerald-300 transition-colors">
+                    <h3 className="font-bold text-base text-white line-clamp-1 group-hover:text-pink-300 transition-colors">
                       {item.nama_pertemuan}
                     </h3>
                   </div>
@@ -377,12 +377,12 @@ export const PertemuanPage: React.FC = () => {
                         onClick={(e) => handleToggleManual(e, item)}
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition ${
                         item.manual_active
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+                            ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
                             : 'bg-slate-900/80 text-slate-400 border border-slate-700 hover:bg-slate-700'
                         }`}
                         title="Toggle Manual Aktif"
                     >
-                        <div className={`w-1.5 h-1.5 rounded-full ${item.manual_active ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></div>
+                        <div className={`w-1.5 h-1.5 rounded-full ${item.manual_active ? 'bg-pink-400 animate-pulse' : 'bg-slate-500'}`}></div>
                         {item.manual_active ? 'MANUAL ON' : 'MANUAL OFF'}
                     </button>
                     
@@ -421,8 +421,8 @@ export const PertemuanPage: React.FC = () => {
                 <div className="px-5 py-4 border-t border-slate-700/50 bg-slate-800/40 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
-                      <div className="w-7 h-7 rounded-full bg-emerald-500/20 border-2 border-slate-800 flex items-center justify-center z-20">
-                        <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <div className="w-7 h-7 rounded-full bg-pink-500/20 border-2 border-slate-800 flex items-center justify-center z-20">
+                        <UserCheck className="w-3.5 h-3.5 text-pink-400" />
                       </div>
                       <div className="w-7 h-7 rounded-full bg-slate-700 border-2 border-slate-800 flex items-center justify-center z-10 text-[10px] font-bold text-slate-300">
                         +{item.absensi_count || 0}
@@ -451,7 +451,7 @@ export const PertemuanPage: React.FC = () => {
                       to={`/rekap?pertemuan_id=${item.id}`}
                       onClick={(e) => e.stopPropagation()}
                       title="Lihat Excel Rekap"
-                      className="p-2 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition"
+                      className="p-2 hover:bg-pink-500/20 text-pink-400 rounded-lg transition"
                     >
                       <FileSpreadsheet className="w-4 h-4" />
                     </Link>
@@ -472,7 +472,7 @@ export const PertemuanPage: React.FC = () => {
             <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-start bg-slate-800/50 backdrop-blur-md sticky top-0 z-10">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <div className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">
+                  <div className="px-2.5 py-1 rounded-md bg-pink-500/20 text-pink-400 font-bold text-xs border border-pink-500/30">
                     Pertemuan {selectedMeeting.pertemuan_ke}
                   </div>
                   <h2 className="text-xl font-bold text-white">
@@ -498,7 +498,7 @@ export const PertemuanPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button 
                   onClick={(e) => openEditModal(e, selectedMeeting)}
-                  className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-pink-400 hover:bg-pink-500/10 rounded-lg transition-colors"
                   title="Edit Pertemuan"
                 >
                   <Edit2 className="w-5 h-5" />
@@ -515,7 +515,7 @@ export const PertemuanPage: React.FC = () => {
             {/* Modal Content */}
             <div className="flex-1 overflow-hidden flex flex-col bg-slate-900/50">
               {detailLoading ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-emerald-400/80 gap-3">
+                <div className="flex-1 flex flex-col items-center justify-center text-pink-400/80 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin" />
                   <p className="text-sm">Memuat detail absensi...</p>
                 </div>
@@ -523,13 +523,13 @@ export const PertemuanPage: React.FC = () => {
                 <>
                   {/* Summary Stats */}
                   <div className="grid grid-cols-2 gap-4 p-6 bg-slate-800/20 border-b border-slate-800/50">
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-4 flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400">
                         <UserCheck className="w-6 h-6" />
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-emerald-400">{absensiList.length}</div>
-                        <div className="text-xs text-emerald-400/70 uppercase tracking-wider font-semibold">Anggota Hadir</div>
+                        <div className="text-2xl font-bold text-pink-400">{absensiList.length}</div>
+                        <div className="text-xs text-pink-400/70 uppercase tracking-wider font-semibold">Anggota Hadir</div>
                       </div>
                     </div>
                     <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 flex items-center gap-4">
@@ -577,7 +577,7 @@ export const PertemuanPage: React.FC = () => {
                         placeholder="Cari anggota..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-xl leading-5 bg-slate-800/50 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:text-sm transition-colors"
+                        className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-xl leading-5 bg-slate-800/50 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-800 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 sm:text-sm transition-colors"
                       />
                     </div>
                   </div>
@@ -594,7 +594,7 @@ export const PertemuanPage: React.FC = () => {
                         {activeTab === 'hadir' ? (
                           (filteredList as AbsensiRecord[]).map((item) => (
                             <div key={item.id} className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3 flex items-center gap-4 hover:bg-slate-800/80 transition-colors">
-                              <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 border border-emerald-500/30">
+                              <div className="w-10 h-10 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold text-sm shrink-0 border border-pink-500/30">
                                 {item.anggota.nama_lengkap.substring(0, 2).toUpperCase()}
                               </div>
                               <div className="flex-1 min-w-0">
@@ -602,14 +602,14 @@ export const PertemuanPage: React.FC = () => {
                                 <div className="text-[11px] text-slate-400 mt-0.5 truncate flex items-center gap-2">
                                   <span>{item.anggota.kelas} {item.anggota.jurusan}</span>
                                   {item.anggota.jabatan !== 'Anggota' && (
-                                    <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] font-semibold">
+                                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[9px] font-semibold">
                                       {item.anggota.jabatan}
                                     </span>
                                   )}
                                 </div>
                               </div>
                               <div className="text-right shrink-0">
-                                <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
+                                <div className="text-xs font-mono text-pink-400 bg-pink-500/10 px-2 py-1 rounded">
                                   {formatTime(item.scan_time)}
                                 </div>
                               </div>
@@ -656,11 +656,11 @@ export const PertemuanPage: React.FC = () => {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl relative overflow-hidden">
             {/* Top gradient glow */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-pink-500"></div>
 
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                {isEditing ? <Edit2 className="w-5 h-5 text-emerald-400" /> : <Plus className="w-5 h-5 text-emerald-400" />}
+                {isEditing ? <Edit2 className="w-5 h-5 text-pink-400" /> : <Plus className="w-5 h-5 text-pink-400" />}
                 {isEditing ? 'Edit Jadwal Pertemuan' : 'Tambah Pertemuan Baru'}
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white hover:bg-slate-800 p-1.5 rounded-lg transition-colors">
@@ -676,7 +676,7 @@ export const PertemuanPage: React.FC = () => {
                   value={formData.nama_pertemuan}
                   onChange={(e) => setFormData({ ...formData, nama_pertemuan: e.target.value })}
                   placeholder="Contoh: Pertemuan Ke-1"
-                  className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-600"
+                  className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all placeholder:text-slate-600"
                   required
                 />
               </div>
@@ -688,7 +688,7 @@ export const PertemuanPage: React.FC = () => {
                     type="number"
                     value={formData.pertemuan_ke}
                     onChange={(e) => setFormData({ ...formData, pertemuan_ke: parseInt(e.target.value, 10) || 1 })}
-                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                     required
                   />
                 </div>
@@ -698,7 +698,7 @@ export const PertemuanPage: React.FC = () => {
                     type="date"
                     value={formData.tanggal}
                     onChange={(e) => setFormData({ ...formData, tanggal: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                     required
                   />
                 </div>
@@ -711,7 +711,7 @@ export const PertemuanPage: React.FC = () => {
                     type="time"
                     value={formData.jam_mulai_scan}
                     onChange={(e) => setFormData({ ...formData, jam_mulai_scan: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                     required
                   />
                 </div>
@@ -721,7 +721,7 @@ export const PertemuanPage: React.FC = () => {
                     type="time"
                     value={formData.jam_akhir_scan}
                     onChange={(e) => setFormData({ ...formData, jam_akhir_scan: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                     required
                   />
                 </div>
@@ -734,7 +734,7 @@ export const PertemuanPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
                   placeholder="Contoh: Pengenalan Huruf Hiragana & Katakana"
                   rows={2}
-                  className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none placeholder:text-slate-600"
+                  className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all resize-none placeholder:text-slate-600"
                 />
               </div>
 
@@ -745,11 +745,11 @@ export const PertemuanPage: React.FC = () => {
                       type="checkbox"
                       checked={formData.manual_active}
                       onChange={(e) => setFormData({ ...formData, manual_active: e.target.checked })}
-                      className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-slate-900 cursor-pointer"
+                      className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-pink-500 focus:ring-pink-500/30 focus:ring-offset-slate-900 cursor-pointer"
                     />
                   </div>
                   <div>
-                    <div className="text-slate-200 font-medium text-sm group-hover:text-emerald-400 transition-colors">Aktifkan Manual Sekarang</div>
+                    <div className="text-slate-200 font-medium text-sm group-hover:text-pink-400 transition-colors">Aktifkan Manual Sekarang</div>
                     <div className="text-slate-500 text-xs">Abaikan jam otomatis, absensi langsung dibuka</div>
                   </div>
                 </label>
@@ -780,7 +780,7 @@ export const PertemuanPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all hover:-translate-y-0.5"
+                  className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-pink-600 hover:from-pink-500 hover:to-pink-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-pink-900/30 transition-all hover:-translate-y-0.5"
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   <span>Simpan Jadwal</span>

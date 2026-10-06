@@ -126,7 +126,7 @@ export const PengurusPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-teal-400" />
+            <UserCheck className="w-6 h-6 text-pink-400" />
             <span>Data Pengurus Ekstrakurikuler</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -152,7 +152,7 @@ export const PengurusPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari pengurus berdasarkan nama, NIS, kelas..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500"
+            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-pink-500"
           />
         </div>
       </div>
@@ -161,7 +161,7 @@ export const PengurusPage: React.FC = () => {
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-teal-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
             <p className="text-xs">Memuat data pengurus...</p>
           </div>
         ) : filteredPengurus.length === 0 ? (
@@ -189,7 +189,7 @@ export const PengurusPage: React.FC = () => {
                   return (
                     <tr key={item.id} className="hover:bg-slate-700/20 transition">
                       <td className="p-3.5 text-slate-500">{index + 1}</td>
-                      <td className="p-3.5 font-mono text-teal-400 font-semibold">{kode}</td>
+                      <td className="p-3.5 font-mono text-pink-400 font-semibold">{kode}</td>
                       <td className="p-3.5 font-medium text-slate-100">{item.nama_lengkap}</td>
                       <td className="p-3.5 text-slate-300">
                         {item.kelas} {item.jurusan}
@@ -201,7 +201,7 @@ export const PengurusPage: React.FC = () => {
                           <button
                             onClick={() => setPreviewCard(item)}
                             title="Lihat Kartu Pengurus"
-                            className="p-1.5 hover:bg-slate-700 text-teal-400 rounded-lg transition"
+                            className="p-1.5 hover:bg-slate-700 text-pink-400 rounded-lg transition"
                           >
                             <Eye className="w-4 h-4" />
                           </button>

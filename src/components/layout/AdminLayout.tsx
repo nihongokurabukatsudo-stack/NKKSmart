@@ -39,7 +39,7 @@ export const AdminLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('nkk-theme')
-    return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+    return saved ? saved === 'dark' : true
   })
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)

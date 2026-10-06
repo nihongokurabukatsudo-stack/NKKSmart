@@ -11,7 +11,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-100">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
           <p className="text-sm text-slate-400">Memeriksa autentikasi...</p>
         </div>
       </div>

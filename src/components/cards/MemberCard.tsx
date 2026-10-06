@@ -70,15 +70,15 @@ export const MemberCard: React.FC<MemberCardProps> = ({
           <div className="flex items-center gap-2">
             <img src="/img/nkk.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow" />
             <div>
-              <h4 className="text-xs font-bold tracking-wider text-emerald-300 drop-shadow">NKK SMART</h4>
+              <h4 className="text-xs font-bold tracking-wider text-pink-300 drop-shadow">NKK SMART</h4>
               <p className="text-[9px] text-slate-200 drop-shadow">KARTU ABSENSI RESMI</p>
             </div>
           </div>
           <span
             className={`text-[9px] uppercase px-2 py-0.5 rounded-full font-bold tracking-wider shadow ${
               jabatan === 'Pengurus'
-                ? 'bg-teal-500/80 text-white'
-                : 'bg-emerald-500/80 text-white'
+                ? 'bg-pink-500/80 text-white'
+                : 'bg-rose-600/80 text-white'
             }`}
           >
             {jabatan}
@@ -92,7 +92,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
             <p className="text-sm font-bold text-white drop-shadow truncate leading-tight">
               {nama}
             </p>
-            <p className="text-xs text-emerald-200 font-medium drop-shadow mt-0.5">
+            <p className="text-xs text-pink-200 font-medium drop-shadow mt-0.5">
               {kelas} - {jurusan}
             </p>
             {nis && (
@@ -100,7 +100,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
                 NIS: <span className="font-mono font-semibold">{nis}</span>
               </p>
             )}
-            <div className="mt-2 inline-block px-2 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] font-mono font-semibold text-emerald-300 tracking-wider">
+            <div className="mt-2 inline-block px-2 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] font-mono font-semibold text-pink-300 tracking-wider">
               {kodeUnik}
             </div>
           </div>
@@ -138,7 +138,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
           )}
           <button
             onClick={handlePrintSingle}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs transition"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-pink-700 hover:bg-pink-600 text-white rounded-lg text-xs transition"
             title="Cetak Kartu"
           >
             <Printer className="w-3.5 h-3.5" />
@@ -149,4 +149,3 @@ export const MemberCard: React.FC<MemberCardProps> = ({
     </div>
   )
 }
-

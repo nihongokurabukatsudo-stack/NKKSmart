@@ -276,7 +276,7 @@ export const RekapBulananPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <CalendarRange className="w-6 h-6 text-emerald-400" />
+            <CalendarRange className="w-6 h-6 text-pink-400" />
             <span>Rekap Bulanan & Matriks Kehadiran</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -290,12 +290,12 @@ export const RekapBulananPage: React.FC = () => {
             disabled={meetings.length === 0}
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition"
           >
-            <Download className="w-4 h-4 text-emerald-400" />
+            <Download className="w-4 h-4 text-pink-400" />
             <span>Export CSV</span>
           </button>
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-900/30 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Cetak Matriks</span>
@@ -311,7 +311,7 @@ export const RekapBulananPage: React.FC = () => {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
-              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-pink-500"
             >
               {MONTH_NAMES.map((m, idx) => (
                 <option key={idx + 1} value={idx + 1}>
@@ -326,7 +326,7 @@ export const RekapBulananPage: React.FC = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-pink-500"
             >
               {availableYears.map((y) => (
                 <option key={y} value={y}>
@@ -340,7 +340,7 @@ export const RekapBulananPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400">
             Total Pertemuan di Bulan Ini:{' '}
-            <strong className="text-emerald-400 font-mono text-sm">{meetings.length}</strong>
+            <strong className="text-pink-400 font-mono text-sm">{meetings.length}</strong>
           </span>
         </div>
       </div>
@@ -362,7 +362,7 @@ export const RekapBulananPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari siswa..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-pink-500"
           />
         </div>
 
@@ -370,7 +370,7 @@ export const RekapBulananPage: React.FC = () => {
           <select
             value={filterKelas}
             onChange={(e) => setFilterKelas(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="all">Semua Kelas</option>
             <option value="X">Kelas X</option>
@@ -381,7 +381,7 @@ export const RekapBulananPage: React.FC = () => {
           <select
             value={filterJabatan}
             onChange={(e) => setFilterJabatan(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="all">Semua Jabatan</option>
             <option value="Anggota">Anggota Saja</option>
@@ -394,7 +394,7 @@ export const RekapBulananPage: React.FC = () => {
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
             <p className="text-xs">Memuat matriks kehadiran...</p>
           </div>
         ) : meetings.length === 0 ? (
@@ -413,7 +413,7 @@ export const RekapBulananPage: React.FC = () => {
                   <th className="p-3">L/P</th>
                   {meetings.map((m) => (
                     <th key={m.id} className="p-2 text-center border-l border-slate-700/50 min-w-[50px]">
-                      <div className="font-bold text-emerald-400">P{m.pertemuan_ke}</div>
+                      <div className="font-bold text-pink-400">P{m.pertemuan_ke}</div>
                       <div className="text-[9px] text-slate-400 font-normal">
                         {new Date(m.tanggal).getDate()}/{new Date(m.tanggal).getMonth() + 1}
                       </div>
@@ -433,7 +433,7 @@ export const RekapBulananPage: React.FC = () => {
                     <td className="p-3 font-medium text-slate-100">
                       <div>{r.nama_lengkap}</div>
                       {r.jabatan === 'Pengurus' && (
-                        <span className="text-[9px] text-teal-400">Pengurus</span>
+                        <span className="text-[9px] text-pink-400">Pengurus</span>
                       )}
                     </td>
                     <td className="p-3 text-slate-300">
@@ -457,7 +457,7 @@ export const RekapBulananPage: React.FC = () => {
                               title={`${r.nama_lengkap} - P${m.pertemuan_ke}: ${isHadir ? 'Hadir (klik untuk batal)' : 'Alpa (klik untuk tandai hadir)'}`}
                               className={`w-6 h-6 rounded-md inline-flex items-center justify-center transition ${
                                 isHadir
-                                  ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                  ? 'bg-pink-500/20 text-pink-400 hover:bg-pink-500/30'
                                   : 'bg-slate-800 text-slate-600 hover:bg-slate-700 hover:text-slate-400'
                               }`}
                             >
@@ -475,9 +475,9 @@ export const RekapBulananPage: React.FC = () => {
                       <span
                         className={
                           r.percentage >= 75
-                            ? 'text-emerald-400'
+                            ? 'text-pink-400'
                             : r.percentage >= 50
-                            ? 'text-amber-400'
+                            ? 'text-rose-400'
                             : 'text-rose-400'
                         }
                       >

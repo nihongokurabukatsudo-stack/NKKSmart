@@ -131,7 +131,7 @@ export const KartuPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-emerald-400" />
+            <CreditCard className="w-6 h-6 text-pink-400" />
             <span>Cetak Kartu Absensi Anggota</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -158,7 +158,7 @@ export const KartuPage: React.FC = () => {
           </button>
           <button
             onClick={handlePrintSelected}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-900/30 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>
@@ -177,7 +177,7 @@ export const KartuPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari nama, NIS, jurusan, kode..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-pink-500"
           />
         </div>
 
@@ -185,7 +185,7 @@ export const KartuPage: React.FC = () => {
           <select
             value={filterKelas}
             onChange={(e) => setFilterKelas(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="all">Semua Kelas</option>
             <option value="X">Kelas X</option>
@@ -196,7 +196,7 @@ export const KartuPage: React.FC = () => {
           <select
             value={filterJabatan}
             onChange={(e) => setFilterJabatan(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="all">Semua Jabatan</option>
             <option value="Anggota">Anggota Saja</option>
@@ -208,7 +208,7 @@ export const KartuPage: React.FC = () => {
       {/* Card Grid */}
       {isLoading ? (
         <div className="p-16 flex flex-col items-center justify-center gap-3 text-slate-400 no-print">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
           <p className="text-xs">Menyiapkan kartu anggota...</p>
         </div>
       ) : filteredMembers.length === 0 ? (
@@ -232,7 +232,7 @@ export const KartuPage: React.FC = () => {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleSelectOne(item.id)}
-                      className="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0"
+                      className="rounded bg-slate-800 border-slate-700 text-pink-500 focus:ring-0"
                     />
                     <span>Pilih untuk dicetak</span>
                   </label>

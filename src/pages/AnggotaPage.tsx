@@ -424,7 +424,7 @@ export const AnggotaPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-emerald-400" />
+            <Users className="w-6 h-6 text-pink-400" />
             <span>Data Anggota & Pengurus</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -462,7 +462,7 @@ export const AnggotaPage: React.FC = () => {
               setFormError('')
               setIsAddModalOpen(true)
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-900/30 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>Tambah Anggota</span>
@@ -479,7 +479,7 @@ export const AnggotaPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari nama, NIS, jurusan, kode QR..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-pink-500"
           />
         </div>
 
@@ -488,7 +488,7 @@ export const AnggotaPage: React.FC = () => {
           <select
             value={filterKelas}
             onChange={(e) => setFilterKelas(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="all">Semua Kelas</option>
             <option value="X">Kelas X</option>
@@ -500,7 +500,7 @@ export const AnggotaPage: React.FC = () => {
           <select
             value={filterJabatan}
             onChange={(e) => setFilterJabatan(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="all">Semua Jabatan</option>
             <option value="Anggota">Anggota Saja</option>
@@ -511,7 +511,7 @@ export const AnggotaPage: React.FC = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-pink-500"
           >
             <option value="Aktif">Status Aktif</option>
             <option value="Nonaktif">Arsip / Nonaktif</option>
@@ -523,7 +523,7 @@ export const AnggotaPage: React.FC = () => {
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
             <p className="text-xs">Memuat data anggota...</p>
           </div>
         ) : filteredAnggota.length === 0 ? (
@@ -552,7 +552,7 @@ export const AnggotaPage: React.FC = () => {
                   return (
                     <tr key={item.id} className="hover:bg-slate-700/20 transition">
                       <td className="p-3.5 text-slate-500">{index + 1}</td>
-                      <td className="p-3.5 font-mono text-emerald-400 font-semibold">{kode}</td>
+                      <td className="p-3.5 font-mono text-pink-400 font-semibold">{kode}</td>
                       <td className="p-3.5 font-medium text-slate-100">{item.nama_lengkap}</td>
                       <td className="p-3.5 text-slate-300">
                         {item.kelas} {item.jurusan}
@@ -563,7 +563,7 @@ export const AnggotaPage: React.FC = () => {
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                             item.jabatan === 'Pengurus'
-                              ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30'
+                              ? 'bg-pink-500/15 text-pink-300 border border-pink-500/30'
                               : 'bg-slate-700 text-slate-300'
                           }`}
                         >
@@ -575,7 +575,7 @@ export const AnggotaPage: React.FC = () => {
                           <button
                             onClick={() => setPreviewCardAnggota(item)}
                             title="Lihat Kartu"
-                            className="p-1.5 hover:bg-slate-700 text-emerald-400 rounded-lg transition"
+                            className="p-1.5 hover:bg-slate-700 text-pink-400 rounded-lg transition"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
@@ -650,7 +650,7 @@ export const AnggotaPage: React.FC = () => {
                   value={formData.nama_lengkap}
                   onChange={(e) => setFormData({ ...formData, nama_lengkap: e.target.value })}
                   placeholder="Contoh: Arti Sugiarti"
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                   required
                 />
               </div>
@@ -661,7 +661,7 @@ export const AnggotaPage: React.FC = () => {
                   <select
                     value={formData.kelas}
                     onChange={(e) => setFormData({ ...formData, kelas: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                   >
                     <option value="X">Kelas X</option>
                     <option value="XI">Kelas XI</option>
@@ -675,7 +675,7 @@ export const AnggotaPage: React.FC = () => {
                     value={formData.jurusan}
                     onChange={(e) => setFormData({ ...formData, jurusan: e.target.value })}
                     placeholder="Contoh: PPLG 1"
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                     required
                   />
                 </div>
@@ -691,7 +691,7 @@ export const AnggotaPage: React.FC = () => {
                     value={formData.nis}
                     onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
                     placeholder="Nomor Induk Siswa"
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                   />
                 </div>
                 <div>
@@ -699,7 +699,7 @@ export const AnggotaPage: React.FC = () => {
                   <select
                     value={formData.jenis_kelamin}
                     onChange={(e) => setFormData({ ...formData, jenis_kelamin: e.target.value as 'L' | 'P' })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                   >
                     <option value="L">Laki-laki (L)</option>
                     <option value="P">Perempuan (P)</option>
@@ -713,7 +713,7 @@ export const AnggotaPage: React.FC = () => {
                   <select
                     value={formData.jabatan}
                     onChange={(e) => setFormData({ ...formData, jabatan: e.target.value as 'Anggota' | 'Pengurus' })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                   >
                     <option value="Anggota">Anggota</option>
                     <option value="Pengurus">Pengurus</option>
@@ -724,7 +724,7 @@ export const AnggotaPage: React.FC = () => {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Aktif' | 'Nonaktif' })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
                   >
                     <option value="Aktif">Aktif</option>
                     <option value="Nonaktif">Nonaktif</option>
@@ -746,7 +746,7 @@ export const AnggotaPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center gap-1.5"
+                  className="px-4 py-2 bg-pink-600 hover:bg-pink-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center gap-1.5"
                 >
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   <span>Simpan</span>
@@ -829,13 +829,13 @@ export const AnggotaPage: React.FC = () => {
                   type="file"
                   accept=".csv"
                   onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 file:mr-3 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-emerald-600 file:text-white"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 file:mr-3 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-pink-600 file:text-white"
                   required
                 />
               </div>
 
               {importReport && (
-                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-xl space-y-1">
+                <div className="p-3 bg-pink-500/10 border border-pink-500/30 text-pink-300 rounded-xl space-y-1">
                   <p className="font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Import Selesai!</span>
@@ -857,7 +857,7 @@ export const AnggotaPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isImporting || !csvFile}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center gap-1.5"
+                  className="px-4 py-2 bg-pink-600 hover:bg-pink-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center gap-1.5"
                 >
                   {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                   <span>Mulai Import</span>

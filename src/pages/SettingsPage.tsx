@@ -108,7 +108,7 @@ export const SettingsPage: React.FC = () => {
       {/* Top Header */}
       <div>
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
-          <Settings className="w-6 h-6 text-emerald-400" />
+          <Settings className="w-6 h-6 text-pink-400" />
           <span>Pengaturan Akun & Sistem</span>
         </h1>
         <p className="text-xs text-slate-400 mt-1">
@@ -119,7 +119,7 @@ export const SettingsPage: React.FC = () => {
       {/* Profil Admin Card */}
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-          <User className="w-4 h-4 text-emerald-400" />
+          <User className="w-4 h-4 text-pink-400" />
           <span>Informasi Akun Admin Aktif</span>
         </h2>
 
@@ -151,12 +151,12 @@ export const SettingsPage: React.FC = () => {
       {/* Ganti Password Form */}
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-          <Lock className="w-4 h-4 text-teal-400" />
+          <Lock className="w-4 h-4 text-pink-400" />
           <span>Ubah Password Admin</span>
         </h2>
 
         {pwdSuccess && (
-          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs rounded-xl flex items-center gap-2">
+          <div className="p-3.5 bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs rounded-xl flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{pwdSuccess}</span>
           </div>
@@ -177,7 +177,7 @@ export const SettingsPage: React.FC = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Minimal 6 karakter"
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
               required
             />
           </div>
@@ -189,7 +189,7 @@ export const SettingsPage: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Ulangi password baru"
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-pink-500"
               required
             />
           </div>
@@ -197,7 +197,7 @@ export const SettingsPage: React.FC = () => {
           <button
             type="submit"
             disabled={isChangingPassword}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl font-semibold shadow-md shadow-emerald-900/30 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-pink-600 hover:bg-pink-500 disabled:opacity-50 text-white rounded-xl font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             {isChangingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
             <span>Simpan Password Baru</span>
@@ -208,7 +208,7 @@ export const SettingsPage: React.FC = () => {
       {/* Backup Data Card */}
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-          <Database className="w-4 h-4 text-blue-400" />
+          <Database className="w-4 h-4 text-pink-400" />
           <span>Cadangan & Ekspor Data (Backup)</span>
         </h2>
 
@@ -220,7 +220,7 @@ export const SettingsPage: React.FC = () => {
           <button
             onClick={handleExportBackupJSON}
             disabled={isExportingBackup}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-900/30 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-pink-600 hover:bg-pink-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-md shadow-pink-900/30 transition cursor-pointer"
           >
             {isExportingBackup ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             <span>Unduh Cadangan Lengkap (.JSON)</span>
