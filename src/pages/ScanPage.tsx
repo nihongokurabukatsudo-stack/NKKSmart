@@ -64,6 +64,7 @@ interface ScanPopupData {
   jabatan?: string
   message: string
   time?: string
+  meetingName?: string
 }
 
 export const ScanPage: React.FC = () => {
@@ -97,6 +98,8 @@ export const ScanPage: React.FC = () => {
 
   // Scan Result & Logs
   const [popup, setPopup] = useState<ScanPopupData>({ show: false, success: false, message: '' })
+  const [popupImageSrc, setPopupImageSrc] = useState<string | null>(null)
+  const [popupImageReady, setPopupImageReady] = useState(false)
   const [logs, setLogs] = useState<ScanLogEntry[]>([])
 
   // Refs
@@ -115,6 +118,33 @@ export const ScanPage: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    let active = true
+    const loadPopupImage = async () => {
+      for (const src of ['/img/popup.png', '/img/popup.jpg']) {
+        const image = new Image()
+        image.decoding = 'async'
+        image.src = src
+        try {
+          if (typeof image.decode === 'function') await image.decode()
+          else await new Promise<void>((resolve, reject) => {
+            image.onload = () => resolve()
+            image.onerror = () => reject(new Error('Gambar popup gagal dimuat'))
+          })
+          if (active) {
+            setPopupImageSrc(src)
+            setPopupImageReady(true)
+          }
+          return
+        } catch {
+          // Coba format JPG lama sebelum memakai ikon bawaan.
+        }
+      }
+    }
+    void loadPopupImage()
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
     const online = () => setIsOnline(true)
     const offline = () => setIsOnline(false)
     window.addEventListener('online', online)
@@ -124,9 +154,18 @@ export const ScanPage: React.FC = () => {
 
   useEffect(() => {
     if (!popup.show) return
-    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), 2000)
+    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), 2500)
     return () => window.clearTimeout(timer)
   }, [popup.show, popup.message])
+
+  useEffect(() => {
+    if (!popup.show) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPopup((current) => ({ ...current, show: false }))
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [popup.show])
 
   const playNotificationSound = (success: boolean) => {
     if (audioRef.current && success) {
@@ -277,6 +316,10 @@ export const ScanPage: React.FC = () => {
         jabatan?: string
         waktu_scan?: string
       }
+      const scanTime = res.waktu_scan ? new Date(res.waktu_scan) : new Date()
+      const formattedScanTime = Number.isNaN(scanTime.getTime())
+        ? res.waktu_scan
+        : `${new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(scanTime)} WIB`
 
       playNotificationSound(res.ok)
       if (typeof navigator.vibrate === 'function') navigator.vibrate(res.ok ? [60, 30, 60] : 100)
@@ -289,7 +332,8 @@ export const ScanPage: React.FC = () => {
           kelas: res.kelas,
           jabatan: res.jabatan,
           message: res.message || 'Absensi berhasil',
-          time: res.waktu_scan,
+          time: formattedScanTime,
+          meetingName: meetingStatus?.meeting?.nama_pertemuan,
         })
         addLog({
           status: 'success',
@@ -664,50 +708,59 @@ export const ScanPage: React.FC = () => {
 
       {/* Scan Result Popup Modal */}
       {popup.show && (
-        <div role="presentation" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/65 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm animate-in fade-in duration-200 sm:items-center sm:p-4">
-          <div
+        <div role="presentation" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+          <section
             role="status"
+            aria-live="polite"
+            aria-atomic="true"
             onClick={(event) => event.stopPropagation()}
-            className={`w-full max-w-lg rounded-3xl rounded-b-xl p-5 text-center shadow-2xl border sm:rounded-3xl sm:p-8 ${
+            className={`popup-card-enter relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl border p-5 text-center shadow-2xl sm:p-7 ${
               popup.success
-                ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-pink-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
+                ? 'mt-[min(18dvh,120px)] bg-gradient-to-b from-slate-900 to-slate-950 border-pink-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)] pt-[min(23dvh,150px)]'
                 : popupWarning ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-400/40 shadow-[0_0_40px_rgba(244,63,94,0.15)]' : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
             }`}
           >
-            <div
-              className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full shadow-inner sm:mb-5 sm:h-20 sm:w-20 ${
-                popup.success ? 'bg-pink-500/20 text-pink-400' : popupWarning ? 'bg-rose-400/20 text-rose-300' : 'bg-rose-500/20 text-rose-400'
-              }`}
-            >
-              {popup.success ? <CheckCircle2 className="h-9 w-9 animate-in zoom-in duration-300 sm:h-12 sm:w-12" /> : popupWarning ? <AlertTriangle className="h-9 w-9 sm:h-12 sm:w-12" /> : <XCircle className="h-9 w-9 animate-in zoom-in duration-300 sm:h-12 sm:w-12" />}
-            </div>
-
-            <h3 className="text-xl font-bold text-white mb-2">{popup.message}</h3>
-
-            {popup.nama && (
-              <div className="mt-4 p-4 bg-slate-950/60 rounded-2xl border border-white/5 text-sm shadow-inner">
-                <p className="font-bold text-pink-400 text-lg">{popup.nama}</p>
-                {popup.kelas && <p className="text-slate-300 mt-1">{popup.kelas}</p>}
-                {popup.jabatan && (
-                  <span className="inline-block mt-2 px-3 py-1 text-xs rounded-full bg-slate-800 border border-slate-700 text-slate-200 font-medium tracking-wide">
-                    {popup.jabatan}
-                  </span>
+            {popup.success ? (
+              <>
+                {popupImageReady && popupImageSrc ? (
+                  <img
+                    src={popupImageSrc}
+                    alt="Ilustrasi absensi berhasil"
+                    width={760}
+                    height={570}
+                    className="absolute left-1/2 top-[calc(-1*min(22dvh,140px))] z-10 max-h-[40dvh] w-[min(88vw,520px)] -translate-x-1/2 object-contain drop-shadow-2xl"
+                  />
+                ) : (
+                  <div className="absolute left-1/2 top-5 z-10 flex h-16 w-16 -translate-x-1/2 items-center justify-center rounded-full bg-pink-500/20 text-pink-300">
+                    <CheckCircle2 className="h-10 w-10" />
+                  </div>
                 )}
-                {popup.time && <p className="text-slate-500 text-xs mt-3 font-mono">{popup.time}</p>}
-              </div>
+                <h2 className="text-xl font-extrabold text-white sm:text-2xl">Absensi Berhasil</h2>
+                <div className="mx-auto mt-3 max-w-sm rounded-2xl border border-white/10 bg-slate-950/80 p-4 text-left shadow-inner">
+                  <p className="break-words text-lg font-bold leading-snug text-pink-300 sm:text-xl">{popup.nama || 'Absensi berhasil'}</p>
+                  {(popup.kelas || popup.jabatan) && <p className="mt-1 text-sm text-slate-100">{[popup.kelas, popup.jabatan].filter(Boolean).join(' · ')}</p>}
+                  {popup.time && <p className="mt-2 text-sm font-semibold text-white">{popup.time}</p>}
+                  {popup.meetingName && <p className="mt-2 border-t border-white/10 pt-2 text-sm text-slate-300">{popup.meetingName}</p>}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full shadow-inner sm:h-16 sm:w-16 ${popupWarning ? 'bg-rose-400/20 text-rose-300' : 'bg-rose-500/20 text-rose-400'}`}>
+                  {popupWarning ? <AlertTriangle className="h-9 w-9" /> : <XCircle className="h-9 w-9" />}
+                </div>
+                <h2 className="mb-2 text-xl font-bold text-white">{popup.message}</h2>
+                {popup.nama && <div className="mt-4 rounded-2xl border border-white/5 bg-slate-950/60 p-4 text-sm shadow-inner"><p className="text-lg font-bold text-rose-300">{popup.nama}</p>{popup.kelas && <p className="mt-1 text-slate-300">{popup.kelas}</p>}</div>}
+              </>
             )}
 
             <button
               onClick={() => setPopup((current) => ({ ...current, show: false }))}
-              className={`mt-4 min-h-12 w-full rounded-2xl py-3.5 text-sm font-bold shadow-lg text-white sm:mt-6 ${
-                popup.success
-                  ? 'bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400'
-                  : popupWarning ? 'bg-rose-600 hover:bg-rose-500' : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
-              }`}
+              className={`mt-4 min-h-12 w-full rounded-2xl py-3.5 text-sm font-bold text-white shadow-lg sm:mt-5 ${popup.success ? 'bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400' : popupWarning ? 'bg-rose-600 hover:bg-rose-500' : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'}`}
             >
-              Tutup & Lanjutkan
+              Tutup &amp; Lanjutkan
             </button>
-          </div>
+            {popup.success && <div aria-hidden="true" className="popup-auto-progress absolute inset-x-0 bottom-0 h-1 origin-left rounded-b-3xl bg-pink-400" />}
+          </section>
         </div>
       )}
 
