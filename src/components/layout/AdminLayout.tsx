@@ -89,6 +89,7 @@ export const AdminLayout: React.FC = () => {
           <Link
             to="/scan"
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl shadow-lg shadow-emerald-900/30 text-sm font-semibold transition"
           >
             <div className="flex items-center gap-2">
