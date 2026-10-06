@@ -401,7 +401,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {meetingAttendanceQuery.isLoading ? <div className="h-52 animate-pulse rounded-xl bg-slate-700/40" aria-label="Memuat grafik kehadiran" />
+        {isLoading || meetingAttendanceQuery.isLoading ? <div className="h-52 animate-pulse rounded-xl bg-slate-700/40" aria-label="Memuat grafik kehadiran" />
           : meetingAttendanceQuery.isError ? <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-300">Gagal memuat statistik pertemuan.</div>
           : meetingChartData.length === 0 ? <div className="flex min-h-44 flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 text-center"><CalendarDays className="mb-2 h-8 w-8 text-slate-500"/><p className="text-sm text-slate-300">Belum ada pertemuan yang berlangsung</p></div>
           : <div className="overflow-x-auto pb-2">
