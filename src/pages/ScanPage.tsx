@@ -363,8 +363,8 @@ export const ScanPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed flex flex-col text-slate-100" style={{ backgroundImage: "url('/img/background.jpg')" }}>
-      <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-900/85 to-slate-950/95 backdrop-blur-sm flex flex-col">
+    <div className="scan-page flex flex-col text-slate-100">
+      <div className="flex-1 flex flex-col">
         
         {/* Top Header */}
         <header className="bg-slate-950/40 border-b border-white/5 p-4 sticky top-0 z-30 backdrop-blur-md shadow-lg">
@@ -391,7 +391,7 @@ export const ScanPage: React.FC = () => {
         </header>
 
         {/* Main Container */}
-        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
+        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5 lg:mr-8 lg:ml-auto lg:max-w-[min(54vw,760px)]">
           
           {/* Status Meeting Banner */}
           <div

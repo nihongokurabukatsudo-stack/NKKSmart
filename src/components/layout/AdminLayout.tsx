@@ -16,6 +16,8 @@ import {
   Menu,
   X,
   ExternalLink,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 const navItems = [
@@ -35,6 +37,14 @@ export const AdminLayout: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('nkk-theme')
+    return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+  React.useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('nkk-theme', dark ? 'dark' : 'light')
+  }, [dark])
 
   const handleLogout = async () => {
     if (window.confirm('Apakah Anda yakin ingin logout?')) {
@@ -44,7 +54,7 @@ export const AdminLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row">
+    <div className="admin-shell min-h-screen flex flex-col md:flex-row">
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between p-4 bg-slate-800/80 backdrop-blur border-b border-slate-700/50 sticky top-0 z-30">
         <div className="flex items-center gap-3">
@@ -122,6 +132,10 @@ export const AdminLayout: React.FC = () => {
               @{adminProfile?.username || 'admin'}
             </p>
           </div>
+          <div className="flex items-center gap-1">
+          <button onClick={() => setDark(!dark)} title={dark ? 'Mode terang' : 'Mode gelap'} className="min-h-11 min-w-11 rounded-lg p-2 text-slate-300 hover:bg-slate-700/50" aria-label={dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}>
+            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <button
             onClick={handleLogout}
             title="Logout"
@@ -129,6 +143,7 @@ export const AdminLayout: React.FC = () => {
           >
             <LogOut className="w-4 h-4" />
           </button>
+          </div>
         </div>
       </aside>
 
@@ -141,10 +156,9 @@ export const AdminLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 overflow-y-auto">
+      <main className="admin-main flex-1 min-w-0 p-4 sm:p-6 md:p-8 overflow-y-auto">
         <Outlet />
       </main>
     </div>
   )
 }
-

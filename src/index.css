@@ -1,58 +1,26 @@
+@import '@fontsource-variable/plus-jakarta-sans';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: #0f172a; /* Slate 900 */
-  color: #f8fafc; /* Slate 50 */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #1e293b;
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-/* Print CSS for Member Cards */
-@media print {
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-  .no-print {
-    display: none !important;
-  }
-  .print-only {
-    display: block !important;
-  }
-  .card-print-container {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
-    page-break-inside: avoid !important;
-    padding: 10px !important;
-  }
-  .member-card-wrapper {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-}
+:root { font-family: 'Plus Jakarta Sans Variable', sans-serif; color-scheme: light; --brand:#c8102e; --ink:#18212f; --muted:#667085; --surface:#fff; --canvas:#f5f6fa; --line:#e4e7ec; --accent:#873b90; }
+:root.dark { color-scheme:dark; --ink:#f3f4f6; --muted:#a1aaba; --surface:#171923; --canvas:#10121a; --line:#303240; }
+:root.dark body { background:var(--canvas); color:var(--ink) }
+* { box-sizing:border-box }
+html,body,#root { min-height:100%; margin:0 }
+body { background:var(--canvas); color:var(--ink); font-family:'Plus Jakarta Sans Variable',sans-serif; -webkit-font-smoothing:antialiased }
+button,input,select,textarea { font:inherit }
+button,a { -webkit-tap-highlight-color:transparent }
+:focus-visible { outline:3px solid #d35b73; outline-offset:2px }
+::selection { background:#c8102e33 }
+.admin-shell { min-height:100vh; background:var(--canvas); color:var(--ink) }
+.admin-sidebar { background:var(--surface); border-color:var(--line) }
+.admin-main { max-width:1600px; width:100%; margin:0 auto }
+.surface-card { background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 24px #1018280a }
+.scan-page { min-height:100vh; color:#fff; background:#1a1222; position:relative; isolation:isolate; overflow:hidden }
+.scan-page:before { content:''; position:absolute; inset:0; z-index:-2; background:linear-gradient(180deg,#140c1b8c,#160d21d9),url('/img/background.jpg') center top/cover no-repeat }
+.scan-page:after { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,#150b1b1c 0%,#160d21a8 54%,#160d21f2 100%) }
+.scan-glass { background:#17121dcc; border:1px solid #ffffff30; backdrop-filter:blur(16px); box-shadow:0 20px 60px #10081850 }
+@media (min-width:900px) { .scan-page:before { background-image:linear-gradient(90deg,#17101c70,#17101c8a),url('/img/background.jpg'); background-size:cover, min(48vw,680px) auto; background-position:center, left center; filter:none } .scan-page:after { background:linear-gradient(90deg,#120b1766 0%,#120b17cc 44%,#120b17eF 100%) } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important } }
+@media print { body { background:#fff!important; color:#000!important } .no-print { display:none!important } .print-only { display:block!important } .card-print-container { display:grid!important; grid-template-columns:repeat(2,1fr)!important; gap:16px!important; page-break-inside:avoid!important; padding:10px!important } .member-card-wrapper { page-break-inside:avoid!important; break-inside:avoid!important } }
