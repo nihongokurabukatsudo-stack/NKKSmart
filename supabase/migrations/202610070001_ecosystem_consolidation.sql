@@ -110,7 +110,7 @@ begin
   end if;
 
   select count(*) into v_pending_count from public.pendaftar where status = 'pending';
-  if v_pending_count > 500 then
+  if v_pending_count >= 500 then
     return jsonb_build_object('ok', false, 'message', 'Pendaftaran sedang penuh. Silakan coba lagi nanti.');
   end if;
 
@@ -278,6 +278,7 @@ declare
   v_start date;
   v_end date;
   v_period_label text;
+  v_month_label text;
   v_enabled boolean;
   v_name_mode text;
   v_min_meetings integer;
@@ -296,7 +297,8 @@ begin
   if p_periode = 'bulan' then
     v_start := date_trunc('month', v_today)::date;
     v_end := (v_start + interval '1 month')::date;
-    v_period_label := 'Bulan ' || to_char(v_start, 'TMMonth YYYY');
+    v_month_label := (array['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'])[extract(month from v_start)::integer];
+    v_period_label := 'Bulan ' || v_month_label || ' ' || extract(year from v_start)::integer::text;
   else
     if extract(month from v_today) >= 7 then
       v_start := make_date(extract(year from v_today)::integer, 7, 1);
@@ -325,7 +327,7 @@ begin
   ), member_stats as (
     select m.id, m.nama_lengkap, m.kelas_label,
       count(cm.id)::integer as total,
-      count(ab.id) filter (where ab.status = 'hadir')::integer as hadir,
+      (count(ab.id) filter (where ab.status = 'hadir'))::integer as hadir,
       least(coalesce(m.created_at::date, fa.first_date), coalesce(fa.first_date, m.created_at::date)) as mulai
     from active_members m
     left join first_attended fa on fa.anggota_id = m.id
@@ -367,5 +369,39 @@ end;
 $$;
 revoke all on function public.get_public_leaderboard(text, integer) from public;
 grant execute on function public.get_public_leaderboard(text, integer) to anon, authenticated;
+
+-- Public self-service lookup: exact full name only, with card fields and no NIS/contact data.
+create index if not exists anggota_public_name_lookup_idx
+  on public.anggota (lower(btrim(nama_lengkap)))
+  where status = 'Aktif' and coalesce(is_deleted, false) = false;
+create or replace function public.lookup_member_card(p_nama text)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(jsonb_agg(to_jsonb(card) order by card.kelas, card.jurusan, card.nama_lengkap), '[]'::jsonb)
+  from (
+    select
+      a.nama_lengkap,
+      a.kelas,
+      a.jurusan,
+      a.jabatan,
+      coalesce(b.kode_unik, a.kode_qr) as kode_unik,
+      coalesce(b.qr_value, 'NKKSMART|MEMBER|' || coalesce(b.kode_unik, a.kode_qr)) as qr_value
+    from public.anggota a
+    left join public.barcode b on b.anggota_id = a.id
+    where char_length(btrim(coalesce(p_nama, ''))) between 3 and 120
+      and lower(btrim(a.nama_lengkap)) = lower(btrim(p_nama))
+      and a.status = 'Aktif'
+      and coalesce(a.is_deleted, false) = false
+      and coalesce(b.kode_unik, a.kode_qr) is not null
+    order by a.kelas, a.jurusan, a.nama_lengkap
+    limit 10
+  ) card;
+$$;
+revoke all on function public.lookup_member_card(text) from public;
+grant execute on function public.lookup_member_card(text) to anon, authenticated;
 
 commit;

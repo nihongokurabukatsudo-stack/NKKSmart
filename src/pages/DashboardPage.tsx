@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { MemberCard } from '../components/cards/MemberCard'
 import { formatDateIndo, formatTime } from '../lib/utils'
 import {
   Users,
@@ -16,6 +17,8 @@ import {
   XCircle,
   UserMinus,
   UserPlus,
+  Search,
+  Loader2,
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -57,6 +60,17 @@ interface MeetingAttendance {
   hadir: number
 }
 
+interface DashboardCardMember {
+  id: number
+  nama_lengkap: string
+  kelas: string
+  jurusan: string
+  nis: string | null
+  jabatan: string
+  kode_unik: string
+  qr_value: string
+}
+
 const jakartaToday = () => {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -96,6 +110,33 @@ export const DashboardPage: React.FC = () => {
   const [clockInJakarta, setClockInJakarta] = useState(jakartaClock)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null)
+  const [cardSearch, setCardSearch] = useState('')
+  const [cardMembers, setCardMembers] = useState<DashboardCardMember[]>([])
+  const [cardSearchBusy, setCardSearchBusy] = useState(false)
+  const cardSearchRequest = useRef(0)
+
+  const searchDashboardCards = async (value: string) => {
+    const requestId = ++cardSearchRequest.current
+    setCardSearch(value)
+    if (value.trim().length < 2) { setCardMembers([]); setCardSearchBusy(false); return }
+    setCardSearchBusy(true)
+    try {
+      const term = value.trim().replace(/[,%_]/g, ' ')
+      const { data, error } = await supabase.from('anggota').select(`id,nama_lengkap,kelas,jurusan,nis,jabatan,kode_qr,barcode(kode_unik,qr_value)`)
+        .eq('is_deleted', false).eq('status', 'Aktif').ilike('nama_lengkap', `%${term}%`).order('nama_lengkap').limit(12)
+      if (error) throw error
+      if (requestId !== cardSearchRequest.current) return
+      setCardMembers((data || []).map((row: any) => {
+        const barcode = Array.isArray(row.barcode) ? row.barcode[0] : row.barcode
+        const code = barcode?.kode_unik || row.kode_qr || 'NKKP-0000'
+        return { id: row.id, nama_lengkap: row.nama_lengkap, kelas: row.kelas, jurusan: row.jurusan, nis: row.nis, jabatan: row.jabatan, kode_unik: code, qr_value: barcode?.qr_value || `NKKSMART|MEMBER|${code}` }
+      }))
+    } catch (error) {
+      if (requestId !== cardSearchRequest.current) return
+      console.error('Gagal mencari kartu di dashboard:', error)
+      setCardMembers([])
+    } finally { if (requestId === cardSearchRequest.current) setCardSearchBusy(false) }
+  }
 
   useEffect(() => {
     localStorage.setItem('nkk-dashboard-meeting-limit', String(meetingLimit))
@@ -330,6 +371,14 @@ export const DashboardPage: React.FC = () => {
           <span>Buka Scanner Kamera</span>
         </Link>
       </div>
+
+      <section className="rounded-2xl border border-slate-700/60 bg-slate-800/60 p-5 shadow-sm" aria-labelledby="dashboard-card-title">
+        <div className="mb-4"><h2 id="dashboard-card-title" className="text-base font-bold text-white">Cari dan unduh kartu anggota</h2><p className="mt-1 text-sm text-slate-300">Cari nama anggota untuk melihat kartu dan mengunduh kartu PNG lengkap dengan logo, nama, dan QR presensi.</p></div>
+        <label className="relative block max-w-xl"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><input value={cardSearch} onChange={(event) => void searchDashboardCards(event.target.value)} placeholder="Ketik nama anggota (minimal 2 huruf)" className="min-h-12 w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-3 text-sm text-white placeholder:text-slate-400 focus:border-pink-500 focus:outline-none"/></label>
+        {cardSearchBusy && <p className="mt-4 flex items-center gap-2 text-sm text-slate-300"><Loader2 className="h-4 w-4 animate-spin"/>Mencari anggota...</p>}
+        {!cardSearchBusy && cardSearch.trim().length >= 2 && cardMembers.length === 0 && <p className="mt-4 text-sm text-slate-300">Tidak ada anggota aktif yang cocok.</p>}
+        {cardMembers.length > 0 && <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{cardMembers.map((member) => <div key={member.id} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3"><MemberCard id={member.id} nama={member.nama_lengkap} kelas={member.kelas} jurusan={member.jurusan} nis={member.nis} kodeUnik={member.kode_unik} qrValue={member.qr_value} jabatan={member.jabatan} showActions/></div>)}</div>}
+      </section>
 
       {/* Top 4 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
