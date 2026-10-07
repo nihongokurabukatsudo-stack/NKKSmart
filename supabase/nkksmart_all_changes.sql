@@ -492,7 +492,11 @@ begin
     ),
     'leaderboard', coalesce((select jsonb_agg(jsonb_build_object(
       'rank', page.posisi,
-      'nama_tampil', case when v_name_mode = 'penuh' then page.nama_lengkap when v_name_mode = 'inisial' then left(page.nama_lengkap, 1) || '.' else split_part(btrim(page.nama_lengkap), ' ', 1) || case when position(' ' in btrim(page.nama_lengkap)) > 0 then ' ' || left(split_part(btrim(page.nama_lengkap), ' ', 2), 1) || '.' else '' end end,
+      'nama_tampil', case
+        when v_name_mode = 'penuh' then page.nama_lengkap
+        when v_name_mode = 'inisial' then left(page.nama_lengkap, 1) || '.'
+        else array_to_string((regexp_split_to_array(btrim(page.nama_lengkap), '\s+'))[1:2], ' ')
+      end,
       'kelas_label', page.kelas_label, 'hadir', page.hadir, 'total', page.total, 'persen', page.persen
     ) order by page.persen desc, page.hadir desc, page.nama_lengkap)
       from (select * from ranked order by persen desc, hadir desc, nama_lengkap limit v_limit) page), '[]'::jsonb),
