@@ -33,7 +33,7 @@ Isi `.env` dengan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` dari project 
 
 ## Database
 
-SQL disimpan di `supabase/migrations/`. Sebelum menerapkan migration, pastikan project Supabase dan migration history sesuai. `202610070001_ecosystem_consolidation.sql` masih draft dan belum diterapkan. Jangan menyalin schema dari project Supabase lain.
+SQL RPC rekap semester ada di `supabase/rekap_semester.sql`. Jalankan di SQL Editor project Supabase NKKSmart yang sama dengan `VITE_SUPABASE_URL`; script memeriksa schema sebelum mengganti fungsi RPC dan tidak mengubah data.
 
 ## Build dan deployment
 
