@@ -26,15 +26,9 @@ Website publik mengirim pendaftaran melalui RPC `submit_pendaftaran`; admin memp
 
 ## Schema dan migration
 
-Schema aktif yang dituju adalah schema NKKSmart legacy: `admins`, `anggota`, `barcode`, `pertemuan`, `absensi`, dan `geofence_settings`. Daftar tabel `members`, `meetings`, `attendance`, dan `profiles` dari screenshot project lain bukan target schema ini.
+Schema yang dipakai aplikasi adalah NKKSmart: `anggota`, `pertemuan`, dan `absensi`. File `supabase/rekap_semester.sql` membuat atau mengganti RPC rekap semester saja; ia memeriksa tabel dan kolom yang diperlukan, tidak mengubah data, dan aman dijalankan ulang. Jalankan dari SQL Editor project `ceouldcpwflepwudqyvv` yang sama dengan `VITE_SUPABASE_URL`.
 
-| File | Fungsi | Status yang diketahui |
-|---|---|---|
-| `202610060001_attendance_status_and_notes.sql` | Status izin/sakit/alpha dan catatan absensi. | Draft; cek migration history sebelum diterapkan. |
-| `202610060002_rekap_semester_rpc.sql` | RPC rekap semester untuk schema legacy. | Status live belum dikonfirmasi. |
-| `202610070001_ecosystem_consolidation.sql` | Pendaftaran, leaderboard, pencarian kartu, serta akses RPC. | Draft; belum diterapkan. |
-
-Pastikan project Supabase dan migration history, buat backup, lalu terapkan hanya migration yang sudah ditinjau dan belum ada di database. Jangan menjalankan query dari project Supabase yang berbeda.
+Tabel Inggris seperti `members`, `meetings`, dan `attendance` berasal dari schema berbeda dan tidak ditargetkan oleh query tersebut. Bila pemeriksaan tabel/kolom gagal, hentikan dan cocokkan project serta schema sebelum menjalankan SQL lain.
 
 ## Build dan Vercel
 
