@@ -13,7 +13,7 @@ Nihongo Kurabu Katsudo/
 │   ├── pages/                 # halaman publik dan admin
 │   ├── services/              # koneksi data/RPC
 │   └── ...
-└── supabase/migrations/       # perubahan schema database
+└── supabase/                  # satu script setup SQL
 ```
 
 Route website publik: `/`, `/register`, `/tentang`, `/tim-inti`, `/galeri`, `/belajar/hiragana`, dan `/belajar/katakana`. Route admin: `/login` dan `/admin/*`. URL lama seperti `/scan` diarahkan ke route admin yang sesuai.
@@ -26,7 +26,7 @@ Website publik mengirim pendaftaran melalui RPC `submit_pendaftaran`; admin memp
 
 ## Schema dan migration
 
-Schema yang dipakai aplikasi adalah NKKSmart: `anggota`, `pertemuan`, dan `absensi`. File `supabase/rekap_semester.sql` membuat atau mengganti RPC rekap semester saja; ia memeriksa tabel dan kolom yang diperlukan, tidak mengubah data, dan aman dijalankan ulang. Jalankan dari SQL Editor project `ceouldcpwflepwudqyvv` yang sama dengan `VITE_SUPABASE_URL`.
+Schema yang dipakai aplikasi adalah NKKSmart: `admins`, `anggota`, `barcode`, `pertemuan`, dan `absensi`. File `supabase/nkksmart_all_changes.sql` menyiapkan RPC pendaftaran, persetujuan, leaderboard, pencarian kartu, status/catatan absensi, dan rekap semester. Script ini memeriksa tabel dan kolom sebelum bekerja, tidak menghapus tabel atau data, dan aman dijalankan ulang. Jalankan dari SQL Editor project `ceouldcpwflepwudqyvv` yang sama dengan `VITE_SUPABASE_URL`.
 
 Tabel Inggris seperti `members`, `meetings`, dan `attendance` berasal dari schema berbeda dan tidak ditargetkan oleh query tersebut. Bila pemeriksaan tabel/kolom gagal, hentikan dan cocokkan project serta schema sebelum menjalankan SQL lain.
 

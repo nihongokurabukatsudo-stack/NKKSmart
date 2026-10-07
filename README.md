@@ -12,7 +12,7 @@ Nihongo Kurabu Katsudo/
 │   ├── pages/
 │   ├── services/
 │   └── ...
-├── supabase/migrations/ # perubahan schema Supabase
+├── supabase/            # satu script setup SQL untuk Supabase
 ├── index.html           # entry point tunggal
 └── package.json
 ```
@@ -33,7 +33,7 @@ Isi `.env` dengan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` dari project 
 
 ## Database
 
-SQL RPC rekap semester ada di `supabase/rekap_semester.sql`. Jalankan di SQL Editor project Supabase NKKSmart yang sama dengan `VITE_SUPABASE_URL`; script memeriksa schema sebelum mengganti fungsi RPC dan tidak mengubah data.
+SQL untuk seluruh perubahan backend aplikasi ada di `supabase/nkksmart_all_changes.sql`. Jalankan di SQL Editor project Supabase NKKSmart yang sama dengan `VITE_SUPABASE_URL`; script memeriksa schema sebelum bekerja dan tidak menghapus tabel atau data.
 
 ## Build dan deployment
 
