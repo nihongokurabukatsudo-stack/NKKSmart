@@ -4,7 +4,7 @@ import { Download } from 'lucide-react'
 import { formatNis } from '../../lib/nis'
 
 interface MemberCardProps {
-  id: number
+  id?: number
   nama: string
   kelas: string
   jurusan: string

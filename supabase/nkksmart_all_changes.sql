@@ -515,7 +515,7 @@ $$;
 revoke all on function public.get_public_leaderboard(text, integer) from public;
 grant execute on function public.get_public_leaderboard(text, integer) to anon, authenticated;
 
--- Public self-service lookup: exact full name only, with card fields and no NIS/contact data.
+-- Public self-service lookup: partial name search, with card fields and no NIS/contact data.
 create index if not exists anggota_public_name_lookup_idx
   on public.anggota (lower(btrim(nama_lengkap)))
   where status = 'Aktif' and coalesce(is_deleted, false) = false;
@@ -537,13 +537,14 @@ as $$
       coalesce(b.qr_value, 'NKKSMART|MEMBER|' || coalesce(b.kode_unik, a.kode_qr)) as qr_value
     from public.anggota a
     left join public.barcode b on b.anggota_id = a.id
-    where char_length(btrim(coalesce(p_nama, ''))) between 3 and 120
-      and lower(btrim(a.nama_lengkap)) = lower(btrim(p_nama))
+    where char_length(btrim(coalesce(p_nama, ''))) between 2 and 120
+      and position(lower(btrim(p_nama)) in lower(a.nama_lengkap)) > 0
       and a.status = 'Aktif'
       and coalesce(a.is_deleted, false) = false
       and coalesce(b.kode_unik, a.kode_qr) is not null
-    order by a.kelas, a.jurusan, a.nama_lengkap
-    limit 10
+    order by (lower(btrim(a.nama_lengkap)) = lower(btrim(p_nama))) desc,
+      a.kelas, a.jurusan, a.nama_lengkap
+    limit 20
   ) card;
 $$;
 revoke all on function public.lookup_member_card(text) from public;

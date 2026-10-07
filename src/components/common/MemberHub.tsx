@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
-import QRCode from "qrcode";
 import { Search, Trophy, UserRound, LoaderCircle, CalendarDays } from "lucide-react";
+import { MemberCard } from "../cards/MemberCard";
 import { isSupabaseConfigured, supabase } from "../../services/supabaseClient";
 
 type LeaderRow = { rank: number; nama_tampil: string; kelas_label: string; hadir: number; total: number; persen: number };
@@ -15,7 +15,6 @@ export function MemberHub() {
   const [cardBusy, setCardBusy] = useState(false);
   const [cardError, setCardError] = useState("");
   const [cards, setCards] = useState<MemberCardRecord[]>([]);
-  const [qrImages, setQrImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
@@ -34,23 +33,15 @@ export function MemberHub() {
     return () => { active = false; };
   }, [period]);
 
-  useEffect(() => {
-    let active = true;
-    Promise.all(cards.map(async (card) => [card.kode_unik, await QRCode.toDataURL(card.qr_value, { width: 320, margin: 2 })] as const))
-      .then((entries) => { if (active) setQrImages(Object.fromEntries(entries)); })
-      .catch(() => { if (active) setQrImages({}); });
-    return () => { active = false; };
-  }, [cards]);
-
   const searchCard = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (name.trim().length < 3 || !supabase) return;
-    setCardBusy(true); setCardError(""); setCards([]); setQrImages({});
+    if (name.trim().length < 2 || !supabase) return;
+    setCardBusy(true); setCardError(""); setCards([]);
     const { data, error } = await supabase.rpc("lookup_member_card" as never, { p_nama: name.trim() } as never);
     setCardBusy(false);
     if (error) { setCardError("Kartu belum dapat dicari. Coba lagi nanti."); return; }
     const result = (data || []) as unknown as MemberCardRecord[];
-    if (!result.length) { setCardError("Nama belum ditemukan. Pastikan nama sesuai data anggota di NKKSmart."); return; }
+    if (!result.length) { setCardError("Anggota belum ditemukan. Coba kata lain dari namanya."); return; }
     setCards(result);
   };
 
@@ -88,11 +79,11 @@ export function MemberHub() {
       <article className="glass-panel w-full rounded-3xl p-5 sm:p-8 lg:p-10">
         <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nkk-pink/15 text-nkk-pink"><UserRound/></span><div><p className="text-xs font-black tracking-[.16em] text-nkk-pink">KARTU ANGGOTA</p><h2 className="text-2xl font-black sm:text-3xl">Cari QR milikmu</h2></div></div>
         <p className="mt-4 text-sm leading-6 text-zinc-300">Masukkan nama lengkap yang terdaftar untuk menampilkan kartu dan QR presensi.</p>
-        <form onSubmit={searchCard} className="mt-5 flex w-full flex-col gap-2 sm:flex-row"><label className="sr-only" htmlFor="member-name-search">Nama lengkap</label><input id="member-name-search" value={name} onChange={(event) => setName(event.target.value)} minLength={3} maxLength={120} required placeholder="Nama lengkap" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-zinc-950/70 px-4 text-sm text-white placeholder:text-zinc-500 focus:border-nkk-red focus:outline-none"/><button type="submit" disabled={cardBusy || name.trim().length < 3 || !isSupabaseConfigured} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-nkk-red px-5 text-sm font-black text-white disabled:opacity-50"><Search size={17}/>{cardBusy ? "Mencari..." : "Cari kartu"}</button></form>
+        <form onSubmit={searchCard} className="mt-5 flex w-full flex-col gap-2 sm:flex-row"><label className="sr-only" htmlFor="member-name-search">Cari nama anggota</label><input id="member-name-search" value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={120} required placeholder="Ketik sebagian nama, contoh: Fahri" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/10 bg-zinc-950/70 px-4 text-sm text-white placeholder:text-zinc-500 focus:border-nkk-red focus:outline-none"/><button type="submit" disabled={cardBusy || name.trim().length < 2 || !isSupabaseConfigured} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-nkk-red px-5 text-sm font-black text-white disabled:opacity-50"><Search size={17}/>{cardBusy ? "Mencari..." : "Cari kartu"}</button></form>
         {!isSupabaseConfigured && <p className="mt-3 text-xs text-amber-200">Fitur ini aktif setelah migration NKKSmart diterapkan.</p>}
         {cardError && <p role="status" className="mt-4 rounded-xl border border-nkk-pink/30 bg-nkk-pink/10 p-3 text-sm text-pink-100">{cardError}</p>}
         {cardBusy && <p className="mt-5 flex items-center gap-2 text-sm text-zinc-300"><LoaderCircle className="animate-spin" size={18}/>Mencari kartu...</p>}
-        <div className="mt-5 grid w-full gap-4 lg:grid-cols-2">{cards.map((card) => <div key={card.kode_unik} className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 sm:flex-row sm:p-6"><div className="flex min-h-40 w-full max-w-80 flex-col justify-between rounded-2xl border border-white/20 bg-gradient-to-br from-rose-950 via-zinc-900 to-black p-4 shadow-xl"><div className="flex items-center gap-3"><img src="/assets/logo/logo-nkk-white.png" alt="Logo NKK" className="h-9 w-9 object-contain"/><div><p className="text-xs font-black text-pink-200">NKK BAHASA JEPANG</p><p className="text-[10px] font-bold tracking-wider text-zinc-300">KARTU {card.jabatan.toUpperCase()}</p></div></div><div><p className="break-words text-base font-black text-white">{card.nama_lengkap}</p><p className="mt-1 text-xs font-semibold text-pink-100">{card.kelas} · {card.jurusan}</p><p className="mt-2 inline-block rounded-lg bg-white px-2 py-1 font-mono text-xs font-bold text-rose-900">{card.kode_unik}</p></div></div>{qrImages[card.kode_unik] ? <div className="flex flex-col items-center gap-2 rounded-xl bg-white p-3"><img src={qrImages[card.kode_unik]} alt={`QR presensi ${card.nama_lengkap}`} className="h-32 w-32"/><p className="text-[10px] font-bold text-zinc-800">QR PRESENSI</p></div> : <div className="h-36 w-36 animate-pulse rounded-xl bg-white/10"/>}</div>)}</div>
+        <div className="mt-6 grid w-full justify-items-center gap-5 sm:grid-cols-2 xl:grid-cols-3">{cards.map((card, index) => <div key={`${card.kode_unik}-${index}`} className="flex w-full justify-center rounded-2xl border border-white/10 bg-zinc-950/40 p-3 sm:p-4"><MemberCard id={index + 1} nama={card.nama_lengkap} kelas={card.kelas} jurusan={card.jurusan} kodeUnik={card.kode_unik} qrValue={card.qr_value} jabatan={card.jabatan}/></div>)}</div>
       </article>
     </div>
   </section>;
