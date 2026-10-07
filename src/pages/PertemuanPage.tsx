@@ -216,6 +216,7 @@ export const PertemuanPage: React.FC = () => {
           keterangan: formData.keterangan || null,
           manual_active: formData.manual_active,
           is_libur: formData.is_libur,
+          created_at: new Date().toISOString(),
         })
         if (error) throw error
       }
