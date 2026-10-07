@@ -224,7 +224,10 @@ export const PertemuanPage: React.FC = () => {
       await fetchPertemuan()
     } catch (err) {
       console.error(err)
-      const message = err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.'
+      const dbError = err as { message?: string; details?: string; hint?: string; code?: string }
+      const message = [dbError?.message, dbError?.details, dbError?.hint, dbError?.code ? `Kode: ${dbError.code}` : null]
+        .filter(Boolean)
+        .join(' · ') || 'Terjadi kesalahan yang tidak diketahui.'
       setSaveError(`Gagal menyimpan pertemuan: ${message}`)
     } finally {
       setIsSubmitting(false)
@@ -660,8 +663,8 @@ export const PertemuanPage: React.FC = () => {
 
       {/* Modal Add / Edit Pertemuan (Form) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm animate-in fade-in sm:items-center sm:p-4">
+          <div className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-slate-700 bg-slate-900 p-4 shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:p-6">
             {/* Top gradient glow */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-pink-500"></div>
 
@@ -783,7 +786,7 @@ export const PertemuanPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="pt-5 border-t border-slate-800 flex justify-end gap-3">
+              <div className="sticky bottom-0 -mx-4 -mb-4 flex justify-end gap-3 border-t border-slate-800 bg-slate-900/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:-mb-6 sm:px-6">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
