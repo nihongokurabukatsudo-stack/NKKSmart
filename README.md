@@ -5,7 +5,7 @@ Website resmi NIHONGO KURABU KATSUDO dan dashboard NKKSmart berada dalam satu ap
 ## Struktur utama
 
 ```text
-nkksmart-web/
+Nihongo Kurabu Katsudo/
 ├── public/assets/       # gambar, logo, audio, galeri, dan aset kartu
 ├── src/                 # website publik dan dashboard admin
 │   ├── components/

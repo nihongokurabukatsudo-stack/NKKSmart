@@ -1,11 +1,11 @@
 # Panduan proyek NKK
 
-Website resmi dan dashboard NKKSmart sekarang satu aplikasi dan satu repository aktif. Kerjakan perubahan website dan dashboard di folder `nkksmart-web`; jangan menjalankan dua dev server atau menggabungkan `src/` dari project kedua.
+Website resmi dan dashboard NKKSmart sekarang satu aplikasi dan satu repository aktif. Kerjakan perubahan website dan dashboard langsung di folder `Nihongo Kurabu Katsudo`; jangan menjalankan dua dev server atau menggabungkan `src/` dari project kedua.
 
 ## Peta struktur
 
 ```text
-nkksmart-web/
+Nihongo Kurabu Katsudo/
 ├── index.html                 # satu entry point Vite
 ├── public/assets/             # semua gambar, logo, audio, dan aset statis
 ├── src/                       # website publik + dashboard admin
