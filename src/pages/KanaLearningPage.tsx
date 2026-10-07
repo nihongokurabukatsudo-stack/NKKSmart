@@ -7,6 +7,7 @@ import { LoadingState } from "../components/ui/LoadingState";
 import { SectionBadge } from "../components/ui/SectionBadge";
 import { useLocalKanaData } from "../hooks/useLocalKanaData";
 import type { KanaCharacter } from "../types/kana";
+import { completeLearningLesson, getLearningProgress, markCharacterLearned } from "../lib/learningProgress";
 
 interface KanaLearningPageProps {
   title: "Hiragana" | "Katakana";
@@ -18,12 +19,14 @@ interface KanaLearningPageProps {
 export function KanaLearningPage({ title, kanaCharacters, description, quizPath }: KanaLearningPageProps) {
   const { characters, errorMessage, isLoading } = useLocalKanaData(kanaCharacters);
   const [selectedCharacter, setSelectedCharacter] = useState<KanaCharacter | null>(null);
-  const [learnedCharacterIds, setLearnedCharacterIds] = useState<string[]>([]);
+  const [learnedCharacterIds, setLearnedCharacterIds] = useState<string[]>(() => getLearningProgress().learnedCharacters);
 
   const markAsLearned = (kanaCharacter: KanaCharacter) => {
-    setLearnedCharacterIds((currentIds) =>
-      currentIds.includes(kanaCharacter.id) ? currentIds : [...currentIds, kanaCharacter.id],
-    );
+    const progress = markCharacterLearned(kanaCharacter.id);
+    setLearnedCharacterIds(progress.learnedCharacters);
+    const prefix = title === "Hiragana" ? "hira-" : "kata-";
+    const learnedInLesson = progress.learnedCharacters.filter((id) => id.startsWith(prefix)).length;
+    if (characters.length > 0 && learnedInLesson >= characters.length) completeLearningLesson(title.toLowerCase());
     setSelectedCharacter(kanaCharacter);
   };
 

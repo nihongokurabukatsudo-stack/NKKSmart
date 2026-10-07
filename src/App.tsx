@@ -27,6 +27,8 @@ import { KanaLearningPage } from './pages/KanaLearningPage'
 import { KanaQuizPage } from './pages/KanaQuizPage'
 import { LandingPage } from './pages/LandingPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { LearningDashboardPage } from './pages/LearningDashboardPage'
+import { LearningPlacementPage } from './pages/LearningPlacementPage'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } } })
 
@@ -62,6 +64,8 @@ export const App: React.FC = () => <QueryClientProvider client={queryClient}>
         <Route path="/tentang" element={<AboutPage />} />
         <Route path="/tim-inti" element={<CoreTeamPage />} />
         <Route path="/galeri" element={<GalleryPage />} />
+        <Route path="/belajar" element={<LearningDashboardPage />} />
+        <Route path="/belajar/tes" element={<LearningPlacementPage characters={[...hiraganaCharacters, ...katakanaCharacters]} />} />
         <Route path="/belajar/hiragana" element={<KanaLearningPage title="Hiragana" kanaCharacters={hiraganaCharacters} quizPath="/belajar/hiragana/quiz" description={[
           'Hiragana adalah salah satu sistem tulisan dasar bahasa Jepang yang dipakai untuk menulis kata asli Jepang, partikel, akhiran kata kerja, dan bacaan tambahan.',
           'Huruf ini biasanya menjadi langkah pertama saat belajar bahasa Jepang karena bentuknya sering muncul dalam kalimat sehari-hari.',

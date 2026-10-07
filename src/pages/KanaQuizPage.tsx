@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { LoadingState } from "../components/ui/LoadingState";
@@ -7,6 +8,7 @@ import { SectionBadge } from "../components/ui/SectionBadge";
 import { useLocalKanaData } from "../hooks/useLocalKanaData";
 import type { KanaCharacter, QuizQuestion } from "../types/kana";
 import { createQuizQuestions } from "../utils/quiz";
+import { completeDailyPractice, getMistakeIds, recordLearningQuiz } from "../lib/learningProgress";
 
 interface KanaQuizPageProps {
   title: "Hiragana" | "Katakana";
@@ -16,17 +18,30 @@ interface KanaQuizPageProps {
 
 export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPageProps) {
   const { characters, errorMessage, isLoading } = useLocalKanaData(kanaCharacters);
+  const [searchParams] = useSearchParams();
+  const reviewMode = searchParams.get('review') === '1';
+  const dailyMode = searchParams.get('daily') === '1';
+  const questionCount = dailyMode ? 5 : 10;
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizScore, setQuizScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
+  const [wrongQuestionIds, setWrongQuestionIds] = useState<string[]>([]);
+  const hasRecordedResult = useRef(false);
 
   useEffect(() => {
     if (characters.length > 0 && quizQuestions.length === 0) {
-      setQuizQuestions(createQuizQuestions(characters));
+      setQuizQuestions(createQuizQuestions(characters, reviewMode ? getMistakeIds(title.toLowerCase()) : [], questionCount));
     }
-  }, [characters, quizQuestions.length]);
+  }, [characters, quizQuestions.length, reviewMode, title, questionCount]);
+
+  useEffect(() => {
+    if (!isQuizFinished || hasRecordedResult.current) return;
+    hasRecordedResult.current = true;
+    recordLearningQuiz(title.toLowerCase(), quizQuestions, wrongQuestionIds, quizScore);
+    if (dailyMode) completeDailyPractice();
+  }, [isQuizFinished, quizQuestions, title, wrongQuestionIds, quizScore, dailyMode]);
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const totalQuestions = quizQuestions.length;
@@ -40,6 +55,8 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
 
     if (answer === currentQuestion.correctAnswer) {
       setQuizScore((currentScore) => currentScore + 1);
+    } else {
+      setWrongQuestionIds((currentIds) => currentIds.includes(currentQuestion.id) ? currentIds : [...currentIds, currentQuestion.id]);
     }
 
     window.setTimeout(() => {
@@ -56,11 +73,13 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
   };
 
   const restartQuiz = () => {
-    setQuizQuestions(createQuizQuestions(characters));
+    setQuizQuestions(createQuizQuestions(characters, reviewMode ? getMistakeIds(title.toLowerCase()) : [], questionCount));
     setCurrentQuestionIndex(0);
     setQuizScore(0);
     setSelectedAnswer(null);
     setIsQuizFinished(false);
+    setWrongQuestionIds([]);
+    hasRecordedResult.current = false;
   };
 
   const getAnswerClassName = (answer: string) => {
@@ -87,10 +106,10 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
         </Link>
 
         <header className="mt-8">
-          <SectionBadge>QUIZ {title.toUpperCase()}</SectionBadge>
+          <SectionBadge>{dailyMode ? 'LATIHAN HARI INI' : reviewMode ? 'REVIEW KESALAHAN' : `QUIZ ${title.toUpperCase()}`}</SectionBadge>
           <h1 className="mt-5 text-5xl font-black leading-tight text-white sm:text-6xl">Tebak Bacaan Huruf</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-300">
-            Pilih romaji yang sesuai dengan huruf yang tampil. Setiap sesi berisi 10 soal acak.
+            Pilih romaji yang sesuai dengan huruf yang tampil. Setiap sesi berisi {questionCount} soal acak.
           </p>
         </header>
 
@@ -132,7 +151,7 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
                     onClick={() => handleAnswerSelect(answer)}
                     disabled={Boolean(selectedAnswer)}
                   >
-                    {answer}
+                    {answer}{selectedAnswer && answer === currentQuestion.correctAnswer && <span className="ml-2 text-sm">✓ Benar</span>}{selectedAnswer === answer && answer !== currentQuestion.correctAnswer && <span className="ml-2 text-sm">× Belum tepat</span>}
                   </button>
                 ))}
               </div>
@@ -145,6 +164,7 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
               <h2 className="mt-4 text-5xl font-black text-white">
                 {quizScore}/{totalQuestions} benar
               </h2>
+              <p className="mt-2 text-lg font-bold text-nkk-pink">Akurasi {totalQuestions ? Math.round(quizScore * 100 / totalQuestions) : 0}% · +{quizScore === totalQuestions ? 30 : 20}{dailyMode ? ' + bonus harian 10' : ''} XP</p>
               <p className="mt-4 text-base leading-8 text-zinc-300">
                 Mantap. Ulangi quiz untuk mendapatkan kombinasi soal baru.
               </p>
