@@ -3,7 +3,7 @@ import { Search, Trophy, UserRound, LoaderCircle, CalendarDays } from "lucide-re
 import { MemberCard } from "../cards/MemberCard";
 import { isSupabaseConfigured, supabase } from "../../services/supabaseClient";
 
-type LeaderRow = { rank: number; nama_tampil: string; kelas_label: string; hadir: number; total: number; persen: number };
+type LeaderRow = { rank: number; nama_tampil: string; kelas_label: string; hadir: number; total: number };
 type MemberCardRecord = { nama_lengkap: string; kelas: string; jurusan: string; jabatan: string; kode_unik: string; qr_value: string };
 type Leaderboard = { enabled: boolean; periode?: { label: string }; leaderboard?: LeaderRow[]; jadwal_berikutnya?: { nama_pertemuan: string; tanggal: string } | null };
 
@@ -22,7 +22,7 @@ export function MemberHub() {
     if (!supabase || !isSupabaseConfigured) { setLeaderLoading(false); return; }
     void (async () => {
       try {
-        const { data } = await supabase.rpc("get_public_leaderboard", { p_periode: period, p_limit: 10 });
+        const { data } = await supabase.rpc("get_public_leaderboard", { p_periode: period, p_limit: 9 });
         if (active) setLeaderboard(data as Leaderboard | null);
       } catch {
         if (active) setLeaderboard(null);
@@ -50,7 +50,8 @@ export function MemberHub() {
     { row: entries[1], place: 2 },
     { row: entries[0], place: 1 },
     { row: entries[2], place: 3 },
-  ].filter((item): item is { row: LeaderRow; place: number } => Boolean(item.row));
+  ].filter((item): item is { row: LeaderRow; place: number } => Boolean(item.row))
+  const remainingEntries = entries.slice(3)
 
   return <section id="anggota" className="min-h-screen w-full bg-nkk-background px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-10">
     <div className="mx-auto w-full max-w-none space-y-8">
@@ -65,13 +66,13 @@ export function MemberHub() {
             {podium.map(({ row, place }) => <div key={`podium-${place}`} className={`flex min-w-0 flex-col items-center justify-end rounded-t-3xl border border-white/10 px-2 pb-4 pt-5 text-center sm:px-5 sm:pb-6 ${place === 1 ? "col-start-2 h-64 bg-gradient-to-b from-rose-700/50 to-zinc-950 sm:h-80" : place === 2 ? "col-start-1 h-52 bg-gradient-to-b from-zinc-500/30 to-zinc-950 sm:h-64" : "col-start-3 h-44 bg-gradient-to-b from-amber-800/30 to-zinc-950 sm:h-56"}`}>
               <Trophy className={`mb-2 h-6 w-6 sm:h-8 sm:w-8 ${place === 1 ? "text-yellow-300" : place === 2 ? "text-zinc-300" : "text-amber-500"}`}/>
               <span className="text-xs font-black uppercase tracking-widest text-zinc-400">#{row.rank}</span>
-              <p className="mt-1 line-clamp-2 w-full break-words text-sm font-black sm:text-xl">{row.nama_tampil}</p>
-              <p className="mt-1 line-clamp-1 w-full text-[10px] text-zinc-400 sm:text-xs">{row.kelas_label}</p>
-              <p className="mt-3 text-lg font-black text-nkk-pink sm:text-2xl">{row.persen}%</p>
-              <p className="text-[10px] text-zinc-400 sm:text-xs">{row.hadir}/{row.total} hadir</p>
+              <p className="mt-1 line-clamp-2 w-full break-words text-base font-black sm:text-xl">{row.nama_tampil}</p>
+              <p className="mt-1 line-clamp-1 w-full text-xs text-zinc-400">{row.kelas_label}</p>
+              <p className="mt-3 text-xl font-black text-nkk-pink sm:text-2xl">{row.hadir} hadir</p>
+              <p className="text-xs text-zinc-400">dari {row.total} pertemuan</p>
             </div>)}
           </div>
-          {entries.length > 3 && <div className="mx-auto mt-6 grid w-full max-w-5xl gap-2 md:grid-cols-2">{entries.slice(3).map((row) => <div key={`${row.rank}-${row.nama_tampil}-${row.kelas_label}`} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-950/50 p-3 sm:p-4"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-nkk-red/15 font-black text-nkk-red">{row.rank}</span><div className="min-w-0 flex-1"><p className="truncate font-bold">{row.nama_tampil}</p><p className="text-xs text-zinc-400">{row.kelas_label} · {row.hadir}/{row.total} pertemuan</p></div><span className="text-lg font-black text-nkk-pink">{row.persen}%</span></div>)}</div>}
+          {remainingEntries.length > 0 && <div className="mx-auto mt-6 grid w-full max-w-5xl gap-2 md:grid-cols-2">{remainingEntries.map((row) => <div key={`${row.rank}-${row.nama_tampil}-${row.kelas_label}`} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-950/50 p-3 sm:p-4"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-nkk-red/15 font-black text-nkk-red">{row.rank}</span><div className="min-w-0 flex-1"><p className="truncate font-bold">{row.nama_tampil}</p><p className="text-xs text-zinc-400">{row.kelas_label} · dari {row.total} pertemuan</p></div><span className="text-lg font-black text-nkk-pink">{row.hadir} hadir</span></div>)}</div>}
         </> : <p className="mt-6 rounded-xl bg-zinc-950/60 p-4 text-sm text-zinc-300">Belum ada data kehadiran yang memenuhi syarat periode ini.</p>}
         {leaderboard?.jadwal_berikutnya && <p className="mt-6 flex gap-2 text-xs text-zinc-400"><CalendarDays size={16} className="shrink-0"/>Pertemuan berikutnya: {leaderboard.jadwal_berikutnya.nama_pertemuan} · {new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(`${leaderboard.jadwal_berikutnya.tanggal}T00:00:00`))}</p>}
       </article>

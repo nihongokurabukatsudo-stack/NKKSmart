@@ -1,4 +1,4 @@
-import { BookOpen, Check, Home, Layers3, X } from "lucide-react";
+import { BookOpen, Check, Home, Layers3, Volume2, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -8,6 +8,7 @@ import { SectionBadge } from "../components/ui/SectionBadge";
 import { useLocalKanaData } from "../hooks/useLocalKanaData";
 import type { KanaCharacter } from "../types/kana";
 import { completeLearningLesson, getLearningProgress, markCharacterLearned } from "../lib/learningProgress";
+import { speakJapanese } from "../lib/japaneseSpeech";
 
 interface KanaLearningPageProps {
   title: "Hiragana" | "Katakana";
@@ -30,7 +31,7 @@ export function KanaLearningPage({ title, kanaCharacters, description, quizPath 
     setSelectedCharacter(kanaCharacter);
   };
 
-  const learnedProgress = characters.length > 0 ? Math.round((learnedCharacterIds.length / characters.length) * 100) : 0;
+  const lessonComplete = getLearningProgress().completedLessons.includes(title.toLowerCase());
   const exampleText = selectedCharacter
     ? `${selectedCharacter.character} dibaca "${selectedCharacter.romaji}". Latih dengan menyebutnya keras-keras sebelum lanjut ke huruf berikutnya.`
     : "";
@@ -59,12 +60,9 @@ export function KanaLearningPage({ title, kanaCharacters, description, quizPath 
                 <Layers3 size={22} />
               </div>
               <div>
-                <p className="text-sm font-black text-white">Progress Belajar</p>
-                <p className="text-xs font-bold text-zinc-400">{learnedCharacterIds.length} dari {characters.length} huruf dibuka</p>
+                <p className="text-sm font-black text-white">Status materi</p>
+                <p className="text-xs font-bold text-zinc-400">{lessonComplete ? 'Selesai dipelajari' : learnedCharacterIds.some((id) => id.startsWith(title === 'Hiragana' ? 'hira-' : 'kata-')) ? 'Sedang dipelajari' : 'Belum dipelajari'}</p>
               </div>
-            </div>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-nkk-red transition-all" style={{ width: `${learnedProgress}%` }} />
             </div>
           </div>
         </header>
@@ -137,6 +135,7 @@ export function KanaLearningPage({ title, kanaCharacters, description, quizPath 
             <p className="text-8xl font-black leading-none text-nkk-red">{selectedCharacter.character}</p>
             <p className="mt-5 text-sm font-black tracking-[0.18em] text-nkk-pink">ROMAJI</p>
             <h2 className="mt-2 text-4xl font-black text-white">{selectedCharacter.romaji}</h2>
+            <button type="button" onClick={() => speakJapanese(selectedCharacter.character)} className="mx-auto mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-bold"><Volume2 size={17}/>Dengarkan</button>
             <p className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-7 text-zinc-300">
               {exampleText}
             </p>

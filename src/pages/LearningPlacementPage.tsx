@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react'
 import type { KanaCharacter, QuizQuestion } from '../types/kana'
 import { createQuizQuestions } from '../utils/quiz'
-import { recordPlacementResult } from '../lib/learningProgress'
 
 export function LearningPlacementPage({ characters }: { characters: KanaCharacter[] }) {
   const [questions, setQuestions] = useState(() => createQuizQuestions(characters, [], 20))
@@ -22,7 +21,6 @@ export function LearningPlacementPage({ characters }: { characters: KanaCharacte
       if (index + 1 >= questions.length) {
         const finalScore = correct + Number(isCorrect)
         setCorrect(finalScore)
-        recordPlacementResult(finalScore, questions.length)
         setFinished(true)
       } else {
         setIndex((position) => position + 1)

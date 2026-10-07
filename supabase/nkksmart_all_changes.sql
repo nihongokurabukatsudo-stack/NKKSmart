@@ -1,4 +1,4 @@
--- NKKSmart backend setup for project ceouldcpwflepwudqyvv.
+-- NKKSmart feature migration for the legacy NKKSmart schema.
 -- Safe to rerun: additive schema changes and CREATE OR REPLACE RPCs only.
 -- Does not delete tables, rows, or existing scan RPCs.
 
@@ -17,7 +17,7 @@ begin
   where to_regclass(format('public.%I', required.table_name)) is null;
   if missing_tables is not null then
     raise exception 'Schema project tidak cocok; tabel public hilang: %', missing_tables
-      using errcode = '42P01', hint = 'Pastikan SQL Editor membuka project ceouldcpwflepwudqyvv.';
+      using errcode = '42P01', hint = 'Pastikan SQL Editor membuka project Supabase yang URL-nya dipakai aplikasi dan memiliki schema NKKSmart.';
   end if;
 
   select string_agg(required.table_name || '.' || required.column_name, ', ' order by required.table_name, required.column_name)
@@ -413,8 +413,8 @@ revoke all on function public.rekap_semester(integer, integer) from public, anon
 grant execute on function public.rekap_semester(integer, integer) to authenticated;
 
 
--- A7: A privacy-limited public leaderboard. Only aggregated attendance fields leave this function.
-create or replace function public.get_public_leaderboard(p_periode text default 'semester', p_limit integer default 10)
+-- A7: Public leaderboard sorted by attendance count, then member name A-Z.
+create or replace function public.get_public_leaderboard(p_periode text default 'semester', p_limit integer default 9)
 returns jsonb language plpgsql stable security definer set search_path = public as $$
 declare
   v_today date := (now() at time zone 'Asia/Jakarta')::date;
@@ -424,7 +424,6 @@ declare
   v_month_label text;
   v_enabled boolean;
   v_name_mode text;
-  v_min_meetings integer;
   v_limit integer;
   v_result jsonb;
   v_next_meeting jsonb;
@@ -432,10 +431,7 @@ begin
   select coalesce((value #>> '{}')::boolean, true) into v_enabled from public.app_settings where key = 'leaderboard_enabled';
   if not coalesce(v_enabled, true) then return jsonb_build_object('enabled', false); end if;
   select coalesce(value #>> '{}', 'singkat') into v_name_mode from public.app_settings where key = 'leaderboard_nama_mode';
-  select coalesce((value #>> '{}')::integer, 3) into v_min_meetings from public.app_settings where key = 'leaderboard_min_pertemuan';
-  select coalesce((value #>> '{}')::integer, 10) into v_limit from public.app_settings where key = 'leaderboard_limit';
-  v_min_meetings := coalesce(v_min_meetings, 3);
-  v_limit := least(greatest(coalesce(p_limit, v_limit), 1), 50);
+  v_limit := least(greatest(coalesce(p_limit, 9), 1), 9);
 
   if p_periode is null or p_periode not in ('bulan', 'semester') then
     raise exception 'Periode leaderboard tidak valid.' using errcode = '22023';
@@ -469,17 +465,18 @@ begin
       and p.tanggal <= v_today and coalesce(p.is_libur, false) = false
   ), member_stats as (
     select m.id, m.nama_lengkap, m.kelas_label,
-      count(cm.id)::integer as total,
-      (count(ab.id) filter (where ab.status = 'hadir'))::integer as hadir
+      count(distinct cm.id)::integer as total,
+      (count(distinct ab.pertemuan_id) filter (where ab.status = 'hadir'))::integer as hadir
     from active_members m
     left join completed_meetings cm on true
     left join public.absensi ab on ab.anggota_id = m.id and ab.pertemuan_id = cm.id
     group by m.id, m.nama_lengkap, m.kelas_label
   ), rated as (
     select *, round(100.0 * hadir / nullif(total, 0))::integer as persen
-    from member_stats where total >= v_min_meetings
+    from member_stats
   ), ranked as (
-    select *, row_number() over (order by persen desc, hadir desc, nama_lengkap asc) as posisi
+    -- Every member has a unique position: more attendance first, then A-Z.
+    select *, row_number() over (order by hadir desc, lower(btrim(nama_lengkap)), nama_lengkap, id)::integer as posisi
     from rated
   )
   select jsonb_build_object(
@@ -497,9 +494,9 @@ begin
         when v_name_mode = 'inisial' then left(page.nama_lengkap, 1) || '.'
         else array_to_string((regexp_split_to_array(btrim(page.nama_lengkap), '\s+'))[1:2], ' ')
       end,
-      'kelas_label', page.kelas_label, 'hadir', page.hadir, 'total', page.total, 'persen', page.persen
-    ) order by page.persen desc, page.hadir desc, page.nama_lengkap)
-      from (select * from ranked order by persen desc, hadir desc, nama_lengkap limit v_limit) page), '[]'::jsonb),
+      'kelas_label', page.kelas_label, 'hadir', page.hadir, 'total', page.total
+    ) order by page.hadir desc, lower(btrim(page.nama_lengkap)), page.nama_lengkap, page.id)
+      from (select * from ranked order by hadir desc, lower(btrim(nama_lengkap)), nama_lengkap, id limit v_limit) page), '[]'::jsonb),
     'kelas', coalesce((select jsonb_agg(jsonb_build_object('kelas_label', class_stats.kelas_label, 'rata_persen', class_stats.rata_persen, 'jumlah_anggota', class_stats.jumlah_anggota) order by class_stats.rata_persen desc, class_stats.kelas_label)
       from (select kelas_label, round(avg(persen))::integer as rata_persen, count(*)::integer as jumlah_anggota from rated group by kelas_label having count(*) >= 3) class_stats), '[]'::jsonb),
     'jadwal_berikutnya', v_next_meeting,

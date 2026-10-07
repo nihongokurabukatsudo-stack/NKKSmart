@@ -1,48 +1,512 @@
 [
-  { "id": "hira-a", "character": "あ", "romaji": "a" },
-  { "id": "hira-i", "character": "い", "romaji": "i" },
-  { "id": "hira-u", "character": "う", "romaji": "u" },
-  { "id": "hira-e", "character": "え", "romaji": "e" },
-  { "id": "hira-o", "character": "お", "romaji": "o" },
-  { "id": "hira-ka", "character": "か", "romaji": "ka" },
-  { "id": "hira-ki", "character": "き", "romaji": "ki" },
-  { "id": "hira-ku", "character": "く", "romaji": "ku" },
-  { "id": "hira-ke", "character": "け", "romaji": "ke" },
-  { "id": "hira-ko", "character": "こ", "romaji": "ko" },
-  { "id": "hira-sa", "character": "さ", "romaji": "sa" },
-  { "id": "hira-shi", "character": "し", "romaji": "shi" },
-  { "id": "hira-su", "character": "す", "romaji": "su" },
-  { "id": "hira-se", "character": "せ", "romaji": "se" },
-  { "id": "hira-so", "character": "そ", "romaji": "so" },
-  { "id": "hira-ta", "character": "た", "romaji": "ta" },
-  { "id": "hira-chi", "character": "ち", "romaji": "chi" },
-  { "id": "hira-tsu", "character": "つ", "romaji": "tsu" },
-  { "id": "hira-te", "character": "て", "romaji": "te" },
-  { "id": "hira-to", "character": "と", "romaji": "to" },
-  { "id": "hira-na", "character": "な", "romaji": "na" },
-  { "id": "hira-ni", "character": "に", "romaji": "ni" },
-  { "id": "hira-nu", "character": "ぬ", "romaji": "nu" },
-  { "id": "hira-ne", "character": "ね", "romaji": "ne" },
-  { "id": "hira-no", "character": "の", "romaji": "no" },
-  { "id": "hira-ha", "character": "は", "romaji": "ha" },
-  { "id": "hira-hi", "character": "ひ", "romaji": "hi" },
-  { "id": "hira-fu", "character": "ふ", "romaji": "fu" },
-  { "id": "hira-he", "character": "へ", "romaji": "he" },
-  { "id": "hira-ho", "character": "ほ", "romaji": "ho" },
-  { "id": "hira-ma", "character": "ま", "romaji": "ma" },
-  { "id": "hira-mi", "character": "み", "romaji": "mi" },
-  { "id": "hira-mu", "character": "む", "romaji": "mu" },
-  { "id": "hira-me", "character": "め", "romaji": "me" },
-  { "id": "hira-mo", "character": "も", "romaji": "mo" },
-  { "id": "hira-ya", "character": "や", "romaji": "ya" },
-  { "id": "hira-yu", "character": "ゆ", "romaji": "yu" },
-  { "id": "hira-yo", "character": "よ", "romaji": "yo" },
-  { "id": "hira-ra", "character": "ら", "romaji": "ra" },
-  { "id": "hira-ri", "character": "り", "romaji": "ri" },
-  { "id": "hira-ru", "character": "る", "romaji": "ru" },
-  { "id": "hira-re", "character": "れ", "romaji": "re" },
-  { "id": "hira-ro", "character": "ろ", "romaji": "ro" },
-  { "id": "hira-wa", "character": "わ", "romaji": "wa" },
-  { "id": "hira-wo", "character": "を", "romaji": "wo" },
-  { "id": "hira-n", "character": "ん", "romaji": "n" }
+  {
+    "id": "hira-a",
+    "character": "あ",
+    "romaji": "a"
+  },
+  {
+    "id": "hira-i",
+    "character": "い",
+    "romaji": "i"
+  },
+  {
+    "id": "hira-u",
+    "character": "う",
+    "romaji": "u"
+  },
+  {
+    "id": "hira-e",
+    "character": "え",
+    "romaji": "e"
+  },
+  {
+    "id": "hira-o",
+    "character": "お",
+    "romaji": "o"
+  },
+  {
+    "id": "hira-ka",
+    "character": "か",
+    "romaji": "ka"
+  },
+  {
+    "id": "hira-ki",
+    "character": "き",
+    "romaji": "ki"
+  },
+  {
+    "id": "hira-ku",
+    "character": "く",
+    "romaji": "ku"
+  },
+  {
+    "id": "hira-ke",
+    "character": "け",
+    "romaji": "ke"
+  },
+  {
+    "id": "hira-ko",
+    "character": "こ",
+    "romaji": "ko"
+  },
+  {
+    "id": "hira-sa",
+    "character": "さ",
+    "romaji": "sa"
+  },
+  {
+    "id": "hira-shi",
+    "character": "し",
+    "romaji": "shi"
+  },
+  {
+    "id": "hira-su",
+    "character": "す",
+    "romaji": "su"
+  },
+  {
+    "id": "hira-se",
+    "character": "せ",
+    "romaji": "se"
+  },
+  {
+    "id": "hira-so",
+    "character": "そ",
+    "romaji": "so"
+  },
+  {
+    "id": "hira-ta",
+    "character": "た",
+    "romaji": "ta"
+  },
+  {
+    "id": "hira-chi",
+    "character": "ち",
+    "romaji": "chi"
+  },
+  {
+    "id": "hira-tsu",
+    "character": "つ",
+    "romaji": "tsu"
+  },
+  {
+    "id": "hira-te",
+    "character": "て",
+    "romaji": "te"
+  },
+  {
+    "id": "hira-to",
+    "character": "と",
+    "romaji": "to"
+  },
+  {
+    "id": "hira-na",
+    "character": "な",
+    "romaji": "na"
+  },
+  {
+    "id": "hira-ni",
+    "character": "に",
+    "romaji": "ni"
+  },
+  {
+    "id": "hira-nu",
+    "character": "ぬ",
+    "romaji": "nu"
+  },
+  {
+    "id": "hira-ne",
+    "character": "ね",
+    "romaji": "ne"
+  },
+  {
+    "id": "hira-no",
+    "character": "の",
+    "romaji": "no"
+  },
+  {
+    "id": "hira-ha",
+    "character": "は",
+    "romaji": "ha"
+  },
+  {
+    "id": "hira-hi",
+    "character": "ひ",
+    "romaji": "hi"
+  },
+  {
+    "id": "hira-fu",
+    "character": "ふ",
+    "romaji": "fu"
+  },
+  {
+    "id": "hira-he",
+    "character": "へ",
+    "romaji": "he"
+  },
+  {
+    "id": "hira-ho",
+    "character": "ほ",
+    "romaji": "ho"
+  },
+  {
+    "id": "hira-ma",
+    "character": "ま",
+    "romaji": "ma"
+  },
+  {
+    "id": "hira-mi",
+    "character": "み",
+    "romaji": "mi"
+  },
+  {
+    "id": "hira-mu",
+    "character": "む",
+    "romaji": "mu"
+  },
+  {
+    "id": "hira-me",
+    "character": "め",
+    "romaji": "me"
+  },
+  {
+    "id": "hira-mo",
+    "character": "も",
+    "romaji": "mo"
+  },
+  {
+    "id": "hira-ya",
+    "character": "や",
+    "romaji": "ya"
+  },
+  {
+    "id": "hira-yu",
+    "character": "ゆ",
+    "romaji": "yu"
+  },
+  {
+    "id": "hira-yo",
+    "character": "よ",
+    "romaji": "yo"
+  },
+  {
+    "id": "hira-ra",
+    "character": "ら",
+    "romaji": "ra"
+  },
+  {
+    "id": "hira-ri",
+    "character": "り",
+    "romaji": "ri"
+  },
+  {
+    "id": "hira-ru",
+    "character": "る",
+    "romaji": "ru"
+  },
+  {
+    "id": "hira-re",
+    "character": "れ",
+    "romaji": "re"
+  },
+  {
+    "id": "hira-ro",
+    "character": "ろ",
+    "romaji": "ro"
+  },
+  {
+    "id": "hira-wa",
+    "character": "わ",
+    "romaji": "wa"
+  },
+  {
+    "id": "hira-wo",
+    "character": "を",
+    "romaji": "wo"
+  },
+  {
+    "id": "hira-n",
+    "character": "ん",
+    "romaji": "n"
+  },
+  {
+    "id": "hira-ga",
+    "character": "が",
+    "romaji": "ga"
+  },
+  {
+    "id": "hira-gi",
+    "character": "ぎ",
+    "romaji": "gi"
+  },
+  {
+    "id": "hira-gu",
+    "character": "ぐ",
+    "romaji": "gu"
+  },
+  {
+    "id": "hira-ge",
+    "character": "げ",
+    "romaji": "ge"
+  },
+  {
+    "id": "hira-go",
+    "character": "ご",
+    "romaji": "go"
+  },
+  {
+    "id": "hira-za",
+    "character": "ざ",
+    "romaji": "za"
+  },
+  {
+    "id": "hira-ji",
+    "character": "じ",
+    "romaji": "ji"
+  },
+  {
+    "id": "hira-zu",
+    "character": "ず",
+    "romaji": "zu"
+  },
+  {
+    "id": "hira-ze",
+    "character": "ぜ",
+    "romaji": "ze"
+  },
+  {
+    "id": "hira-zo",
+    "character": "ぞ",
+    "romaji": "zo"
+  },
+  {
+    "id": "hira-da",
+    "character": "だ",
+    "romaji": "da"
+  },
+  {
+    "id": "hira-de",
+    "character": "て",
+    "romaji": "de"
+  },
+  {
+    "id": "hira-do",
+    "character": "と",
+    "romaji": "do"
+  },
+  {
+    "id": "hira-ba",
+    "character": "ば",
+    "romaji": "ba"
+  },
+  {
+    "id": "hira-bi",
+    "character": "び",
+    "romaji": "bi"
+  },
+  {
+    "id": "hira-bu",
+    "character": "ぶ",
+    "romaji": "bu"
+  },
+  {
+    "id": "hira-be",
+    "character": "べ",
+    "romaji": "be"
+  },
+  {
+    "id": "hira-bo",
+    "character": "ぼ",
+    "romaji": "bo"
+  },
+  {
+    "id": "hira-pa",
+    "character": "ぱ",
+    "romaji": "pa"
+  },
+  {
+    "id": "hira-pi",
+    "character": "ぴ",
+    "romaji": "pi"
+  },
+  {
+    "id": "hira-pu",
+    "character": "ぷ",
+    "romaji": "pu"
+  },
+  {
+    "id": "hira-pe",
+    "character": "ぺ",
+    "romaji": "pe"
+  },
+  {
+    "id": "hira-po",
+    "character": "ぽ",
+    "romaji": "po"
+  },
+  {
+    "id": "hira-kya",
+    "character": "きゃ",
+    "romaji": "kya"
+  },
+  {
+    "id": "hira-kyu",
+    "character": "きゅ",
+    "romaji": "kyu"
+  },
+  {
+    "id": "hira-kyo",
+    "character": "きょ",
+    "romaji": "kyo"
+  },
+  {
+    "id": "hira-sha",
+    "character": "しゃ",
+    "romaji": "sha"
+  },
+  {
+    "id": "hira-shu",
+    "character": "しゅ",
+    "romaji": "shu"
+  },
+  {
+    "id": "hira-sho",
+    "character": "しょ",
+    "romaji": "sho"
+  },
+  {
+    "id": "hira-cha",
+    "character": "ちゃ",
+    "romaji": "cha"
+  },
+  {
+    "id": "hira-chu",
+    "character": "ちゅ",
+    "romaji": "chu"
+  },
+  {
+    "id": "hira-cho",
+    "character": "ちょ",
+    "romaji": "cho"
+  },
+  {
+    "id": "hira-nya",
+    "character": "にゃ",
+    "romaji": "nya"
+  },
+  {
+    "id": "hira-nyu",
+    "character": "にゅ",
+    "romaji": "nyu"
+  },
+  {
+    "id": "hira-nyo",
+    "character": "にょ",
+    "romaji": "nyo"
+  },
+  {
+    "id": "hira-hya",
+    "character": "ひゃ",
+    "romaji": "hya"
+  },
+  {
+    "id": "hira-hyu",
+    "character": "ひゅ",
+    "romaji": "hyu"
+  },
+  {
+    "id": "hira-hyo",
+    "character": "ひょ",
+    "romaji": "hyo"
+  },
+  {
+    "id": "hira-mya",
+    "character": "みゃ",
+    "romaji": "mya"
+  },
+  {
+    "id": "hira-myu",
+    "character": "みゅ",
+    "romaji": "myu"
+  },
+  {
+    "id": "hira-myo",
+    "character": "みょ",
+    "romaji": "myo"
+  },
+  {
+    "id": "hira-rya",
+    "character": "りゃ",
+    "romaji": "rya"
+  },
+  {
+    "id": "hira-ryu",
+    "character": "りゅ",
+    "romaji": "ryu"
+  },
+  {
+    "id": "hira-ryo",
+    "character": "りょ",
+    "romaji": "ryo"
+  },
+  {
+    "id": "hira-gya",
+    "character": "ぎゃ",
+    "romaji": "gya"
+  },
+  {
+    "id": "hira-gyu",
+    "character": "ぎゅ",
+    "romaji": "gyu"
+  },
+  {
+    "id": "hira-gyo",
+    "character": "ぎょ",
+    "romaji": "gyo"
+  },
+  {
+    "id": "hira-ja",
+    "character": "じゃ",
+    "romaji": "ja"
+  },
+  {
+    "id": "hira-ju",
+    "character": "じゅ",
+    "romaji": "ju"
+  },
+  {
+    "id": "hira-jo",
+    "character": "じょ",
+    "romaji": "jo"
+  },
+  {
+    "id": "hira-bya",
+    "character": "びゃ",
+    "romaji": "bya"
+  },
+  {
+    "id": "hira-byu",
+    "character": "びゅ",
+    "romaji": "byu"
+  },
+  {
+    "id": "hira-byo",
+    "character": "びょ",
+    "romaji": "byo"
+  },
+  {
+    "id": "hira-pya",
+    "character": "ぴゃ",
+    "romaji": "pya"
+  },
+  {
+    "id": "hira-pyu",
+    "character": "ぴゅ",
+    "romaji": "pyu"
+  },
+  {
+    "id": "hira-pyo",
+    "character": "ぴょ",
+    "romaji": "pyo"
+  }
 ]

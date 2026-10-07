@@ -1,48 +1,512 @@
 [
-  { "id": "kata-a", "character": "ア", "romaji": "a" },
-  { "id": "kata-i", "character": "イ", "romaji": "i" },
-  { "id": "kata-u", "character": "ウ", "romaji": "u" },
-  { "id": "kata-e", "character": "エ", "romaji": "e" },
-  { "id": "kata-o", "character": "オ", "romaji": "o" },
-  { "id": "kata-ka", "character": "カ", "romaji": "ka" },
-  { "id": "kata-ki", "character": "キ", "romaji": "ki" },
-  { "id": "kata-ku", "character": "ク", "romaji": "ku" },
-  { "id": "kata-ke", "character": "ケ", "romaji": "ke" },
-  { "id": "kata-ko", "character": "コ", "romaji": "ko" },
-  { "id": "kata-sa", "character": "サ", "romaji": "sa" },
-  { "id": "kata-shi", "character": "シ", "romaji": "shi" },
-  { "id": "kata-su", "character": "ス", "romaji": "su" },
-  { "id": "kata-se", "character": "セ", "romaji": "se" },
-  { "id": "kata-so", "character": "ソ", "romaji": "so" },
-  { "id": "kata-ta", "character": "タ", "romaji": "ta" },
-  { "id": "kata-chi", "character": "チ", "romaji": "chi" },
-  { "id": "kata-tsu", "character": "ツ", "romaji": "tsu" },
-  { "id": "kata-te", "character": "テ", "romaji": "te" },
-  { "id": "kata-to", "character": "ト", "romaji": "to" },
-  { "id": "kata-na", "character": "ナ", "romaji": "na" },
-  { "id": "kata-ni", "character": "ニ", "romaji": "ni" },
-  { "id": "kata-nu", "character": "ヌ", "romaji": "nu" },
-  { "id": "kata-ne", "character": "ネ", "romaji": "ne" },
-  { "id": "kata-no", "character": "ノ", "romaji": "no" },
-  { "id": "kata-ha", "character": "ハ", "romaji": "ha" },
-  { "id": "kata-hi", "character": "ヒ", "romaji": "hi" },
-  { "id": "kata-fu", "character": "フ", "romaji": "fu" },
-  { "id": "kata-he", "character": "ヘ", "romaji": "he" },
-  { "id": "kata-ho", "character": "ホ", "romaji": "ho" },
-  { "id": "kata-ma", "character": "マ", "romaji": "ma" },
-  { "id": "kata-mi", "character": "ミ", "romaji": "mi" },
-  { "id": "kata-mu", "character": "ム", "romaji": "mu" },
-  { "id": "kata-me", "character": "メ", "romaji": "me" },
-  { "id": "kata-mo", "character": "モ", "romaji": "mo" },
-  { "id": "kata-ya", "character": "ヤ", "romaji": "ya" },
-  { "id": "kata-yu", "character": "ユ", "romaji": "yu" },
-  { "id": "kata-yo", "character": "ヨ", "romaji": "yo" },
-  { "id": "kata-ra", "character": "ラ", "romaji": "ra" },
-  { "id": "kata-ri", "character": "リ", "romaji": "ri" },
-  { "id": "kata-ru", "character": "ル", "romaji": "ru" },
-  { "id": "kata-re", "character": "レ", "romaji": "re" },
-  { "id": "kata-ro", "character": "ロ", "romaji": "ro" },
-  { "id": "kata-wa", "character": "ワ", "romaji": "wa" },
-  { "id": "kata-wo", "character": "ヲ", "romaji": "wo" },
-  { "id": "kata-n", "character": "ン", "romaji": "n" }
+  {
+    "id": "kata-a",
+    "character": "ア",
+    "romaji": "a"
+  },
+  {
+    "id": "kata-i",
+    "character": "イ",
+    "romaji": "i"
+  },
+  {
+    "id": "kata-u",
+    "character": "ウ",
+    "romaji": "u"
+  },
+  {
+    "id": "kata-e",
+    "character": "エ",
+    "romaji": "e"
+  },
+  {
+    "id": "kata-o",
+    "character": "オ",
+    "romaji": "o"
+  },
+  {
+    "id": "kata-ka",
+    "character": "カ",
+    "romaji": "ka"
+  },
+  {
+    "id": "kata-ki",
+    "character": "キ",
+    "romaji": "ki"
+  },
+  {
+    "id": "kata-ku",
+    "character": "ク",
+    "romaji": "ku"
+  },
+  {
+    "id": "kata-ke",
+    "character": "ケ",
+    "romaji": "ke"
+  },
+  {
+    "id": "kata-ko",
+    "character": "コ",
+    "romaji": "ko"
+  },
+  {
+    "id": "kata-sa",
+    "character": "サ",
+    "romaji": "sa"
+  },
+  {
+    "id": "kata-shi",
+    "character": "シ",
+    "romaji": "shi"
+  },
+  {
+    "id": "kata-su",
+    "character": "ス",
+    "romaji": "su"
+  },
+  {
+    "id": "kata-se",
+    "character": "セ",
+    "romaji": "se"
+  },
+  {
+    "id": "kata-so",
+    "character": "ソ",
+    "romaji": "so"
+  },
+  {
+    "id": "kata-ta",
+    "character": "タ",
+    "romaji": "ta"
+  },
+  {
+    "id": "kata-chi",
+    "character": "チ",
+    "romaji": "chi"
+  },
+  {
+    "id": "kata-tsu",
+    "character": "ツ",
+    "romaji": "tsu"
+  },
+  {
+    "id": "kata-te",
+    "character": "テ",
+    "romaji": "te"
+  },
+  {
+    "id": "kata-to",
+    "character": "ト",
+    "romaji": "to"
+  },
+  {
+    "id": "kata-na",
+    "character": "ナ",
+    "romaji": "na"
+  },
+  {
+    "id": "kata-ni",
+    "character": "ニ",
+    "romaji": "ni"
+  },
+  {
+    "id": "kata-nu",
+    "character": "ヌ",
+    "romaji": "nu"
+  },
+  {
+    "id": "kata-ne",
+    "character": "ネ",
+    "romaji": "ne"
+  },
+  {
+    "id": "kata-no",
+    "character": "ノ",
+    "romaji": "no"
+  },
+  {
+    "id": "kata-ha",
+    "character": "ハ",
+    "romaji": "ha"
+  },
+  {
+    "id": "kata-hi",
+    "character": "ヒ",
+    "romaji": "hi"
+  },
+  {
+    "id": "kata-fu",
+    "character": "フ",
+    "romaji": "fu"
+  },
+  {
+    "id": "kata-he",
+    "character": "ヘ",
+    "romaji": "he"
+  },
+  {
+    "id": "kata-ho",
+    "character": "ホ",
+    "romaji": "ho"
+  },
+  {
+    "id": "kata-ma",
+    "character": "マ",
+    "romaji": "ma"
+  },
+  {
+    "id": "kata-mi",
+    "character": "ミ",
+    "romaji": "mi"
+  },
+  {
+    "id": "kata-mu",
+    "character": "ム",
+    "romaji": "mu"
+  },
+  {
+    "id": "kata-me",
+    "character": "メ",
+    "romaji": "me"
+  },
+  {
+    "id": "kata-mo",
+    "character": "モ",
+    "romaji": "mo"
+  },
+  {
+    "id": "kata-ya",
+    "character": "ヤ",
+    "romaji": "ya"
+  },
+  {
+    "id": "kata-yu",
+    "character": "ユ",
+    "romaji": "yu"
+  },
+  {
+    "id": "kata-yo",
+    "character": "ヨ",
+    "romaji": "yo"
+  },
+  {
+    "id": "kata-ra",
+    "character": "ラ",
+    "romaji": "ra"
+  },
+  {
+    "id": "kata-ri",
+    "character": "リ",
+    "romaji": "ri"
+  },
+  {
+    "id": "kata-ru",
+    "character": "ル",
+    "romaji": "ru"
+  },
+  {
+    "id": "kata-re",
+    "character": "レ",
+    "romaji": "re"
+  },
+  {
+    "id": "kata-ro",
+    "character": "ロ",
+    "romaji": "ro"
+  },
+  {
+    "id": "kata-wa",
+    "character": "ワ",
+    "romaji": "wa"
+  },
+  {
+    "id": "kata-wo",
+    "character": "ヲ",
+    "romaji": "wo"
+  },
+  {
+    "id": "kata-n",
+    "character": "ン",
+    "romaji": "n"
+  },
+  {
+    "id": "kata-ga",
+    "character": "ガ",
+    "romaji": "ga"
+  },
+  {
+    "id": "kata-gi",
+    "character": "ギ",
+    "romaji": "gi"
+  },
+  {
+    "id": "kata-gu",
+    "character": "グ",
+    "romaji": "gu"
+  },
+  {
+    "id": "kata-ge",
+    "character": "ゲ",
+    "romaji": "ge"
+  },
+  {
+    "id": "kata-go",
+    "character": "ゴ",
+    "romaji": "go"
+  },
+  {
+    "id": "kata-za",
+    "character": "ザ",
+    "romaji": "za"
+  },
+  {
+    "id": "kata-ji",
+    "character": "ジ",
+    "romaji": "ji"
+  },
+  {
+    "id": "kata-zu",
+    "character": "ズ",
+    "romaji": "zu"
+  },
+  {
+    "id": "kata-ze",
+    "character": "ゼ",
+    "romaji": "ze"
+  },
+  {
+    "id": "kata-zo",
+    "character": "ゾ",
+    "romaji": "zo"
+  },
+  {
+    "id": "kata-da",
+    "character": "ダ",
+    "romaji": "da"
+  },
+  {
+    "id": "kata-de",
+    "character": "テ",
+    "romaji": "de"
+  },
+  {
+    "id": "kata-do",
+    "character": "ト",
+    "romaji": "do"
+  },
+  {
+    "id": "kata-ba",
+    "character": "バ",
+    "romaji": "ba"
+  },
+  {
+    "id": "kata-bi",
+    "character": "ビ",
+    "romaji": "bi"
+  },
+  {
+    "id": "kata-bu",
+    "character": "ブ",
+    "romaji": "bu"
+  },
+  {
+    "id": "kata-be",
+    "character": "ベ",
+    "romaji": "be"
+  },
+  {
+    "id": "kata-bo",
+    "character": "ボ",
+    "romaji": "bo"
+  },
+  {
+    "id": "kata-pa",
+    "character": "パ",
+    "romaji": "pa"
+  },
+  {
+    "id": "kata-pi",
+    "character": "ピ",
+    "romaji": "pi"
+  },
+  {
+    "id": "kata-pu",
+    "character": "プ",
+    "romaji": "pu"
+  },
+  {
+    "id": "kata-pe",
+    "character": "ペ",
+    "romaji": "pe"
+  },
+  {
+    "id": "kata-po",
+    "character": "ポ",
+    "romaji": "po"
+  },
+  {
+    "id": "kata-kya",
+    "character": "キャ",
+    "romaji": "kya"
+  },
+  {
+    "id": "kata-kyu",
+    "character": "キュ",
+    "romaji": "kyu"
+  },
+  {
+    "id": "kata-kyo",
+    "character": "キョ",
+    "romaji": "kyo"
+  },
+  {
+    "id": "kata-sha",
+    "character": "シャ",
+    "romaji": "sha"
+  },
+  {
+    "id": "kata-shu",
+    "character": "シュ",
+    "romaji": "shu"
+  },
+  {
+    "id": "kata-sho",
+    "character": "ショ",
+    "romaji": "sho"
+  },
+  {
+    "id": "kata-cha",
+    "character": "チャ",
+    "romaji": "cha"
+  },
+  {
+    "id": "kata-chu",
+    "character": "チュ",
+    "romaji": "chu"
+  },
+  {
+    "id": "kata-cho",
+    "character": "チョ",
+    "romaji": "cho"
+  },
+  {
+    "id": "kata-nya",
+    "character": "ニャ",
+    "romaji": "nya"
+  },
+  {
+    "id": "kata-nyu",
+    "character": "ニュ",
+    "romaji": "nyu"
+  },
+  {
+    "id": "kata-nyo",
+    "character": "ニョ",
+    "romaji": "nyo"
+  },
+  {
+    "id": "kata-hya",
+    "character": "ヒャ",
+    "romaji": "hya"
+  },
+  {
+    "id": "kata-hyu",
+    "character": "ヒュ",
+    "romaji": "hyu"
+  },
+  {
+    "id": "kata-hyo",
+    "character": "ヒョ",
+    "romaji": "hyo"
+  },
+  {
+    "id": "kata-mya",
+    "character": "ミャ",
+    "romaji": "mya"
+  },
+  {
+    "id": "kata-myu",
+    "character": "ミュ",
+    "romaji": "myu"
+  },
+  {
+    "id": "kata-myo",
+    "character": "ミョ",
+    "romaji": "myo"
+  },
+  {
+    "id": "kata-rya",
+    "character": "リャ",
+    "romaji": "rya"
+  },
+  {
+    "id": "kata-ryu",
+    "character": "リュ",
+    "romaji": "ryu"
+  },
+  {
+    "id": "kata-ryo",
+    "character": "リョ",
+    "romaji": "ryo"
+  },
+  {
+    "id": "kata-gya",
+    "character": "ギャ",
+    "romaji": "gya"
+  },
+  {
+    "id": "kata-gyu",
+    "character": "ギュ",
+    "romaji": "gyu"
+  },
+  {
+    "id": "kata-gyo",
+    "character": "ギョ",
+    "romaji": "gyo"
+  },
+  {
+    "id": "kata-ja",
+    "character": "ジャ",
+    "romaji": "ja"
+  },
+  {
+    "id": "kata-ju",
+    "character": "ジュ",
+    "romaji": "ju"
+  },
+  {
+    "id": "kata-jo",
+    "character": "ジョ",
+    "romaji": "jo"
+  },
+  {
+    "id": "kata-bya",
+    "character": "ビャ",
+    "romaji": "bya"
+  },
+  {
+    "id": "kata-byu",
+    "character": "ビュ",
+    "romaji": "byu"
+  },
+  {
+    "id": "kata-byo",
+    "character": "ビョ",
+    "romaji": "byo"
+  },
+  {
+    "id": "kata-pya",
+    "character": "ピャ",
+    "romaji": "pya"
+  },
+  {
+    "id": "kata-pyu",
+    "character": "ピュ",
+    "romaji": "pyu"
+  },
+  {
+    "id": "kata-pyo",
+    "character": "ピョ",
+    "romaji": "pyo"
+  }
 ]

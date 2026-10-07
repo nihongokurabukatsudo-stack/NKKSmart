@@ -8,7 +8,9 @@ import { SectionBadge } from "../components/ui/SectionBadge";
 import { useLocalKanaData } from "../hooks/useLocalKanaData";
 import type { KanaCharacter, QuizQuestion } from "../types/kana";
 import { createQuizQuestions } from "../utils/quiz";
-import { completeDailyPractice, getMistakeIds, recordLearningQuiz } from "../lib/learningProgress";
+import { getMistakeIds, recordLearningQuiz } from "../lib/learningProgress";
+import { Volume2 } from "lucide-react";
+import { speakJapanese } from "../lib/japaneseSpeech";
 
 interface KanaQuizPageProps {
   title: "Hiragana" | "Katakana";
@@ -21,6 +23,8 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
   const [searchParams] = useSearchParams();
   const reviewMode = searchParams.get('review') === '1';
   const dailyMode = searchParams.get('daily') === '1';
+  const listeningMode = searchParams.get('listening') === '1';
+  const [audioEnabled, setAudioEnabled] = useState(true);
   const questionCount = dailyMode ? 5 : 10;
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -39,9 +43,8 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
   useEffect(() => {
     if (!isQuizFinished || hasRecordedResult.current) return;
     hasRecordedResult.current = true;
-    recordLearningQuiz(title.toLowerCase(), quizQuestions, wrongQuestionIds, quizScore);
-    if (dailyMode) completeDailyPractice();
-  }, [isQuizFinished, quizQuestions, title, wrongQuestionIds, quizScore, dailyMode]);
+    recordLearningQuiz(title.toLowerCase(), quizQuestions, wrongQuestionIds);
+  }, [isQuizFinished, quizQuestions, title, wrongQuestionIds]);
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const totalQuestions = quizQuestions.length;
@@ -53,7 +56,7 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
 
     setSelectedAnswer(answer);
 
-    if (answer === currentQuestion.correctAnswer) {
+    if (answer === (listeningMode ? currentQuestion.character : currentQuestion.correctAnswer)) {
       setQuizScore((currentScore) => currentScore + 1);
     } else {
       setWrongQuestionIds((currentIds) => currentIds.includes(currentQuestion.id) ? currentIds : [...currentIds, currentQuestion.id]);
@@ -87,7 +90,8 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
       return "border-white/10 bg-nkk-panel hover:border-white/30 hover:bg-white/10";
     }
 
-    if (answer === currentQuestion.correctAnswer) {
+    const correctAnswer = listeningMode ? currentQuestion.character : currentQuestion.correctAnswer;
+    if (answer === correctAnswer) {
       return "border-emerald-400/70 bg-emerald-500/18 text-white";
     }
 
@@ -106,11 +110,12 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
         </Link>
 
         <header className="mt-8">
-          <SectionBadge>{dailyMode ? 'LATIHAN HARI INI' : reviewMode ? 'REVIEW KESALAHAN' : `QUIZ ${title.toUpperCase()}`}</SectionBadge>
-          <h1 className="mt-5 text-5xl font-black leading-tight text-white sm:text-6xl">Tebak Bacaan Huruf</h1>
+          <SectionBadge>{listeningMode ? 'JAPANESE LISTENING' : reviewMode ? 'REVIEW KESALAHAN' : `QUIZ ${title.toUpperCase()}`}</SectionBadge>
+          <h1 className="mt-5 text-4xl font-black leading-tight text-white sm:text-6xl">{listeningMode ? 'Dengarkan dan kenali huruf' : 'Tebak bacaan huruf'}</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-300">
-            Pilih romaji yang sesuai dengan huruf yang tampil. Setiap sesi berisi {questionCount} soal acak.
+            {listeningMode ? 'Dengarkan pengucapan Jepang, lalu pilih kana yang kamu dengar.' : `Pilih romaji yang sesuai dengan huruf yang tampil. Setiap sesi berisi ${questionCount} soal acak.`}
           </p>
+          <label className="mt-4 inline-flex min-h-10 cursor-pointer items-center gap-2 text-sm text-zinc-300"><input type="checkbox" checked={audioEnabled} onChange={(event) => setAudioEnabled(event.target.checked)} className="h-4 w-4 accent-rose-500"/>Audio aktif</label>
         </header>
 
         <section className="mt-10">
@@ -137,21 +142,19 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
               </div>
 
               <div className="py-12 text-center">
-                <p className="text-8xl font-black leading-none text-nkk-red sm:text-9xl">
-                  {currentQuestion.character}
-                </p>
+                {listeningMode ? <button type="button" disabled={!audioEnabled} onClick={() => speakJapanese(currentQuestion.character)} className="mx-auto inline-flex min-h-14 items-center gap-3 rounded-xl border border-white/15 px-5 text-lg font-bold disabled:opacity-50"><Volume2/>{audioEnabled ? 'Putar audio Jepang' : 'Audio dimatikan'}</button> : <p className="text-8xl font-black leading-none text-nkk-red sm:text-9xl">{currentQuestion.character}</p>}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                {currentQuestion.answerOptions.map((answer) => (
+                {(listeningMode ? currentQuestion.answerOptions.map((romaji) => characters.find((character) => character.romaji === romaji)?.character || romaji) : currentQuestion.answerOptions).map((answer) => (
                   <button
                     key={answer}
                     type="button"
                     className={`min-h-14 rounded-lg border px-5 py-4 text-lg font-black transition ${getAnswerClassName(answer)}`}
-                    onClick={() => handleAnswerSelect(answer)}
+                    onClick={() => handleAnswerSelect(listeningMode ? (characters.find((character) => character.character === answer)?.character || answer) : answer)}
                     disabled={Boolean(selectedAnswer)}
                   >
-                    {answer}{selectedAnswer && answer === currentQuestion.correctAnswer && <span className="ml-2 text-sm">✓ Benar</span>}{selectedAnswer === answer && answer !== currentQuestion.correctAnswer && <span className="ml-2 text-sm">× Belum tepat</span>}
+                    {answer}{selectedAnswer && answer === (listeningMode ? currentQuestion.character : currentQuestion.correctAnswer) && <span className="ml-2 text-sm">✓ Benar</span>}{selectedAnswer === (listeningMode ? (characters.find((character) => character.character === answer)?.character || answer) : answer) && selectedAnswer !== (listeningMode ? currentQuestion.character : currentQuestion.correctAnswer) && <span className="ml-2 text-sm">× Belum tepat</span>}
                   </button>
                 ))}
               </div>
@@ -164,7 +167,7 @@ export function KanaQuizPage({ title, kanaCharacters, learningPath }: KanaQuizPa
               <h2 className="mt-4 text-5xl font-black text-white">
                 {quizScore}/{totalQuestions} benar
               </h2>
-              <p className="mt-2 text-lg font-bold text-nkk-pink">Akurasi {totalQuestions ? Math.round(quizScore * 100 / totalQuestions) : 0}% · +{quizScore === totalQuestions ? 30 : 20}{dailyMode ? ' + bonus harian 10' : ''} XP</p>
+              <p className="mt-2 text-lg font-bold text-nkk-pink">Akurasi {totalQuestions ? Math.round(quizScore * 100 / totalQuestions) : 0}%</p>
               <p className="mt-4 text-base leading-8 text-zinc-300">
                 Mantap. Ulangi quiz untuk mendapatkan kombinasi soal baru.
               </p>

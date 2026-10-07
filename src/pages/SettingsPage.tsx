@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -26,6 +26,49 @@ export const SettingsPage: React.FC = () => {
 
   // Backup State
   const [isExportingBackup, setIsExportingBackup] = useState(false)
+  const [documentationTitle, setDocumentationTitle] = useState('Panduan NKKSmart')
+  const [documentationBody, setDocumentationBody] = useState('')
+  const [isLoadingDocumentation, setIsLoadingDocumentation] = useState(true)
+  const [isSavingDocumentation, setIsSavingDocumentation] = useState(false)
+  const [documentationMessage, setDocumentationMessage] = useState('')
+
+  useEffect(() => {
+    let active = true
+    void (async () => {
+      try {
+        const { data, error } = await (supabase.from('app_settings' as never) as any)
+          .select('value').eq('key', 'admin_documentation').maybeSingle()
+        if (error) throw error
+        if (active && data?.value) {
+          setDocumentationTitle(typeof data.value.title === 'string' ? data.value.title : 'Panduan NKKSmart')
+          setDocumentationBody(typeof data.value.body === 'string' ? data.value.body : '')
+        }
+      } catch {
+        if (active) setDocumentationMessage('Dokumentasi belum dapat dimuat. Pastikan schema app_settings sudah diterapkan.')
+      } finally {
+        if (active) setIsLoadingDocumentation(false)
+      }
+    })()
+    return () => { active = false }
+  }, [])
+
+  const handleSaveDocumentation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSavingDocumentation(true)
+    setDocumentationMessage('')
+    try {
+      const { error } = await (supabase.from('app_settings' as never) as any).upsert({
+        key: 'admin_documentation',
+        value: { title: documentationTitle.trim(), body: documentationBody, updated_at: new Date().toISOString() },
+      }, { onConflict: 'key' })
+      if (error) throw error
+      setDocumentationMessage('Dokumentasi berhasil disimpan.')
+    } catch (err: unknown) {
+      setDocumentationMessage(err instanceof Error ? err.message : 'Gagal menyimpan dokumentasi. Pastikan schema app_settings dan akses admin aktif.')
+    } finally {
+      setIsSavingDocumentation(false)
+    }
+  }
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -205,6 +248,18 @@ export const SettingsPage: React.FC = () => {
         </form>
       </div>
 
+      {/* Admin-editable project documentation */}
+      <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-4">
+        <h2 className="text-sm font-bold text-white flex items-center gap-2"><Info className="w-4 h-4 text-pink-400"/><span>Dokumentasi Project</span></h2>
+        <p className="text-xs leading-relaxed text-slate-300">Atur panduan yang ingin disertakan untuk admin/operator project. Konten tersimpan di Supabase dan tidak mencakup data anggota.</p>
+        {documentationMessage && <p role="status" className="rounded-lg border border-pink-500/20 bg-pink-500/10 p-3 text-xs text-pink-200">{documentationMessage}</p>}
+        <form onSubmit={handleSaveDocumentation} className="space-y-3">
+          <label className="block text-xs font-semibold text-slate-300">Judul panduan<input value={documentationTitle} onChange={(event) => setDocumentationTitle(event.target.value)} maxLength={120} required className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white"/></label>
+          <label className="block text-xs font-semibold text-slate-300">Isi dokumentasi<textarea value={documentationBody} onChange={(event) => setDocumentationBody(event.target.value)} maxLength={20000} rows={10} placeholder="Tulis langkah setup, cara pakai dashboard, atau catatan deployment…" className="mt-1.5 w-full resize-y rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm leading-6 text-white placeholder:text-slate-500"/></label>
+          <div className="flex flex-wrap items-center gap-3"><button type="submit" disabled={isSavingDocumentation || isLoadingDocumentation} className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-pink-600 px-4 text-xs font-bold text-white disabled:opacity-50">{isSavingDocumentation ? <Loader2 className="h-4 w-4 animate-spin"/> : <CheckCircle2 className="h-4 w-4"/>}Simpan dokumentasi</button>{isLoadingDocumentation && <span className="text-xs text-slate-400">Memuat panduan…</span>}</div>
+        </form>
+      </div>
+
       {/* Backup Data Card */}
       <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -237,4 +292,3 @@ export const SettingsPage: React.FC = () => {
     </div>
   )
 }
-

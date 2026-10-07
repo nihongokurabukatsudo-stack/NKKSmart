@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
@@ -29,6 +29,7 @@ import { LandingPage } from './pages/LandingPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { LearningDashboardPage } from './pages/LearningDashboardPage'
 import { LearningPlacementPage } from './pages/LearningPlacementPage'
+import { LearningMaterialPage } from './pages/LearningMaterialPage'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } } })
 
@@ -50,6 +51,12 @@ const RouteRobots: React.FC = () => {
   return null
 }
 
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation()
+  useLayoutEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }) }, [pathname])
+  return null
+}
+
 const NotFound: React.FC = () => <main className="min-h-screen bg-slate-950 p-8 text-slate-100"><h1 className="text-2xl font-bold">Halaman tidak ditemukan</h1><p className="mt-2 text-slate-300">Alamat yang dibuka tidak tersedia.</p><a className="mt-4 inline-block text-pink-300 underline" href="/">Kembali ke beranda</a></main>
 const LegacyMeetingRedirect: React.FC = () => { const { id } = useParams(); return <Navigate to={`/admin/pertemuan/${id}`} replace /> }
 
@@ -57,6 +64,7 @@ export const App: React.FC = () => <QueryClientProvider client={queryClient}>
   <AuthProvider>
     <BrowserRouter>
       <RouteRobots />
+      <ScrollToTop />
       <Routes>
         {/* Website resmi publik */}
         <Route path="/" element={<LandingPage />} />
@@ -65,6 +73,7 @@ export const App: React.FC = () => <QueryClientProvider client={queryClient}>
         <Route path="/tim-inti" element={<CoreTeamPage />} />
         <Route path="/galeri" element={<GalleryPage />} />
         <Route path="/belajar" element={<LearningDashboardPage />} />
+        <Route path="/belajar/materi/:id" element={<LearningMaterialPage />} />
         <Route path="/belajar/tes" element={<LearningPlacementPage characters={[...hiraganaCharacters, ...katakanaCharacters]} />} />
         <Route path="/belajar/hiragana" element={<KanaLearningPage title="Hiragana" kanaCharacters={hiraganaCharacters} quizPath="/belajar/hiragana/quiz" description={[
           'Hiragana adalah salah satu sistem tulisan dasar bahasa Jepang yang dipakai untuk menulis kata asli Jepang, partikel, akhiran kata kerja, dan bacaan tambahan.',
