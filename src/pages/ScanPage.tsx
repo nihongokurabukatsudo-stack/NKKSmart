@@ -98,8 +98,6 @@ export const ScanPage: React.FC = () => {
 
   // Scan Result & Logs
   const [popup, setPopup] = useState<ScanPopupData>({ show: false, success: false, message: '' })
-  const [popupImageSrc, setPopupImageSrc] = useState<string | null>(null)
-  const [popupImageReady, setPopupImageReady] = useState(false)
   const [logs, setLogs] = useState<ScanLogEntry[]>([])
 
   // Refs
@@ -118,33 +116,6 @@ export const ScanPage: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    let active = true
-    const loadPopupImage = async () => {
-      for (const src of ['/assets/admin/popup.png', '/assets/admin/popup.jpg']) {
-        const image = new Image()
-        image.decoding = 'async'
-        image.src = src
-        try {
-          if (typeof image.decode === 'function') await image.decode()
-          else await new Promise<void>((resolve, reject) => {
-            image.onload = () => resolve()
-            image.onerror = () => reject(new Error('Gambar popup gagal dimuat'))
-          })
-          if (active) {
-            setPopupImageSrc(src)
-            setPopupImageReady(true)
-          }
-          return
-        } catch {
-          // Coba format JPG lama sebelum memakai ikon bawaan.
-        }
-      }
-    }
-    void loadPopupImage()
-    return () => { active = false }
-  }, [])
-
-  useEffect(() => {
     const online = () => setIsOnline(true)
     const offline = () => setIsOnline(false)
     window.addEventListener('online', online)
@@ -154,7 +125,7 @@ export const ScanPage: React.FC = () => {
 
   useEffect(() => {
     if (!popup.show) return
-    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), 2500)
+    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), 3000)
     return () => window.clearTimeout(timer)
   }, [popup.show, popup.message])
 
@@ -690,64 +661,28 @@ export const ScanPage: React.FC = () => {
           <button type="button" onClick={() => setHistorySheetOpen(true)} className="scan-sheet-trigger order-6 flex min-h-12 items-center justify-between rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><span><History className="mr-2 inline h-4 w-4 text-pink-300"/>Riwayat scan</span><span className="text-xs text-slate-300">{logs.length} entri</span></button>
         </main>
         {!isOnline && <div className="fixed left-3 right-3 top-16 z-40 rounded-xl border border-rose-300/40 bg-rose-950/90 p-3 text-center text-sm text-rose-100 shadow-xl">Tidak ada koneksi internet. Scan memerlukan koneksi untuk tersimpan.</div>}
-        {manualSheetOpen && isAdmin && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setManualSheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Input manual" className="scan-glass w-full max-w-lg rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Input manual · Admin</h2><button type="button" onClick={() => setManualSheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">×</button></div><form onSubmit={(event) => { void handleManualSubmit(event); setManualSheetOpen(false) }} className="flex gap-2"><input type="text" value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Masukkan kode unik" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/20 bg-slate-950/75 px-4 text-base text-white placeholder-slate-400"/><button type="submit" disabled={isSubmittingManual || !manualCode.trim()} className="min-h-12 rounded-xl bg-pink-600 px-4 font-semibold text-white disabled:opacity-50"><Send className="mr-1 inline h-4 w-4"/>Kirim</button></form></section></div>}
+        {manualSheetOpen && isAdmin && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => !isSubmittingManual && setManualSheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Input manual" className="scan-glass w-full max-w-lg rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Input manual · Admin</h2><button type="button" onClick={() => setManualSheetOpen(false)} disabled={isSubmittingManual} className="min-h-12 min-w-12 rounded-full border border-white/20 disabled:opacity-50">×</button></div><form onSubmit={async (event) => { await handleManualSubmit(event); setManualSheetOpen(false) }} className="flex gap-2"><input type="text" value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Masukkan kode unik" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/20 bg-slate-950/75 px-4 text-base text-white placeholder-slate-400"/><button type="submit" disabled={isSubmittingManual || !manualCode.trim()} className="min-h-12 rounded-xl bg-pink-600 px-4 font-semibold text-white disabled:opacity-50"><Send className="mr-1 inline h-4 w-4"/>Kirim</button></form></section></div>}
         {historySheetOpen && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setHistorySheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Riwayat scan" className="scan-glass max-h-[70dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold"><History className="mr-2 inline h-5 w-5 text-pink-300"/>Riwayat scan</h2><button type="button" onClick={() => setHistorySheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">Tutup</button></div>{logs.length === 0 ? <p className="py-8 text-center text-sm text-slate-300">Belum ada scan yang dilakukan.</p> : <div className="space-y-2">{logs.map((log) => <div key={log.id} className={`flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 p-3 ${log.status === 'success' ? 'border-l-4 border-l-pink-500' : log.status === 'warning' ? 'border-l-4 border-l-rose-400' : 'border-l-4 border-l-rose-500'}`}><span className="min-w-0 text-sm text-white">{log.message}</span><time className="shrink-0 text-xs text-slate-300">{log.time}</time></div>)}</div>}</section></div>}
       </div>
 
-      {/* Scan Result Popup Modal */}
+      {/* Non-blocking scan result notification */}
       {popup.show && (
-        <div role="presentation" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <div className="pointer-events-none fixed inset-x-3 top-[max(1rem,env(safe-area-inset-top))] z-[100] flex justify-center sm:inset-x-auto sm:right-5 sm:w-[min(26rem,calc(100vw-2.5rem))]">
           <section
-            role="status"
-            aria-live="polite"
+            role={popup.success ? 'status' : 'alert'}
+            aria-live={popup.success ? 'polite' : 'assertive'}
             aria-atomic="true"
-            onClick={(event) => event.stopPropagation()}
-            className={`popup-card-enter relative max-h-[90dvh] w-full max-w-lg rounded-3xl border p-5 text-center shadow-2xl sm:p-7 ${
-              popup.success
-                ? 'mt-[min(18dvh,120px)] bg-gradient-to-b from-slate-900 to-slate-950 border-pink-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)] pt-[min(23dvh,150px)]'
-                : popupWarning ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-400/40 shadow-[0_0_40px_rgba(244,63,94,0.15)]' : 'bg-gradient-to-b from-slate-900 to-slate-950 border-rose-500/30 shadow-[0_0_40px_rgba(244,63,94,0.15)]'
-            }`}
+            className={`popup-card-enter pointer-events-auto relative w-full rounded-2xl border p-4 pr-12 text-left shadow-2xl ${popup.success ? 'border-pink-500/40 bg-slate-900 text-white' : popupWarning ? 'border-amber-400/40 bg-slate-900 text-white' : 'border-rose-500/40 bg-slate-900 text-white'}`}
           >
-            {popup.success ? (
-              <>
-                {popupImageReady && popupImageSrc ? (
-                  <img
-                    src={popupImageSrc}
-                    alt="Ilustrasi absensi berhasil"
-                    width={760}
-                    height={570}
-                    className="absolute left-1/2 top-[calc(-1*min(22dvh,140px))] z-10 max-h-[40dvh] w-[min(88vw,520px)] -translate-x-1/2 object-contain drop-shadow-2xl"
-                  />
-                ) : (
-                  <div className="absolute left-1/2 top-5 z-10 flex h-16 w-16 -translate-x-1/2 items-center justify-center rounded-full bg-pink-500/20 text-pink-300">
-                    <CheckCircle2 className="h-10 w-10" />
-                  </div>
-                )}
-                <h2 className="text-xl font-extrabold text-white sm:text-2xl">Absensi Berhasil</h2>
-                <div className="mx-auto mt-3 max-w-sm rounded-2xl border border-white/10 bg-slate-950/80 p-4 text-left shadow-inner">
-                  <p className="break-words text-lg font-bold leading-snug text-pink-300 sm:text-xl">{popup.nama || 'Absensi berhasil'}</p>
-                  {(popup.kelas || popup.jabatan) && <p className="mt-1 text-sm text-slate-100">{[popup.kelas, popup.jabatan].filter(Boolean).join(' · ')}</p>}
-                  {popup.time && <p className="mt-2 text-sm font-semibold text-white">{popup.time}</p>}
-                  {popup.meetingName && <p className="mt-2 border-t border-white/10 pt-2 text-sm text-slate-300">{popup.meetingName}</p>}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full shadow-inner sm:h-16 sm:w-16 ${popupWarning ? 'bg-rose-400/20 text-rose-300' : 'bg-rose-500/20 text-rose-400'}`}>
-                  {popupWarning ? <AlertTriangle className="h-9 w-9" /> : <XCircle className="h-9 w-9" />}
-                </div>
-                <h2 className="mb-2 text-xl font-bold text-white">{popup.message}</h2>
-                {popup.nama && <div className="mt-4 rounded-2xl border border-white/5 bg-slate-950/60 p-4 text-sm shadow-inner"><p className="text-lg font-bold text-rose-300">{popup.nama}</p>{popup.kelas && <p className="mt-1 text-slate-300">{popup.kelas}</p>}</div>}
-              </>
-            )}
-
-            <button
-              onClick={() => setPopup((current) => ({ ...current, show: false }))}
-              className={`mt-4 min-h-12 w-full rounded-2xl py-3.5 text-sm font-bold text-white shadow-lg sm:mt-5 ${popup.success ? 'bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400' : popupWarning ? 'bg-rose-600 hover:bg-rose-500' : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'}`}
-            >
-              Tutup &amp; Lanjutkan
-            </button>
-            {popup.success && <div aria-hidden="true" className="popup-auto-progress absolute inset-x-0 bottom-0 h-1 origin-left rounded-b-3xl bg-pink-400" />}
+            <button aria-label="Tutup pemberitahuan" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full text-slate-300 hover:bg-white/10">×</button>
+            <div className="flex items-start gap-3">
+              <span className={`mt-0.5 shrink-0 ${popup.success ? 'text-pink-300' : popupWarning ? 'text-amber-300' : 'text-rose-300'}`}>{popup.success ? <CheckCircle2 className="h-5 w-5"/> : <AlertTriangle className="h-5 w-5"/>}</span>
+              <div className="min-w-0">
+                <p className="font-bold">{popup.success ? 'Absensi berhasil' : popup.message}</p>
+                {popup.success && <p className="mt-1 break-words text-sm text-slate-200">{[popup.nama, popup.kelas, popup.jabatan, popup.time, popup.meetingName].filter(Boolean).join(' · ') || popup.message}</p>}
+                {!popup.success && popup.nama && <p className="mt-1 text-sm text-slate-300">{[popup.nama, popup.kelas].filter(Boolean).join(' · ')}</p>}
+              </div>
+            </div>
           </section>
         </div>
       )}

@@ -158,7 +158,7 @@ export const AdminLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <main className="admin-main flex-1 min-w-0 p-4 sm:p-6 md:p-8 overflow-y-auto">
+      <main className="admin-main flex-1 min-w-0 overflow-x-hidden p-4 sm:p-6 md:p-8">
         <Outlet />
       </main>
     </div>
