@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { formatDateIndo, formatTime } from '../lib/utils'
 import { PrintSheet, PrintTips } from '../components/print/PrintSheet'
 import { printWhenReady } from '../lib/print'
+import { formatNis } from '../lib/nis'
 import {
   FileSpreadsheet,
   Download,
@@ -145,7 +146,7 @@ export const RekapPage: React.FC = () => {
         const q = searchTerm.toLowerCase()
         return (
           r.nama_lengkap.toLowerCase().includes(q) ||
-          (r.nis || '').includes(q) ||
+          formatNis(r.nis).toLowerCase().includes(q) ||
           r.jurusan.toLowerCase().includes(q)
         )
       }
@@ -165,7 +166,7 @@ export const RekapPage: React.FC = () => {
       'Nama Lengkap': r.nama_lengkap,
       Kelas: r.kelas,
       Jurusan: r.jurusan,
-      NIS: r.nis || '',
+      NIS: formatNis(r.nis),
       Jabatan: r.jabatan,
       Status: r.status_hadir === 'hadir' ? 'Hadir' : 'Tidak Hadir',
       'Waktu Scan': r.scan_time ? new Date(r.scan_time).toLocaleTimeString('id-ID') : '-',
@@ -222,7 +223,7 @@ export const RekapPage: React.FC = () => {
                 <td class="text-center">${i + 1}</td>
                 <td>${r.nama_lengkap}</td>
                 <td>${r.kelas} ${r.jurusan}</td>
-                <td>${r.nis || '-'}</td>
+                <td>${formatNis(r.nis) || '-'}</td>
                 <td>${r.jabatan}</td>
                 <td class="text-center">${r.status_hadir === 'hadir' ? 'Hadir' : 'Tidak Hadir'}</td>
                 <td class="text-center">${r.scan_time ? new Date(r.scan_time).toLocaleTimeString('id-ID') : '-'}</td>
@@ -406,7 +407,7 @@ export const RekapPage: React.FC = () => {
                       <td className="p-3.5 text-slate-300">
                         {row.kelas} {row.jurusan}
                       </td>
-                      <td className="p-3.5 font-mono text-slate-400">{row.nis || '-'}</td>
+                      <td className="p-3.5 font-mono text-slate-400">{formatNis(row.nis) || '-'}</td>
                       <td className="p-3.5">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${

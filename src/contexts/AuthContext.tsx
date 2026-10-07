@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const fetchAdminProfile = async (userId: string) => {
+  const fetchAdminProfile = async (userId: string): Promise<AdminProfile | null> => {
     try {
       const { data, error } = await supabase
         .from('admins')
@@ -37,13 +37,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!error && data) {
         setAdminProfile(data as AdminProfile)
         setIsAdmin(true)
+        return data as AdminProfile
       } else {
         setAdminProfile(null)
         setIsAdmin(false)
+        return null
       }
     } catch (e) {
       console.error('Error fetching admin profile:', e)
       setIsAdmin(false)
+      setAdminProfile(null)
+      return null
     }
   }
 
@@ -95,11 +99,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
 
       if (error) {
-        return { ok: false, error: error.message || 'Login gagal. Periksa username dan password.' }
+        return { ok: false, error: 'Username atau password salah' }
       }
 
       if (data.user) {
-        await fetchAdminProfile(data.user.id)
+        const profile = await fetchAdminProfile(data.user.id)
+        if (!profile) {
+          await supabase.auth.signOut()
+          return { ok: false, error: 'Username atau password salah' }
+        }
+        localStorage.setItem('nkk-had-admin-session', 'true')
         // Update last login
         await supabase
           .from('admins')
@@ -107,13 +116,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('id', data.user.id)
       }
 
-      return { ok: true }
+      return data.user ? { ok: true } : { ok: false, error: 'Username atau password salah' }
     } catch (err: unknown) {
-      return { ok: false, error: err instanceof Error ? err.message : 'Terjadi kesalahan sistem' }
+      console.error('Admin login failed:', err)
+      return { ok: false, error: 'Username atau password salah' }
     }
   }
 
   const logout = async () => {
+    localStorage.removeItem('nkk-had-admin-session')
     try {
       await supabase.auth.signOut()
     } finally {
@@ -137,4 +148,3 @@ export const useAuth = () => {
   }
   return context
 }
-

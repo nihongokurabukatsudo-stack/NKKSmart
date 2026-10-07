@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Papa from 'papaparse'
 import { supabase } from '../lib/supabase'
-import { parseClassAndJurusan, classRequiresNis } from '../lib/utils'
+import { parseClassAndJurusan } from '../lib/utils'
+import { formatNis, memberImportKey } from '../lib/nis'
 import { MemberCard } from '../components/cards/MemberCard'
 import {
   Users,
@@ -122,7 +123,7 @@ export const AnggotaPage: React.FC = () => {
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase()
         const matchNama = a.nama_lengkap.toLowerCase().includes(q)
-        const matchNis = (a.nis || '').toLowerCase().includes(q)
+        const matchNis = formatNis(a.nis).toLowerCase().includes(q)
         const matchJurusan = a.jurusan.toLowerCase().includes(q)
         const matchKode = (a.kode_qr || a.barcode?.kode_unik || '').toLowerCase().includes(q)
         if (!matchNama && !matchNis && !matchJurusan && !matchKode) return false
@@ -166,28 +167,9 @@ export const AnggotaPage: React.FC = () => {
       setFormError('Nama lengkap wajib diisi.')
       return
     }
-    if (classRequiresNis(parsed.kelas) && (!nisClean || nisClean.length < 5)) {
-      setFormError(`NIS wajib minimal 5 digit untuk kelas ${parsed.kelas}.`)
-      return
-    }
-
     setIsSubmitting(true)
     try {
       if (isAddModalOpen) {
-        // Cek duplicate NIS jika ada
-        if (nisClean) {
-          const { data: existing } = await supabase
-            .from('anggota')
-            .select('id')
-            .eq('nis', nisClean)
-            .maybeSingle()
-          if (existing) {
-            setFormError(`NIS ${nisClean} sudah terdaftar.`)
-            setIsSubmitting(false)
-            return
-          }
-        }
-
         const uniqueCode = await getNextUniqueCode()
 
         // Insert anggota
@@ -273,7 +255,7 @@ export const AnggotaPage: React.FC = () => {
       'Nama Lengkap': a.nama_lengkap,
       Kelas: a.kelas,
       Jurusan: a.jurusan,
-      NIS: a.nis || '',
+      NIS: formatNis(a.nis),
       'Jenis Kelamin': a.jenis_kelamin || '',
       Jabatan: a.jabatan,
       Status: a.status,
@@ -319,6 +301,19 @@ export const AnggotaPage: React.FC = () => {
     setIsImporting(true)
     setImportReport(null)
 
+    const { data: knownMembers, error: knownMembersError } = await supabase
+      .from('anggota')
+      .select('id,nama_lengkap,kelas,jurusan')
+      .eq('is_deleted', false)
+    if (knownMembersError) {
+      console.error('Gagal memeriksa anggota untuk import:', knownMembersError)
+      setIsImporting(false)
+      setImportReport({ inserted: 0, updated: 0, skipped: 0 })
+      setFormError('Data anggota tidak dapat diperiksa. Import belum dijalankan.')
+      return
+    }
+    const existingByIdentity = new Map((knownMembers || []).map((member) => [memberImportKey(member.nama_lengkap, member.kelas, member.jurusan), member.id]))
+
     Papa.parse(csvFile, {
       header: true,
       skipEmptyLines: true,
@@ -336,7 +331,7 @@ export const AnggotaPage: React.FC = () => {
           const rawJabatan = (row.jabatan || 'Anggota').trim()
 
           const parsed = parseClassAndJurusan(rawKelas, rawJurusan)
-          const nisClean = rawNis ? rawNis.replace(/\D+/g, '') : null
+          const nisClean = rawNis || null
           const jk = ['L', 'P'].includes(rawJk) ? (rawJk as 'L' | 'P') : null
           const jabatan = ['Anggota', 'Pengurus'].includes(rawJabatan) ? (rawJabatan as 'Anggota' | 'Pengurus') : 'Anggota'
 
@@ -344,22 +339,9 @@ export const AnggotaPage: React.FC = () => {
             skipCount++
             continue
           }
-          if (classRequiresNis(parsed.kelas) && (!nisClean || nisClean.length < 5)) {
-            skipCount++
-            continue
-          }
-
           try {
-            // Cek existing by NIS
-            let existingId: number | null = null
-            if (nisClean) {
-              const { data: exist } = await supabase
-                .from('anggota')
-                .select('id')
-                .eq('nis', nisClean)
-                .maybeSingle()
-              if (exist) existingId = exist.id
-            }
+            const identity = memberImportKey(rawNama, parsed.kelas, parsed.jurusan)
+            const existingId = existingByIdentity.get(identity)
 
             if (existingId) {
               // Update
@@ -369,6 +351,7 @@ export const AnggotaPage: React.FC = () => {
                   nama_lengkap: rawNama,
                   kelas: parsed.kelas,
                   jurusan: parsed.jurusan,
+                  nis: nisClean,
                   jenis_kelamin: jk,
                   jabatan,
                   status: 'Aktif',
@@ -397,6 +380,7 @@ export const AnggotaPage: React.FC = () => {
                 .single()
 
               if (newRec) {
+                existingByIdentity.set(identity, newRec.id)
                 await supabase.from('barcode').insert({
                   kode_unik: uniqueCode,
                   qr_value: `NKKSMART|MEMBER|${uniqueCode}`,
@@ -557,7 +541,7 @@ export const AnggotaPage: React.FC = () => {
                       <td className="p-3.5 text-slate-300">
                         {item.kelas} {item.jurusan}
                       </td>
-                      <td className="p-3.5 font-mono text-slate-400">{item.nis || '-'}</td>
+              <td className="p-3.5 font-mono text-slate-400">{formatNis(item.nis) || '-'}</td>
                       <td className="p-3.5 text-slate-400">{item.jenis_kelamin || '-'}</td>
                       <td className="p-3.5">
                         <span
@@ -684,7 +668,7 @@ export const AnggotaPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1">
-                    NIS {classRequiresNis(formData.kelas) ? '*' : '(Opsional)'}
+                    NIS (Opsional)
                   </label>
                   <input
                     type="text"
@@ -870,4 +854,3 @@ export const AnggotaPage: React.FC = () => {
     </div>
   )
 }
-

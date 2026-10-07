@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { Download } from 'lucide-react'
+import { formatNis } from '../../lib/nis'
 
 interface MemberCardProps {
   id: number
@@ -41,6 +42,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
   }, [qrValue, kodeUnik])
 
   const nameFontSize = Math.min(12, Math.max(6, Math.floor((440 / Math.max(nama.length, 1)) * 10) / 10))
+  const visibleNis = formatNis(nis)
 
   return (
     <div className="member-card-wrapper flex flex-col items-center gap-2" data-print-ready={qrDataUrl ? 'true' : 'false'}>
@@ -64,7 +66,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
             <section className="min-w-0 flex-1 rounded-[2mm] bg-white/[0.94] px-[2.5mm] py-[2mm] leading-tight">
               <h2 className="member-card-name line-clamp-2 break-words font-extrabold text-slate-950" style={{ fontSize: `${nameFontSize}pt` }}>{nama}</h2>
               <p className="mt-[1mm] line-clamp-1 text-[7pt] font-semibold text-rose-800">{kelas}{jurusan ? ` · ${jurusan}` : ''}</p>
-              {nis && <p className="mt-[.7mm] text-[6.5pt] font-medium text-slate-700">NIS: {nis}</p>}
+              {visibleNis && <p className="mt-[.7mm] text-[6.5pt] font-medium text-slate-700">NIS: {visibleNis}</p>}
               <p className="mt-[1.5mm] inline-block rounded-full bg-white/[0.94] px-[2mm] py-[.7mm] font-mono text-[6pt] font-bold tracking-wide text-rose-900">{kodeUnik}</p>
             </section>
 

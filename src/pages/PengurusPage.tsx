@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Papa from 'papaparse'
 import { supabase } from '../lib/supabase'
 import { MemberCard } from '../components/cards/MemberCard'
+import { formatNis } from '../lib/nis'
 import {
   UserCheck,
   Search,
@@ -74,7 +75,7 @@ export const PengurusPage: React.FC = () => {
     const q = searchTerm.toLowerCase()
     return (
       p.nama_lengkap.toLowerCase().includes(q) ||
-      (p.nis || '').toLowerCase().includes(q) ||
+      formatNis(p.nis).toLowerCase().includes(q) ||
       p.kelas.toLowerCase().includes(q) ||
       p.jurusan.toLowerCase().includes(q)
     )
@@ -104,7 +105,7 @@ export const PengurusPage: React.FC = () => {
       'Nama Lengkap': p.nama_lengkap,
       Kelas: p.kelas,
       Jurusan: p.jurusan,
-      NIS: p.nis || '',
+      NIS: formatNis(p.nis),
       'Jenis Kelamin': p.jenis_kelamin || '',
       Jabatan: 'Pengurus',
       Status: p.status,
@@ -194,7 +195,7 @@ export const PengurusPage: React.FC = () => {
                       <td className="p-3.5 text-slate-300">
                         {item.kelas} {item.jurusan}
                       </td>
-                      <td className="p-3.5 font-mono text-slate-400">{item.nis || '-'}</td>
+                      <td className="p-3.5 font-mono text-slate-400">{formatNis(item.nis) || '-'}</td>
                       <td className="p-3.5 text-slate-400">{item.jenis_kelamin || '-'}</td>
                       <td className="p-3.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
@@ -258,4 +259,3 @@ export const PengurusPage: React.FC = () => {
     </div>
   )
 }
-

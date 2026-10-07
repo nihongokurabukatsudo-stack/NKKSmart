@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { formatDateIndo } from '../lib/utils'
 import { PrintSheet, PrintTips } from '../components/print/PrintSheet'
 import { printWhenReady } from '../lib/print'
+import { formatNis } from '../lib/nis'
 import {
   CalendarRange,
   Download,
@@ -238,7 +239,7 @@ export const RekapBulananPage: React.FC = () => {
         const q = searchTerm.toLowerCase()
         return (
           r.nama_lengkap.toLowerCase().includes(q) ||
-          (r.nis || '').includes(q) ||
+          formatNis(r.nis).toLowerCase().includes(q) ||
           r.jurusan.toLowerCase().includes(q)
         )
       }
@@ -253,7 +254,7 @@ export const RekapBulananPage: React.FC = () => {
         No: idx + 1,
         'Nama Lengkap': r.nama_lengkap,
         Kelas: `${r.kelas} ${r.jurusan}`,
-        NIS: r.nis || '',
+        NIS: formatNis(r.nis),
         JK: r.jenis_kelamin || '',
         Jabatan: r.jabatan,
       }

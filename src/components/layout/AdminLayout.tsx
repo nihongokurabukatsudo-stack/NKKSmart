@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
+import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { PUBLIC_SITE_URL } from './ProtectedRoute'
 import {
   LayoutDashboard,
   QrCode,
@@ -21,22 +22,22 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/anggota', label: 'Data Anggota', icon: Users },
-  { path: '/pengurus', label: 'Data Pengurus', icon: UserCheck },
-  { path: '/pertemuan', label: 'Jadwal Pertemuan', icon: CalendarDays },
-  { path: '/lokasi', label: 'Lokasi & Geofence', icon: MapPin },
-  { path: '/kartu', label: 'Cetak Kartu', icon: CreditCard },
-  { path: '/rekap', label: 'Rekap Absensi', icon: FileSpreadsheet },
-  { path: '/rekap-bulanan', label: 'Rekap Bulanan', icon: CalendarRange },
-  { path: '/rekap-semester', label: 'Rekap Semester', icon: CalendarRange },
-  { path: '/pengaturan', label: 'Pengaturan', icon: Settings },
+  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/anggota', label: 'Data Anggota', icon: Users },
+  { path: '/admin/pengurus', label: 'Data Pengurus', icon: UserCheck },
+  { path: '/admin/pertemuan', label: 'Jadwal Pertemuan', icon: CalendarDays },
+  { path: '/admin/lokasi', label: 'Lokasi & Geofence', icon: MapPin },
+  { path: '/admin/kartu', label: 'Cetak Kartu', icon: CreditCard },
+  { path: '/admin/rekap', label: 'Rekap Absensi', icon: FileSpreadsheet },
+  { path: '/admin/rekap-bulanan', label: 'Rekap Bulanan', icon: CalendarRange },
+  { path: '/admin/rekap-semester', label: 'Rekap Semester', icon: CalendarRange },
+  { path: '/admin/pendaftar', label: 'Pendaftar', icon: Users },
+  { path: '/admin/pengaturan', label: 'Pengaturan', icon: Settings },
 ]
 
 export const AdminLayout: React.FC = () => {
   const { adminProfile, logout } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('nkk-theme')
@@ -50,7 +51,7 @@ export const AdminLayout: React.FC = () => {
   const handleLogout = async () => {
     if (window.confirm('Apakah Anda yakin ingin logout?')) {
       await logout()
-      navigate('/login')
+      window.location.replace(PUBLIC_SITE_URL)
     }
   }
 
@@ -88,7 +89,7 @@ export const AdminLayout: React.FC = () => {
         {/* Public Scanner Quick Link */}
         <div className="p-3">
           <Link
-            to="/scan"
+            to="/admin/scan"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white rounded-xl shadow-lg shadow-pink-900/30 text-sm font-semibold transition"

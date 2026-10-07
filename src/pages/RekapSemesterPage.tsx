@@ -4,6 +4,7 @@ import { CalendarRange, Download, FileSpreadsheet, FileText, Loader2, Printer, S
 import { supabase } from '../lib/supabase'
 import { PrintSheet, PrintTips } from '../components/print/PrintSheet'
 import { printWhenReady } from '../lib/print'
+import { formatNis } from '../lib/nis'
 
 type AttendanceStatus = 'hadir' | 'tidak_hadir'
 interface SemesterMeeting { id: string; nama_pertemuan: string; pertemuan_ke: number; tanggal: string; is_libur: boolean }
@@ -72,7 +73,7 @@ export const RekapSemesterPage: React.FC = () => {
     if (jabatan !== 'all' && member.jabatan !== jabatan) return false
     if (search.trim()) {
       const q = search.trim().toLocaleLowerCase('id-ID')
-      return `${member.nama_lengkap} ${member.nis || ''} ${member.jurusan}`.toLocaleLowerCase('id-ID').includes(q)
+      return `${member.nama_lengkap} ${formatNis(member.nis)} ${member.jurusan}`.toLocaleLowerCase('id-ID').includes(q)
     }
     return true
   }).sort((a, b) => Number(b.jabatan === 'Pengurus') - Number(a.jabatan === 'Pengurus') || a.kelas.localeCompare(b.kelas, 'id') || a.nama_lengkap.localeCompare(b.nama_lengkap, 'id')), [report.members, kelas, jabatan, search])
@@ -107,7 +108,7 @@ export const RekapSemesterPage: React.FC = () => {
     const headers = ['No', 'Jabatan', 'Nama', 'Kelas', 'Jurusan', 'NIS', ...meetings.map((meeting) => `P${meeting.pertemuan_ke} ${dateLabel(meeting.tanggal)}`), 'Hadir', 'Jumlah Pertemuan', 'Persentase']
     const rows = filteredMembers.map((member, index) => {
       const totals = rateFor(member)
-      return [index + 1, member.jabatan, member.nama_lengkap, member.kelas, member.jurusan, member.nis || '', ...meetings.map((meeting) => valueFor(member, meeting)), totals.count, sessions.length, `${totals.rate}%`]
+      return [index + 1, member.jabatan, member.nama_lengkap, member.kelas, member.jurusan, formatNis(member.nis), ...meetings.map((meeting) => valueFor(member, meeting)), totals.count, sessions.length, `${totals.rate}%`]
     })
     return { headers, rows }
   }
@@ -222,7 +223,7 @@ export const RekapSemesterPage: React.FC = () => {
                     return [<tr key={`group-${month}-${groupName}`} className="semester-group-row"><th colSpan={monthMeetings.length + 6} className="border border-slate-500 bg-slate-200 px-2 py-1 text-left font-bold">{role} · Kelas {className}</th></tr>, ...members.map((member, memberIndex) => {
                       const totals = rateFor(member)
                       const memberNumber = filteredMembers.findIndex((item) => item.id === member.id) + 1
-                      return <tr key={`${month}-${member.id}`} className="semester-data-row"><td className="border border-slate-400 px-1 py-1 text-center">{memberNumber}</td><td className="border border-slate-400 px-1 py-1">{member.nama_lengkap}{member.nis && <small className="block text-slate-600">NIS {member.nis}</small>}</td><td className="border border-slate-400 px-1 py-1 text-center">{member.kelas}</td>{monthMeetings.map((meeting) => <td key={meeting.id} className={`border border-slate-400 px-1 py-1 text-center font-bold ${meeting.is_libur ? 'holiday-column' : ''}`}>{valueFor(member, meeting)}</td>)}<td className="border border-slate-400 px-1 py-1 text-center font-bold">{totals.count}</td><td className="border border-slate-400 px-1 py-1 text-center">{sessions.length}</td><td className="border border-slate-400 px-1 py-1 text-center font-bold">{totals.rate}%</td></tr>
+                      return <tr key={`${month}-${member.id}`} className="semester-data-row"><td className="border border-slate-400 px-1 py-1 text-center">{memberNumber}</td><td className="border border-slate-400 px-1 py-1">{member.nama_lengkap}{formatNis(member.nis) && <small className="block text-slate-600">NIS {formatNis(member.nis)}</small>}</td><td className="border border-slate-400 px-1 py-1 text-center">{member.kelas}</td>{monthMeetings.map((meeting) => <td key={meeting.id} className={`border border-slate-400 px-1 py-1 text-center font-bold ${meeting.is_libur ? 'holiday-column' : ''}`}>{valueFor(member, meeting)}</td>)}<td className="border border-slate-400 px-1 py-1 text-center font-bold">{totals.count}</td><td className="border border-slate-400 px-1 py-1 text-center">{sessions.length}</td><td className="border border-slate-400 px-1 py-1 text-center font-bold">{totals.rate}%</td></tr>
                     })]
                   })}</tbody>
                 </table></div>

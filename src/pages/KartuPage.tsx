@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { MemberCard } from '../components/cards/MemberCard'
 import { PrintTips } from '../components/print/PrintSheet'
 import { printWhenReady } from '../lib/print'
+import { formatNis } from '../lib/nis'
 import {
   CreditCard,
   Printer,
@@ -100,7 +101,7 @@ export const KartuPage: React.FC = () => {
         return (
           m.nama_lengkap.toLowerCase().includes(q) ||
           m.kode_unik.toLowerCase().includes(q) ||
-          (m.nis || '').includes(q) ||
+          formatNis(m.nis).toLowerCase().includes(q) ||
           m.jurusan.toLowerCase().includes(q)
         )
       }
