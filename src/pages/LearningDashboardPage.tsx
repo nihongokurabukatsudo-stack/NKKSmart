@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { ArrowRight, BookOpen, Brain, Flame, RotateCcw, Sparkles, Trophy, CalendarDays, Target } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getLearningProgress, type LearningProgress } from '../lib/learningProgress'
@@ -10,6 +10,7 @@ const kanaLessons = [
 
 export function LearningDashboardPage() {
   const [progress, setProgress] = useState<LearningProgress>(() => getLearningProgress())
+  useLayoutEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }) }, [])
   useEffect(() => {
     const refresh = () => setProgress(getLearningProgress())
     window.addEventListener('storage', refresh)

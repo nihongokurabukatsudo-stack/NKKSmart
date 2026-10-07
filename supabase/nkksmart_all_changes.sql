@@ -479,7 +479,7 @@ begin
     select *, round(100.0 * hadir / nullif(total, 0))::integer as persen
     from member_stats where total >= v_min_meetings
   ), ranked as (
-    select *, rank() over (order by persen desc, hadir desc) as posisi
+    select *, row_number() over (order by persen desc, hadir desc, nama_lengkap asc) as posisi
     from rated
   )
   select jsonb_build_object(
