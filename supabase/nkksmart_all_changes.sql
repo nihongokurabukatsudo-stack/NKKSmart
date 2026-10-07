@@ -459,28 +459,22 @@ begin
   end if;
 
   with active_members as (
-    select a.id, a.nama_lengkap, a.kelas, a.jurusan, a.created_at,
+    select a.id, a.nama_lengkap, a.kelas, a.jurusan,
       concat_ws(' ', nullif(a.kelas, ''), nullif(a.jurusan, '')) as kelas_label
     from public.anggota a
     where a.jabatan = 'Anggota' and a.status = 'Aktif' and a.is_deleted = false and a.tampil_leaderboard = true
-  ), first_attended as (
-    select ab.anggota_id, min(p.tanggal) as first_date
-    from public.absensi ab join public.pertemuan p on p.id = ab.pertemuan_id
-    where ab.status = 'hadir' and p.is_libur = false and p.tanggal <= v_today
-    group by ab.anggota_id
   ), completed_meetings as (
     select p.id, p.tanggal from public.pertemuan p
-    where p.tanggal >= v_start and p.tanggal < v_end and p.tanggal <= v_today and p.is_libur = false
+    where p.tanggal >= v_start and p.tanggal < v_end
+      and p.tanggal <= v_today and coalesce(p.is_libur, false) = false
   ), member_stats as (
     select m.id, m.nama_lengkap, m.kelas_label,
       count(cm.id)::integer as total,
-      (count(ab.id) filter (where ab.status = 'hadir'))::integer as hadir,
-      least(coalesce(m.created_at::date, fa.first_date), coalesce(fa.first_date, m.created_at::date)) as mulai
+      (count(ab.id) filter (where ab.status = 'hadir'))::integer as hadir
     from active_members m
-    left join first_attended fa on fa.anggota_id = m.id
-    left join completed_meetings cm on cm.tanggal >= least(coalesce(m.created_at::date, fa.first_date), coalesce(fa.first_date, m.created_at::date))
+    left join completed_meetings cm on true
     left join public.absensi ab on ab.anggota_id = m.id and ab.pertemuan_id = cm.id
-    group by m.id, m.nama_lengkap, m.kelas_label, m.created_at, fa.first_date
+    group by m.id, m.nama_lengkap, m.kelas_label
   ), rated as (
     select *, round(100.0 * hadir / nullif(total, 0))::integer as persen
     from member_stats where total >= v_min_meetings
