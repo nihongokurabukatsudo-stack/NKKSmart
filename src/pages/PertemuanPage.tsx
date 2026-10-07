@@ -71,6 +71,7 @@ export const PertemuanPage: React.FC = () => {
     is_libur: false,
   })
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Detail Modal State
   const [selectedMeeting, setSelectedMeeting] = useState<PertemuanItem | null>(null)
@@ -172,11 +173,12 @@ export const PertemuanPage: React.FC = () => {
   // Save
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaveError(null)
     setIsSubmitting(true)
 
     try {
       if (isEditing) {
-        await supabase
+        const { error } = await supabase
           .from('pertemuan')
           .update({
             nama_pertemuan: formData.nama_pertemuan,
@@ -189,6 +191,7 @@ export const PertemuanPage: React.FC = () => {
             is_libur: formData.is_libur,
           })
           .eq('id', formData.id)
+        if (error) throw error
         
         if (selectedMeeting?.id === formData.id) {
             setSelectedMeeting({
@@ -204,7 +207,7 @@ export const PertemuanPage: React.FC = () => {
             })
         }
       } else {
-        await supabase.from('pertemuan').insert({
+        const { error } = await supabase.from('pertemuan').insert({
           nama_pertemuan: formData.nama_pertemuan,
           pertemuan_ke: formData.pertemuan_ke,
           tanggal: formData.tanggal,
@@ -214,13 +217,15 @@ export const PertemuanPage: React.FC = () => {
           manual_active: formData.manual_active,
           is_libur: formData.is_libur,
         })
+        if (error) throw error
       }
 
       setIsModalOpen(false)
       await fetchPertemuan()
     } catch (err) {
       console.error(err)
-      alert('Gagal menyimpan jadwal pertemuan.')
+      const message = err instanceof Error ? err.message : 'Terjadi kesalahan yang tidak diketahui.'
+      setSaveError(`Gagal menyimpan pertemuan: ${message}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -240,6 +245,7 @@ export const PertemuanPage: React.FC = () => {
       is_libur: false,
     })
     setIsEditing(false)
+    setSaveError(null)
     setIsModalOpen(true)
   }
 
@@ -257,6 +263,7 @@ export const PertemuanPage: React.FC = () => {
       is_libur: item.is_libur,
     })
     setIsEditing(true)
+    setSaveError(null)
     setIsModalOpen(true)
   }
 
@@ -768,6 +775,13 @@ export const PertemuanPage: React.FC = () => {
                   </div>
                 </label>
               </div>
+
+              {saveError && (
+                <div role="alert" className="flex items-start gap-2 rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-200">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{saveError}</span>
+                </div>
+              )}
 
               <div className="pt-5 border-t border-slate-800 flex justify-end gap-3">
                 <button
