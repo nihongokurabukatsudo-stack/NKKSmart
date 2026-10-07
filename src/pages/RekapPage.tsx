@@ -321,7 +321,7 @@ export const RekapPage: React.FC = () => {
       {/* Print Header Visible Only on Print */}
       {selectedPertemuan && (
         <div className="hidden print-only mb-4 text-center">
-          <img src="/img/nkk.png" alt="Logo NKK" width={64} height={64} className="mx-auto mb-2 h-12 w-12 object-contain" />
+          <img src="/assets/admin/nkk.png" alt="Logo NKK" width={64} height={64} className="mx-auto mb-2 h-12 w-12 object-contain" />
           <h2 className="text-lg font-bold">REKAP ABSENSI EKSTRAKURIKULER BAHASA JEPANG</h2>
           <h3 className="text-sm font-semibold">{selectedPertemuan.nama_pertemuan} (Pertemuan Ke-{selectedPertemuan.pertemuan_ke})</h3>
           <p className="text-xs mt-1">

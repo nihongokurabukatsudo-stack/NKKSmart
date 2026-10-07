@@ -203,7 +203,7 @@ export const RekapSemesterPage: React.FC = () => {
         <>
           <PrintSheet orientation="landscape" className="semester-report">
             <header className="print-color mb-4 flex items-center justify-center gap-4 border-b-2 border-rose-800 pb-3">
-              <img src="/img/nkk.png" alt="Logo NKK" width={96} height={96} className="h-[17mm] w-[17mm] object-contain"/>
+              <img src="/assets/admin/nkk.png" alt="Logo NKK" width={96} height={96} className="h-[17mm] w-[17mm] object-contain"/>
               <div className="text-center"><p className="text-xs font-bold uppercase tracking-widest text-rose-800">NKK Bahasa Jepang</p><h2 className="mt-1 text-lg font-extrabold">{title}</h2><p className="mt-1 text-xs">Dicetak {dateLabel(today)}</p></div>
             </header>
 

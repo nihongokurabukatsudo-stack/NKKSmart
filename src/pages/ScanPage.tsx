@@ -112,7 +112,7 @@ export const ScanPage: React.FC = () => {
 
   // Init notification audio
   useEffect(() => {
-    const audio = new Audio('/audio/notif.mp3')
+    const audio = new Audio('/assets/audio/notif.mp3')
     audio.preload = 'auto'
     audioRef.current = audio
   }, [])
@@ -120,7 +120,7 @@ export const ScanPage: React.FC = () => {
   useEffect(() => {
     let active = true
     const loadPopupImage = async () => {
-      for (const src of ['/img/popup.png', '/img/popup.jpg']) {
+      for (const src of ['/assets/admin/popup.png', '/assets/admin/popup.jpg']) {
         const image = new Image()
         image.decoding = 'async'
         image.src = src
@@ -496,7 +496,7 @@ export const ScanPage: React.FC = () => {
               </Link>
               <div className="flex min-w-0 items-center gap-2">
                 <div className="h-9 w-9 shrink-0 rounded-full bg-slate-900/80 border border-white/10 p-1 flex items-center justify-center shadow-inner">
-                  <img src="/img/nkk.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
+                  <img src="/assets/admin/nkk.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
                 </div>
                 <div>
                   <h1 className="font-bold text-sm sm:text-lg bg-gradient-to-r from-pink-300 to-pink-300 bg-clip-text text-transparent">NKKSmart Scan</h1>
@@ -654,7 +654,7 @@ export const ScanPage: React.FC = () => {
             {/* Idle Placeholder */}
             {!isScanning && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 p-4 text-center bg-slate-950/25 backdrop-blur-[2px] sm:gap-5 sm:p-6">
-                <img src="/img/nkk.png" alt="Watermark" className="absolute inset-0 m-auto w-48 h-48 opacity-5 object-contain pointer-events-none" />
+                <img src="/assets/admin/nkk.png" alt="Watermark" className="absolute inset-0 m-auto w-48 h-48 opacity-5 object-contain pointer-events-none" />
                 <div className="z-10 flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-slate-900/70 text-slate-100 shadow-xl sm:h-20 sm:w-20 sm:text-slate-400">
                   <Camera className="h-7 w-7 sm:h-10 sm:w-10" />
                 </div>

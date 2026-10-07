@@ -1,0 +1,28 @@
+export const classOptions = ["X", "XI"];
+
+export const majorOptions = [
+  "PSPT 1",
+  "PSPT 2",
+  "TJKT 1",
+  "TJKT 2",
+  "PPLG",
+  "TAV 1",
+  "TAV 2",
+  "TMT",
+  "TITL 1",
+  "TITL 2",
+  "TITL 3",
+  "TITL 4",
+  "TPM 1",
+  "TPM 2",
+  "TPM 3",
+  "TPM 4",
+  "OT 1",
+  "OT 2",
+  "OT 3",
+  "OT 4",
+  "DPIB 1",
+  "DPIB 2",
+  "DPIB 3",
+  "DPIB 4",
+];

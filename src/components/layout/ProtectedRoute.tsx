@@ -1,28 +1,18 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Loader2 } from 'lucide-react'
 
-export const PUBLIC_SITE_URL = import.meta.env.VITE_PUBLIC_SITE_URL || 'https://nihongo-kurabu-katsudo.vercel.app'
-
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, isLoading } = useAuth()
   const hadAdminSession = localStorage.getItem('nkk-had-admin-session') === 'true'
-
-  useEffect(() => {
-    if (!isLoading && (!user || !isAdmin) && !hadAdminSession) {
-      window.location.replace(PUBLIC_SITE_URL)
-    }
-  }, [hadAdminSession, isAdmin, isLoading, user])
 
   if (isLoading) {
     return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-100"><div className="flex flex-col items-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-pink-500" /><p className="text-sm text-slate-400">Memeriksa autentikasi...</p></div></div>
   }
 
   if (!user || !isAdmin) {
-    return hadAdminSession
-      ? <Navigate to="/login" replace />
-      : <div className="min-h-screen bg-slate-950" aria-label="Mengalihkan ke situs resmi" />
+    return <Navigate to={hadAdminSession ? '/login' : '/'} replace />
   }
 
   return <>{children}</>

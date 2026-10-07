@@ -357,7 +357,7 @@ export const RekapBulananPage: React.FC = () => {
       <PrintSheet orientation="landscape" className="mt-4">
       {/* Print Title */}
       <div className="hidden print-only mb-4 text-center">
-        <img src="/img/nkk.png" alt="Logo NKK" width={64} height={64} className="mx-auto mb-2 h-12 w-12 object-contain" />
+        <img src="/assets/admin/nkk.png" alt="Logo NKK" width={64} height={64} className="mx-auto mb-2 h-12 w-12 object-contain" />
         <h2 className="text-lg font-bold">MATRIKS REKAPITULASI KEHADIRAN BULANAN</h2>
         <p className="text-xs">
           Bulan: {MONTH_NAMES[selectedMonth - 1]} {selectedYear} &bull; Ekstrakurikuler Bahasa Jepang

@@ -1,96 +1,43 @@
-# Panduan ekosistem NKK
+# Panduan proyek NKK
 
-Panduan ini menjelaskan repo mana yang dibuka, alur data, dan lokasi schema. Kedua aplikasi sengaja tetap menjadi dua repo karena deployment dan tanggung jawabnya berbeda; keduanya memakai project Supabase NKKSmart yang sama.
+Website resmi dan dashboard NKKSmart sekarang satu aplikasi dan satu repository aktif. Kerjakan perubahan website dan dashboard di folder `nkksmart-web`; jangan menjalankan dua dev server atau menggabungkan `src/` dari project kedua.
 
-## Peta folder
-
-Di komputer ini, kedua folder berada di bawah `Nihongo Kurabu Katsudo`:
-
-| Folder | Peran | Yang dikerjakan di sini |
-|---|---|---|
-| `NKK_Project` | Website resmi publik | Landing, profil, galeri, materi belajar, pendaftaran publik, leaderboard, pencarian QR anggota. |
-| `nkksmart-web` | Dashboard admin NKKSmart | Login admin, data anggota, kamera presensi, jadwal, cetak kartu, rekap, pengaturan, persetujuan pendaftar. |
-
-Jangan mencampur source `src/` dari kedua folder. Untuk mengerjakan website, buka folder `NKK_Project`; untuk dashboard dan schema Supabase, buka `nkksmart-web`.
+## Peta struktur
 
 ```text
-Nihongo Kurabu Katsudo/
-├── NKK_Project/                 # website resmi
-└── nkksmart-web/                # dashboard admin + schema Supabase
-    ├── src/                     # aplikasi admin
-    └── supabase/migrations/     # perubahan schema SQL
+nkksmart-web/
+├── index.html                 # satu entry point Vite
+├── public/assets/             # semua gambar, logo, audio, dan aset statis
+├── src/                       # website publik + dashboard admin
+│   ├── components/            # komponen bersama dan layout
+│   ├── pages/                 # halaman publik dan admin
+│   ├── services/              # koneksi data/RPC
+│   └── ...
+└── supabase/migrations/       # perubahan schema database
 ```
 
-## Alur data sederhana
+Route website publik: `/`, `/register`, `/tentang`, `/tim-inti`, `/galeri`, `/belajar/hiragana`, dan `/belajar/katakana`. Route admin: `/login` dan `/admin/*`. URL lama seperti `/scan` diarahkan ke route admin yang sesuai.
 
-```text
-Website publik (NKK_Project) ── RPC submit_pendaftaran ──┐
-Website publik ──────────────── RPC leaderboard/kartu ──┤
-                                                        ├── Supabase NKKSmart
-Dashboard admin (nkksmart-web) ── login + CRUD/RPC ─────┘
-```
+## Koneksi Supabase
 
-- Kedua repo memakai `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` yang menunjuk ke **project NKKSmart yang sama**.
-- Jangan memakai `service_role` di browser, `.env`, atau Vercel frontend.
-- Website publik tidak membaca tabel anggota secara langsung. Leaderboard dan pencarian kartu memakai RPC; pencarian kartu hanya menerima nama lengkap yang cocok persis dan hanya mengembalikan informasi kartu.
-- Pendaftaran publik mengirim ke RPC `submit_pendaftaran`. Admin memproses antrean melalui halaman `/admin/pendaftar`; persetujuan membuat anggota dan barcode.
-- Data lama pada project Supabase website sebelumnya belum dipindahkan. Jangan menghapus project atau antrean lama sebelum inventaris dan pemindahan data disetujui.
+Satu aplikasi memakai `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` dari project NKKSmart yang sama. Isi `.env` lokal dan Environment Variables Vercel dengan nilai tersebut. Jangan memakai `service_role` di browser atau Vercel frontend.
 
-## Menjalankan dua web di localhost
+Website publik mengirim pendaftaran melalui RPC `submit_pendaftaran`; admin memproses antrean lewat `/admin/pendaftar`. Leaderboard dan pencarian kartu juga memakai RPC, bukan akses tabel anggota langsung dari browser.
 
-Pakai Node.js **22.12+**. Buka dua terminal PowerShell.
+## Schema dan migration
 
-Terminal 1 — website publik:
-
-```powershell
-Set-Location "C:\Users\ThinkPad\Documents\Nihongo Kurabu Katsudo\NKK_Project"
-npm install
-if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-npm run dev
-```
-
-Terminal 2 — dashboard admin:
-
-```powershell
-Set-Location "C:\Users\ThinkPad\Documents\Nihongo Kurabu Katsudo\nkksmart-web"
-npm install
-if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-npm run dev -- --port 5174
-```
-
-Isi kedua `.env` menggunakan Project URL dan anon/public key yang sama dari Supabase NKKSmart. Website publik berjalan di port 5173 dan dashboard di 5174. `.env` tidak boleh masuk Git.
-
-Untuk menguji hasil produksi lokal:
-
-```powershell
-npm run build
-npm run preview
-```
-
-Jalankan perintah dari folder repo yang sedang diuji.
-
-## Sumber schema dan urutannya
-
-Schema aktif yang ditargetkan adalah schema legacy NKKSmart: `admins`, `anggota`, `barcode`, `pertemuan`, `absensi`, dan `geofence_settings`. Daftar `members`, `meetings`, `attendance`, `profiles` dari screenshot sebelumnya bukan target project ini.
+Schema aktif yang dituju adalah schema NKKSmart legacy: `admins`, `anggota`, `barcode`, `pertemuan`, `absensi`, dan `geofence_settings`. Daftar tabel `members`, `meetings`, `attendance`, dan `profiles` dari screenshot project lain bukan target schema ini.
 
 | File | Fungsi | Status yang diketahui |
 |---|---|---|
-| `202610060001_attendance_status_and_notes.sql` | Status absensi izin/sakit/alpha dan kolom catatan. | Berlabel DRAFT; cek apakah sudah diterapkan sebelum mengambil tindakan. |
-| `202610060002_rekap_semester_rpc.sql` | RPC rekap semester untuk tabel NKKSmart legacy. | Status live belum dikonfirmasi; cek migration history. |
-| `202610070001_ecosystem_consolidation.sql` | Antrean pendaftar, akses admin/RPC, leaderboard publik, dan pencarian kartu. | DRAFT; belum diterapkan. |
+| `202610060001_attendance_status_and_notes.sql` | Status izin/sakit/alpha dan catatan absensi. | Draft; cek migration history sebelum diterapkan. |
+| `202610060002_rekap_semester_rpc.sql` | RPC rekap semester untuk schema legacy. | Status live belum dikonfirmasi. |
+| `202610070001_ecosystem_consolidation.sql` | Pendaftaran, leaderboard, pencarian kartu, serta akses RPC. | Draft; belum diterapkan. |
 
-Jangan mengeksekusi file hanya karena nomor tanggalnya berurutan. Sebelum perubahan database: pastikan nama project Supabase NKKSmart, cek migration history, buat backup, tinjau isi SQL, lalu terapkan hanya file yang belum diterapkan dan sudah disetujui. File `NKK_Project/docs/pending_schema.sql` adalah rancangan historis lama untuk tabel `pending`; jangan jalankan untuk alur baru.
+Pastikan project Supabase dan migration history, buat backup, lalu terapkan hanya migration yang sudah ditinjau dan belum ada di database. Jangan menjalankan query dari project Supabase yang berbeda.
 
-## Build dan deployment
+## Build dan Vercel
 
-Untuk **masing-masing repo**:
+Gunakan Node.js **22.12+**. Jalankan `npm install`, salin `.env.example` menjadi `.env` jika belum ada, kemudian `npm run dev`. Untuk produksi jalankan `npm run build`.
 
-```powershell
-npm run build
-```
-
-Konfigurasi Vercel untuk keduanya: framework Vite, build command `npm run build`, output `dist`. Tambahkan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` pada Environment Variables Vercel untuk Preview dan Production. Setelah mengubah env, redeploy agar nilainya masuk ke build.
-
-## Commit dan push
-
-Setiap repo mempunyai Git history sendiri. Commit perubahan di repo yang sesuai. Jangan push sebelum pemilik meminta atau menyetujuinya.
+Di Vercel pilih framework Vite, build command `npm run build`, dan output `dist`. `vercel.json` mengatur SPA rewrite agar refresh pada route React Router tidak menghasilkan 404. Tambahkan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` untuk Preview dan Production.

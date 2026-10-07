@@ -353,7 +353,7 @@ export const DashboardPage: React.FC = () => {
       {/* Header Welcome */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-800 to-slate-800/60 p-5 rounded-2xl border border-slate-700/60 shadow-lg">
         <div className="flex items-center gap-4">
-          <img src="/img/nkk.png" alt="Logo NKK" className="w-14 h-14 object-contain rounded-xl drop-shadow" />
+          <img src="/assets/admin/nkk.png" alt="Logo NKK" className="w-14 h-14 object-contain rounded-xl drop-shadow" />
           <div>
             <h1 className="text-xl font-bold text-white tracking-wide">NKK Bahasa Jepang</h1>
             <p className="text-xs text-slate-300 mt-0.5">

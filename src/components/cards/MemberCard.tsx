@@ -60,7 +60,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
     })
     try {
       const [background, logo, qr] = await Promise.all([
-        loadImage('/img/kartu_bgs.jpg'), loadImage('/img/nkk.png'), loadImage(qrDataUrl),
+        loadImage('/assets/admin/kartu_bgs.jpg'), loadImage('/assets/admin/nkk.png'), loadImage(qrDataUrl),
       ])
       const scale = Math.max(canvas.width / background.width, canvas.height / background.height)
       const width = background.width * scale
@@ -113,11 +113,11 @@ export const MemberCard: React.FC<MemberCardProps> = ({
   return (
     <div className="member-card-wrapper flex flex-col items-center gap-2" data-print-ready={qrDataUrl ? 'true' : 'false'}>
       <article data-member-card-id={id} className="member-card relative h-[54mm] w-[85.6mm] shrink-0 overflow-hidden rounded-[2.5mm] bg-slate-950 text-slate-950 print-color">
-        <img src="/img/kartu_bgs.jpg" alt="" aria-hidden="true" width={1280} height={720} className="absolute inset-0 h-full w-full object-cover" />
+        <img src="/assets/admin/kartu_bgs.jpg" alt="" aria-hidden="true" width={1280} height={720} className="absolute inset-0 h-full w-full object-cover" />
         <div className="relative z-10 flex h-full flex-col p-[3mm]">
           <header className="flex min-h-[9mm] items-center justify-between gap-[1mm] rounded-[2mm] bg-white/[0.94] px-[2mm] py-[1mm]">
             <div className="flex min-w-0 items-center gap-[1.5mm]">
-              <img src="/img/nkk.png" alt="Logo NKK" width={80} height={80} className="h-[7mm] w-[7mm] shrink-0 object-contain" />
+              <img src="/assets/admin/nkk.png" alt="Logo NKK" width={80} height={80} className="h-[7mm] w-[7mm] shrink-0 object-contain" />
               <div className="min-w-0 leading-tight">
                 <p className="text-[8pt] font-extrabold tracking-wide text-rose-800">NKK Bahasa Jepang</p>
                 <p className="text-[6pt] font-semibold text-slate-700">KARTU ANGGOTA</p>

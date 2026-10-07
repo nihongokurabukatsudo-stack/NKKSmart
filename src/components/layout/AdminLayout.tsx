@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { PUBLIC_SITE_URL } from './ProtectedRoute'
 import {
   LayoutDashboard,
   QrCode,
@@ -51,7 +50,7 @@ export const AdminLayout: React.FC = () => {
   const handleLogout = async () => {
     if (window.confirm('Apakah Anda yakin ingin logout?')) {
       await logout()
-      window.location.replace(PUBLIC_SITE_URL)
+      window.location.replace('/')
     }
   }
 
@@ -60,7 +59,7 @@ export const AdminLayout: React.FC = () => {
       {/* Mobile Topbar */}
       <header className="md:hidden flex items-center justify-between p-4 bg-slate-800/80 backdrop-blur border-b border-slate-700/50 sticky top-0 z-30">
         <div className="flex items-center gap-3">
-          <img src="/img/nkk.png" alt="NKK" className="w-8 h-8 object-contain" />
+          <img src="/assets/admin/nkk.png" alt="NKK" className="w-8 h-8 object-contain" />
           <span className="font-bold text-lg tracking-wider text-pink-400">NKKSmart</span>
         </div>
         <button
@@ -79,7 +78,7 @@ export const AdminLayout: React.FC = () => {
       >
         {/* Brand */}
         <div className="p-5 flex items-center gap-3 border-b border-slate-700/50">
-          <img src="/img/nkk.png" alt="NKK" className="w-9 h-9 object-contain" />
+          <img src="/assets/admin/nkk.png" alt="NKK" className="w-9 h-9 object-contain" />
           <div>
             <h1 className="font-bold text-lg text-pink-400 leading-tight">NKKSmart</h1>
             <p className="text-xs text-slate-400">Absensi Ekstrakurikuler</p>
