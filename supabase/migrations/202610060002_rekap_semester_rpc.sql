@@ -1,5 +1,13 @@
--- Semester report for the live schema (meetings, members, attendance).
--- Runs with caller privileges so the existing table RLS remains in force.
+-- NKKSmart legacy schema: pertemuan/anggota/absensi.
+-- Return the full selected semester; the UI controls whether future meetings are shown.
+create index if not exists pertemuan_rekap_semester_idx
+  on public.pertemuan (tanggal, pertemuan_ke, id);
+create index if not exists absensi_rekap_semester_idx
+  on public.absensi (pertemuan_id, anggota_id) include (status);
+create index if not exists anggota_rekap_semester_idx
+  on public.anggota (jabatan, kelas, nama_lengkap)
+  where status = 'Aktif' and coalesce(is_deleted, false) = false;
+
 create or replace function public.rekap_semester(p_tahun integer, p_semester integer)
 returns jsonb
 language sql
@@ -15,48 +23,53 @@ as $$
            else make_date(p_tahun + 1, 7, 1) end as ends_before
     where p_semester in (1, 2)
   ), semester_meetings as (
-    select
-      m.id,
-      m.meeting_number,
-      m.meeting_date,
-      (m.status::text = 'libur') as is_libur
-    from public.meetings m
+    select p.id, p.nama_pertemuan, p.pertemuan_ke, p.tanggal,
+      coalesce(p.is_libur, false) as is_libur
+    from public.pertemuan p
     cross join semester_bounds b
-    where m.meeting_date >= b.starts_on and m.meeting_date < b.ends_before
+    where p.tanggal >= b.starts_on and p.tanggal < b.ends_before
+  ), active_members as (
+    select a.id, a.nama_lengkap, a.kelas, a.jurusan, a.nis, a.jabatan
+    from public.anggota a
+    where a.status = 'Aktif' and coalesce(a.is_deleted, false) = false
   ), attendance_by_member as (
-    select
-      a.member_id,
-      jsonb_object_agg(a.meeting_id::text, a.status::text) as attendance
-    from public.attendance a
-    join semester_meetings sm on sm.id = a.meeting_id
-    group by a.member_id
+    select ab.anggota_id,
+      jsonb_object_agg(
+        ab.pertemuan_id::text,
+        case when ab.status = 'hadir' then 'hadir' else 'tidak_hadir' end
+        order by ab.pertemuan_id
+      ) as attendance
+    from public.absensi ab
+    join semester_meetings sm on sm.id = ab.pertemuan_id
+    where ab.status in ('hadir', 'izin', 'sakit', 'alpha', 'tidak_hadir')
+    group by ab.anggota_id
   )
   select jsonb_build_object(
     'meetings', coalesce((
       select jsonb_agg(jsonb_build_object(
         'id', sm.id,
-        'nama_pertemuan', 'Pertemuan ' || sm.meeting_number,
-        'pertemuan_ke', sm.meeting_number,
-        'tanggal', sm.meeting_date,
+        'nama_pertemuan', sm.nama_pertemuan,
+        'pertemuan_ke', sm.pertemuan_ke,
+        'tanggal', sm.tanggal,
         'is_libur', sm.is_libur
-      ) order by sm.meeting_date, sm.meeting_number, sm.id)
+      ) order by sm.tanggal, sm.pertemuan_ke, sm.id)
       from semester_meetings sm
     ), '[]'::jsonb),
     'members', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'id', m.id,
-        'nama_lengkap', m.nama,
-        'kelas', coalesce(m.kelas, ''),
-        'jurusan', coalesce(m.jurusan, ''),
-        'nis', m.nis,
-        'jabatan', case when m.title::text = 'pengurus' then 'Pengurus' else 'Anggota' end,
+        'id', am.id,
+        'nama_lengkap', am.nama_lengkap,
+        'kelas', am.kelas,
+        'jurusan', am.jurusan,
+        'nis', am.nis,
+        'jabatan', am.jabatan,
         'attendance', coalesce(abm.attendance, '{}'::jsonb)
-      ) order by (m.title::text = 'pengurus') desc, m.kelas, m.nama)
-      from public.members m
-      left join attendance_by_member abm on abm.member_id = m.id
+      ) order by (am.jabatan = 'Pengurus') desc, am.kelas, am.nama_lengkap)
+      from active_members am
+      left join attendance_by_member abm on abm.anggota_id = am.id
     ), '[]'::jsonb)
   );
 $$;
 
-revoke all on function public.rekap_semester(integer, integer) from public;
+revoke all on function public.rekap_semester(integer, integer) from public, anon;
 grant execute on function public.rekap_semester(integer, integer) to authenticated;

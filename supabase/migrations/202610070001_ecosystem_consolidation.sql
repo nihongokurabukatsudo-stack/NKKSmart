@@ -7,6 +7,13 @@ begin;
 -- A1: NIS is optional and may repeat. Keep ordinary indexes for lookup.
 alter table public.anggota drop constraint if exists anggota_nis_key;
 create index if not exists anggota_nis_idx on public.anggota(nis);
+create index if not exists pertemuan_rekap_semester_idx
+  on public.pertemuan (tanggal, pertemuan_ke, id);
+create index if not exists absensi_rekap_semester_idx
+  on public.absensi (pertemuan_id, anggota_id) include (status);
+create index if not exists anggota_rekap_semester_idx
+  on public.anggota (jabatan, kelas, nama_lengkap)
+  where status = 'Aktif' and coalesce(is_deleted, false) = false;
 alter table if exists public.pengurus_migrated_backup drop constraint if exists pengurus_migrated_backup_nis_key;
 create index if not exists pengurus_migrated_backup_nis_idx on public.pengurus_migrated_backup(nis);
 revoke all on table public.admins, public.anggota, public.barcode, public.pertemuan, public.absensi, public.geofence_settings, public.pengurus_migrated_backup from public, anon;
@@ -249,7 +256,6 @@ returns jsonb language plpgsql stable security definer set search_path = public 
 declare
   v_start date;
   v_end date;
-  v_today date := (now() at time zone 'Asia/Jakarta')::date;
   v_result jsonb;
 begin
   if not public.is_admin() then raise exception 'Admin access required' using errcode = '42501'; end if;
@@ -258,9 +264,9 @@ begin
   v_end := case when p_semester = 1 then make_date(p_tahun + 1, 1, 1) else make_date(p_tahun + 1, 7, 1) end;
   select jsonb_build_object(
     'meetings', coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'nama_pertemuan', p.nama_pertemuan, 'pertemuan_ke', p.pertemuan_ke, 'tanggal', p.tanggal, 'is_libur', p.is_libur) order by p.tanggal, p.pertemuan_ke, p.id)
-      from public.pertemuan p where p.tanggal >= v_start and p.tanggal < v_end and p.tanggal <= v_today), '[]'::jsonb),
+      from public.pertemuan p where p.tanggal >= v_start and p.tanggal < v_end), '[]'::jsonb),
     'members', coalesce((select jsonb_agg(jsonb_build_object('id', a.id, 'nama_lengkap', a.nama_lengkap, 'kelas', a.kelas, 'jurusan', a.jurusan, 'nis', a.nis, 'jabatan', a.jabatan,
-      'attendance', coalesce((select jsonb_object_agg(ab.pertemuan_id::text, ab.status) from public.absensi ab join public.pertemuan p on p.id = ab.pertemuan_id where ab.anggota_id = a.id and p.tanggal >= v_start and p.tanggal < v_end and p.tanggal <= v_today), '{}'::jsonb))
+      'attendance', coalesce((select jsonb_object_agg(ab.pertemuan_id::text, case when ab.status = 'hadir' then 'hadir' else 'tidak_hadir' end) from public.absensi ab join public.pertemuan p on p.id = ab.pertemuan_id where ab.anggota_id = a.id and p.tanggal >= v_start and p.tanggal < v_end and ab.status in ('hadir', 'izin', 'sakit', 'alpha', 'tidak_hadir')), '{}'::jsonb))
       order by (a.jabatan = 'Pengurus') desc, a.kelas, a.nama_lengkap)
       from public.anggota a where a.status = 'Aktif' and a.is_deleted = false), '[]'::jsonb)
   ) into v_result;

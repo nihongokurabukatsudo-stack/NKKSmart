@@ -77,15 +77,27 @@ export const RekapSemesterPage: React.FC = () => {
     }
     return true
   }).sort((a, b) => Number(b.jabatan === 'Pengurus') - Number(a.jabatan === 'Pengurus') || a.kelas.localeCompare(b.kelas, 'id') || a.nama_lengkap.localeCompare(b.nama_lengkap, 'id')), [report.members, kelas, jabatan, search])
-  const sessions = meetings.filter((meeting) => !meeting.is_libur)
-  const presentCount = filteredMembers.reduce((sum, member) => sum + sessions.filter((meeting) => member.attendance[String(meeting.id)] === 'hadir').length, 0)
+  const sessions = useMemo(() => meetings.filter((meeting) => !meeting.is_libur), [meetings])
+  const attendanceCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const member of filteredMembers) {
+      let count = 0
+      for (const meeting of sessions) if (member.attendance[String(meeting.id)] === 'hadir') count++
+      counts.set(member.id, count)
+    }
+    return counts
+  }, [filteredMembers, sessions])
+  const memberNumbers = useMemo(() => new Map(filteredMembers.map((member, index) => [member.id, index + 1])), [filteredMembers])
+  const presentCount = filteredMembers.reduce((sum, member) => sum + (attendanceCounts.get(member.id) || 0), 0)
   const possibleCount = filteredMembers.length * sessions.length
   const averageRate = possibleCount ? Math.round((presentCount * 100) / possibleCount) : 0
   const meetingMonths = useMemo(() => {
     const map = new Map<number, SemesterMeeting[]>()
     meetings.forEach((meeting) => {
       const month = monthOf(meeting.tanggal)
-      map.set(month, [...(map.get(month) || []), meeting])
+      const items = map.get(month)
+      if (items) items.push(meeting)
+      else map.set(month, [meeting])
     })
     return [...map.entries()].sort(([a], [b]) => a - b)
   }, [meetings])
@@ -94,13 +106,15 @@ export const RekapSemesterPage: React.FC = () => {
     const map = new Map<string, SemesterMember[]>()
     filteredMembers.forEach((member) => {
       const key = `${member.jabatan}|${member.kelas || 'Tanpa kelas'}`
-      map.set(key, [...(map.get(key) || []), member])
+      const items = map.get(key)
+      if (items) items.push(member)
+      else map.set(key, [member])
     })
     return [...map.entries()]
   }, [filteredMembers])
 
   const rateFor = (member: SemesterMember) => {
-    const count = sessions.filter((meeting) => member.attendance[String(meeting.id)] === 'hadir').length
+    const count = attendanceCounts.get(member.id) || 0
     return { count, rate: sessions.length ? Math.round((count * 100) / sessions.length) : 0 }
   }
   const valueFor = (member: SemesterMember, meeting: SemesterMeeting) => meeting.is_libur ? 'Libur' : STATUS_LETTER[member.attendance[String(meeting.id)]] || '-'
@@ -222,7 +236,7 @@ export const RekapSemesterPage: React.FC = () => {
                     const [role, className] = groupName.split('|')
                     return [<tr key={`group-${month}-${groupName}`} className="semester-group-row"><th colSpan={monthMeetings.length + 6} className="border border-slate-500 bg-slate-200 px-2 py-1 text-left font-bold">{role} · Kelas {className}</th></tr>, ...members.map((member, memberIndex) => {
                       const totals = rateFor(member)
-                      const memberNumber = filteredMembers.findIndex((item) => item.id === member.id) + 1
+                      const memberNumber = memberNumbers.get(member.id) || 0
                       return <tr key={`${month}-${member.id}`} className="semester-data-row"><td className="border border-slate-400 px-1 py-1 text-center">{memberNumber}</td><td className="border border-slate-400 px-1 py-1">{member.nama_lengkap}{formatNis(member.nis) && <small className="block text-slate-600">NIS {formatNis(member.nis)}</small>}</td><td className="border border-slate-400 px-1 py-1 text-center">{member.kelas}</td>{monthMeetings.map((meeting) => <td key={meeting.id} className={`border border-slate-400 px-1 py-1 text-center font-bold ${meeting.is_libur ? 'holiday-column' : ''}`}>{valueFor(member, meeting)}</td>)}<td className="border border-slate-400 px-1 py-1 text-center font-bold">{totals.count}</td><td className="border border-slate-400 px-1 py-1 text-center">{sessions.length}</td><td className="border border-slate-400 px-1 py-1 text-center font-bold">{totals.rate}%</td></tr>
                     })]
                   })}</tbody>
