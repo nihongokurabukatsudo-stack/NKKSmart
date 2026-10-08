@@ -11,7 +11,6 @@ export const navigationItems: NavigationItem[] = [
     href: "/#tentang",
     children: [
       { label: "Profil", href: "/tentang" },
-      { label: "Tim Inti", href: "/tim-inti" },
     ],
   },
   {

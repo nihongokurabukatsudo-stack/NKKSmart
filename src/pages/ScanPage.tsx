@@ -460,51 +460,51 @@ export const ScanPage: React.FC = () => {
 
         {/* Top Header */}
         <header className="scan-topbar border-b border-white/10 bg-slate-950/45 px-3 py-2.5 backdrop-blur-xl shadow-lg">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2">
+          <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-              <Link to="/" aria-label="Kembali" className="hidden p-2 text-slate-300 hover:text-white rounded-full hover:bg-white/10 transition-colors sm:inline-flex">
+              <Link to="/admin" aria-label="Kembali ke dashboard" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-slate-300 transition hover:border-pink-400/50 hover:bg-white/5 hover:text-white">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div className="flex min-w-0 items-center gap-2">
-                <div className="h-9 w-9 shrink-0 rounded-full bg-slate-900/80 border border-white/10 p-1 flex items-center justify-center shadow-inner">
-                  <img src="/assets/admin/nkk.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
+                <div className="h-10 w-10 shrink-0 rounded-xl border border-white/10 bg-zinc-900 p-1 flex items-center justify-center">
+                  <img src="/assets/admin/nkk.png" alt="Logo NKK" className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-sm sm:text-lg bg-gradient-to-r from-pink-300 to-pink-300 bg-clip-text text-transparent">NKKSmart Scan</h1>
-                  <p className="hidden text-[10px] text-slate-300 sm:block">Absensi ekstrakurikuler</p>
+                  <h1 className="font-bold text-sm text-white sm:text-lg">NKKSmart Scan</h1>
+                  <p className="text-[10px] text-slate-400 sm:text-xs">Absensi Ekstrakurikuler</p>
                 </div>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${meetingStatus?.active ? 'border-pink-400/40 bg-pink-500/20 text-pink-200' : meetingStatus?.status === 'libur' ? 'border-slate-300/30 bg-slate-500/20 text-slate-100' : 'border-rose-300/40 bg-rose-500/20 text-rose-100'}`}>
+              <span className={`rounded-full border px-2.5 py-1.5 text-[10px] font-bold sm:px-3 sm:text-xs ${meetingStatus?.status === 'libur' ? 'border-red-400/50 bg-red-500/20 text-red-200' : meetingStatus?.active ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-200'}`}>
                 {isStatusLoading ? 'Memuat…' : meetingStatus?.active ? 'Aktif' : meetingStatus?.status === 'libur' ? 'Libur' : 'Di luar jadwal'}
               </span>
-              {geofence?.configured && <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold sm:px-3 sm:text-xs ${hasLocationFix && isInsideFence ? 'border-pink-400/40 bg-pink-500/20 text-pink-100' : hasLocationFix || geoError ? 'border-rose-300/50 bg-rose-500/25 text-rose-100' : 'border-white/20 bg-slate-500/30 text-slate-100'}`}>{locationBadge}</span>}
+              <span className={`rounded-full border px-2.5 py-1.5 text-[10px] font-bold sm:px-3 sm:text-xs ${hasLocationFix && isInsideFence ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200' : geoError || hasLocationFix ? 'border-red-400/40 bg-red-500/15 text-red-200' : 'border-slate-600 bg-slate-800 text-slate-200'}`}>{geofence?.configured ? locationBadge : 'GPS belum disetel'}</span>
             </div>
           </div>
         </header>
 
         {/* Main Container */}
-        <main className="scan-main mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto px-3 py-3 sm:gap-5 sm:p-6 lg:mr-8 lg:ml-auto lg:max-w-[min(54vw,760px)]">
+        <main className="scan-main mx-auto grid min-h-0 w-full max-w-[1440px] flex-1 grid-cols-1 gap-3 overflow-x-hidden px-3 py-3 sm:gap-5 sm:px-6 sm:py-6">
 
           {/* Status Meeting Banner */}
           <div
-            className={`scan-meeting-status order-1 rounded-xl border px-3 py-2.5 backdrop-blur-md flex items-center justify-between text-sm shadow-lg transition-all duration-300 sm:p-4 sm:rounded-2xl ${
+            className={`scan-meeting-status order-1 rounded-2xl border px-3 py-3 flex items-center justify-between text-sm transition-colors sm:p-5 ${
               meetingStatus?.active
-                ? 'bg-gradient-to-r from-pink-950/60 to-pink-900/40 border-pink-500/40 text-pink-100 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
+                ? 'bg-emerald-950/35 border-emerald-500/40 text-emerald-100'
                 : meetingStatus?.status === 'libur'
-                ? 'bg-gradient-to-r from-rose-950/60 to-rose-900/40 border-rose-500/40 text-rose-100 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
-                : 'bg-slate-900/50 border-white/10 text-slate-300'
+                ? 'bg-red-950/60 border-red-500/60 text-red-100'
+                : 'bg-zinc-900 border-zinc-700 text-slate-300'
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-full flex items-center justify-center ${meetingStatus?.active ? 'bg-pink-500/20' : meetingStatus?.status === 'libur' ? 'bg-rose-500/20' : 'bg-white/5'}`}>
+              <div className={`p-2.5 rounded-xl flex items-center justify-center ${meetingStatus?.active ? 'bg-emerald-500/15' : meetingStatus?.status === 'libur' ? 'bg-red-500/15' : 'bg-zinc-800'}`}>
                 {meetingStatus?.active ? (
-                  <CheckCircle2 className="w-5 h-5 text-pink-400 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-300 shrink-0" />
                 ) : meetingStatus?.status === 'libur' ? (
-                  <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+                  <AlertTriangle className="w-5 h-5 text-red-300 shrink-0" />
                 ) : (
-                  <XCircle className="w-5 h-5 text-slate-500 shrink-0" />
+                  <XCircle className="w-5 h-5 text-slate-400 shrink-0" />
                 )}
               </div>
               <div>
@@ -515,36 +515,33 @@ export const ScanPage: React.FC = () => {
             <button
               onClick={fetchMeetingStatus}
               title="Refresh Status"
-              className="min-h-12 min-w-12 p-2 hover:bg-white/10 rounded-full transition-colors text-slate-300 hover:text-white"
+              className="min-h-11 min-w-11 p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-300 hover:text-white"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
           </div>
 
           {/* Geofence Status Banner */}
-          {geofence?.configured && (
             <div
-              className={`scan-geofence-status order-2 rounded-xl border px-3 py-2 backdrop-blur-md flex items-center gap-2 text-xs shadow-lg transition-colors sm:p-3.5 sm:gap-3 sm:text-sm sm:rounded-2xl ${
+              className={`scan-geofence-status order-2 rounded-2xl border px-3 py-3 flex items-center gap-3 text-xs transition-colors sm:p-5 sm:text-sm ${
                 hasLocationFix && isInsideFence
-                  ? 'bg-rose-950/40 border-rose-500/30 text-rose-100'
-                  : hasLocationFix || geoError ? 'bg-rose-950/40 border-rose-500/30 text-rose-100 shadow-[0_0_15px_rgba(244,63,94,0.15)]' : 'bg-slate-900/50 border-white/10 text-slate-200'
+                  ? 'bg-zinc-900 border-emerald-500/40 text-emerald-100'
+                  : hasLocationFix || geoError ? 'bg-zinc-900 border-red-500/40 text-red-100' : 'bg-zinc-900 border-zinc-700 text-slate-200'
               }`}
             >
-              <div className={`p-2 rounded-full ${hasLocationFix && isInsideFence ? 'bg-rose-500/20' : hasLocationFix || geoError ? 'bg-rose-500/20' : 'bg-white/5'}`}>
-                <MapPin className={`w-4 h-4 shrink-0 ${hasLocationFix && isInsideFence ? 'text-rose-400' : hasLocationFix || geoError ? 'text-rose-300' : 'text-slate-300'}`} />
+              <div className={`p-2.5 rounded-xl ${hasLocationFix && isInsideFence ? 'bg-emerald-500/10' : hasLocationFix || geoError ? 'bg-red-500/10' : 'bg-zinc-800'}`}>
+                <MapPin className={`w-5 h-5 shrink-0 ${hasLocationFix && isInsideFence ? 'text-emerald-300' : hasLocationFix || geoError ? 'text-red-300' : 'text-slate-300'}`} />
               </div>
               <div className="flex-1">
                 <span className="font-medium text-white">
-                  {hasLocationFix ? (isInsideFence ? 'Lokasi Valid' : 'Di Luar Radius Sekolah') : 'Memeriksa GPS'}:
+                  {hasLocationFix ? (isInsideFence ? 'Lokasi Valid' : 'Di luar radius') : 'Status Lokasi'}:
                 </span>{' '}
-                <span className="opacity-90">{distance !== null ? `Jarak ${distance}m (Maksimal ${geofence.radius}m)` : 'Menunggu izin lokasi perangkat.'}</span>
-                {geoError && <span className="block text-rose-400 mt-1 text-xs font-medium bg-rose-950/50 p-1.5 rounded-md">{geoError}</span>}
+                <span className="text-slate-300">{!geofence?.configured ? 'Lokasi presensi belum dikonfigurasi.' : distance !== null ? `Jarak ${distance} m (Maksimal ${geofence.radius} m)` : geoError || 'Menunggu izin lokasi perangkat.'}</span>
+                {geoError && geofence?.configured && <span className="block text-red-200 mt-1 text-xs font-medium">{geoError}</span>}
               </div>
             </div>
-          )}
-
           {/* Controls Toolbar */}
-          <div className="scan-controls order-4 bg-slate-900/65 backdrop-blur-xl border border-white/15 p-3 rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-2 sm:p-4 sm:gap-4">
+          <div className="scan-controls order-4 bg-zinc-900 border border-zinc-700 p-3 rounded-2xl shadow-xl flex flex-wrap items-center justify-between gap-2 sm:p-4 sm:gap-4">
             {/* Target Filter */}
             <div className="flex items-center gap-3">
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Target</span>
@@ -552,7 +549,7 @@ export const ScanPage: React.FC = () => {
                 value={scanType}
                 onChange={(e) => setScanType(e.target.value as 'auto' | 'anggota' | 'pengurus')}
                 aria-label="Target scan"
-                className="bg-slate-950/50 border border-white/10 rounded-full px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all appearance-none cursor-pointer"
+                  className="bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all appearance-none cursor-pointer"
               >
                 <option value="auto">Semua (Auto)</option>
                 <option value="anggota">Khusus Anggota</option>
@@ -567,7 +564,7 @@ export const ScanPage: React.FC = () => {
                   value={selectedCameraId}
                   onChange={(e) => { void handleCameraChange(e.target.value) }}
                   aria-label="Ganti kamera"
-                  className="min-h-12 min-w-0 flex-1 bg-slate-950/70 border border-white/15 rounded-full px-3 py-2 text-base text-slate-100 focus:outline-none focus:border-pink-500 transition-all appearance-none cursor-pointer sm:max-w-[200px] sm:flex-none disabled:opacity-50"
+                  className="min-h-12 min-w-0 flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-base text-slate-100 focus:outline-none focus:border-pink-500 transition-all appearance-none cursor-pointer sm:max-w-[200px] sm:flex-none disabled:opacity-50"
                 >
                   {!selectedCameraId && <option value="">Otomatis</option>}
                   {cameras.map((c) => (
@@ -588,34 +585,17 @@ export const ScanPage: React.FC = () => {
                 className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border transition-all duration-300 shadow-md ${
                   isMirrored
                     ? 'bg-pink-500/20 border-pink-500/50 text-pink-400'
-                    : 'bg-slate-800/50 border-white/10 text-slate-300 hover:text-white hover:bg-slate-700/50'
+                    : 'bg-zinc-950 border-zinc-700 text-slate-300 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 <FlipHorizontal className="w-4 h-4" />
               </button>
-              {torchSupported && <button type="button" onClick={toggleTorch} aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'} className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-full border ${torchOn ? 'border-rose-300 bg-rose-400/20 text-rose-200' : 'border-white/15 bg-slate-800/80 text-slate-200'}`}><Flashlight className="h-5 w-5"/></button>}
-              {isScanning ? (
-                <button
-                  onClick={stopScanner}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(225,29,72,0.3)] transition-all hover:scale-105 active:scale-95"
-                >
-                  <CameraOff className="w-4 h-4" />
-                    <span>Hentikan Scan</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => { void startScanner() }}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 text-white rounded-full text-sm font-semibold shadow-[0_0_15px_rgba(244,63,94,0.3)] transition-all hover:scale-105 active:scale-95"
-                >
-                  <Camera className="w-4 h-4" />
-                    <span>{cameraError ? 'Coba lagi' : 'Mulai Scan'}</span>
-                </button>
-              )}
+              {torchSupported && <button type="button" onClick={toggleTorch} aria-label={torchOn ? 'Matikan senter' : 'Nyalakan senter'} className={`inline-flex min-h-12 min-w-12 items-center justify-center rounded-xl border ${torchOn ? 'border-amber-300 bg-amber-400/10 text-amber-100' : 'border-zinc-700 bg-zinc-950 text-slate-200 hover:bg-zinc-800'}`}><Flashlight className="h-5 w-5"/></button>}
             </div>
           </div>
 
           {/* Video Scanner Viewport */}
-          <div className="scan-camera-window order-3 relative mx-auto w-full overflow-hidden rounded-3xl border border-white/20 bg-slate-950/85 shadow-2xl flex items-center justify-center backdrop-blur-sm">
+          <div className="scan-camera-window order-3 relative w-full overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl flex items-center justify-center sm:rounded-3xl">
             {/* Reader HTML5 Target Element */}
             <div
               id="qr-reader"
@@ -624,15 +604,14 @@ export const ScanPage: React.FC = () => {
 
             {/* Idle Placeholder */}
             {!isScanning && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 p-4 text-center bg-slate-950/25 backdrop-blur-[2px] sm:gap-5 sm:p-6">
-                <img src="/assets/admin/nkk.png" alt="Watermark" className="absolute inset-0 m-auto w-48 h-48 opacity-5 object-contain pointer-events-none" />
-                <div className="z-10 flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-slate-900/70 text-slate-100 shadow-xl sm:h-20 sm:w-20 sm:text-slate-400">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-zinc-950 p-4 text-center sm:p-6">
+                <div className="z-10 flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-900 text-slate-300">
                   <Camera className="h-7 w-7 sm:h-10 sm:w-10" />
                 </div>
                 <div className="z-10">
-                  <p className="font-bold text-lg text-white tracking-wide">{cameraError ? 'Kamera belum siap' : 'Kamera Nonaktif'}</p>
-                  <p className="mx-auto mt-2 max-w-xs text-sm text-slate-200">
-                    {cameraError || 'Arahkan kartu NKKSmart Anda ke kamera setelah menekan tombol di bawah.'}
+                  <p className="font-bold text-base text-white tracking-wide sm:text-lg">{cameraError ? 'Kamera belum siap' : 'Kamera Nonaktif'}</p>
+                  <p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-slate-400 sm:text-sm">
+                    {cameraError || 'Aktifkan kamera, lalu arahkan ke QR kartu anggota.'}
                   </p>
                 </div>
               </div>
@@ -654,11 +633,19 @@ export const ScanPage: React.FC = () => {
             )}
           </div>
 
+          <div className="scan-camera-action">
+            {isScanning ? (
+              <button type="button" onClick={stopScanner} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-zinc-800 px-5 text-sm font-bold text-white transition hover:bg-zinc-700 active:scale-[.99]"><CameraOff size={18}/>Hentikan Scan</button>
+            ) : (
+              <button type="button" onClick={() => { void startScanner() }} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-5 text-sm font-bold text-white shadow-lg shadow-rose-950/30 transition hover:from-rose-500 hover:to-pink-500 active:scale-[.99]"><Camera size={18}/>{cameraError ? 'Coba Kamera Lagi' : 'Buka Kamera Scan'}</button>
+            )}
+          </div>
+
           {/* Manual Code Input (Hanya jika admin login) */}
-          {isAdmin && <button type="button" onClick={() => setManualSheetOpen(true)} className="scan-sheet-trigger order-5 min-h-12 rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><ShieldCheck className="mr-2 inline h-4 w-4 text-pink-300"/>Input manual</button>}
+          {isAdmin && <button type="button" onClick={() => setManualSheetOpen(true)} className="scan-sheet-trigger scan-manual-trigger order-5 min-h-12 rounded-xl border border-zinc-700 bg-zinc-900 px-4 text-sm font-semibold text-slate-100 transition hover:border-pink-400/50 hover:bg-zinc-800"><ShieldCheck className="mr-2 inline h-4 w-4 text-pink-300"/>Input manual</button>}
 
           {/* Scan History Log */}
-          <button type="button" onClick={() => setHistorySheetOpen(true)} className="scan-sheet-trigger order-6 flex min-h-12 items-center justify-between rounded-2xl border border-white/15 bg-slate-900/60 px-4 text-sm font-semibold text-slate-100"><span><History className="mr-2 inline h-4 w-4 text-pink-300"/>Riwayat scan</span><span className="text-xs text-slate-300">{logs.length} entri</span></button>
+          <button type="button" onClick={() => setHistorySheetOpen(true)} className="scan-sheet-trigger scan-history-trigger order-6 flex min-h-12 items-center justify-between rounded-xl border border-zinc-700 bg-zinc-900 px-4 text-sm font-semibold text-slate-100 transition hover:border-pink-400/50 hover:bg-zinc-800"><span><History className="mr-2 inline h-4 w-4 text-pink-300"/>Riwayat scan</span><span className="text-xs text-slate-300">{logs.length} entri</span></button>
         </main>
         {!isOnline && <div className="fixed left-3 right-3 top-16 z-40 rounded-xl border border-rose-300/40 bg-rose-950/90 p-3 text-center text-sm text-rose-100 shadow-xl">Tidak ada koneksi internet. Scan memerlukan koneksi untuk tersimpan.</div>}
         {manualSheetOpen && isAdmin && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => !isSubmittingManual && setManualSheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Input manual" className="scan-glass w-full max-w-lg rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold">Input manual · Admin</h2><button type="button" onClick={() => setManualSheetOpen(false)} disabled={isSubmittingManual} className="min-h-12 min-w-12 rounded-full border border-white/20 disabled:opacity-50">×</button></div><form onSubmit={async (event) => { await handleManualSubmit(event); setManualSheetOpen(false) }} className="flex gap-2"><input type="text" value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Masukkan kode unik" className="min-h-12 min-w-0 flex-1 rounded-xl border border-white/20 bg-slate-950/75 px-4 text-base text-white placeholder-slate-400"/><button type="submit" disabled={isSubmittingManual || !manualCode.trim()} className="min-h-12 rounded-xl bg-pink-600 px-4 font-semibold text-white disabled:opacity-50"><Send className="mr-1 inline h-4 w-4"/>Kirim</button></form></section></div>}

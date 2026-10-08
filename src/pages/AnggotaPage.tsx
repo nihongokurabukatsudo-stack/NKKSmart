@@ -135,11 +135,10 @@ export const AnggotaPage: React.FC = () => {
 
   // Generate Unique Code Client Helper
   const getNextUniqueCode = async (): Promise<string> => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('barcode')
       .select('kode_unik')
-      .order('id', { ascending: false })
-      .limit(100)
+    if (error) throw error
 
     let maxNum = 0
     if (data) {
@@ -162,8 +161,9 @@ export const AnggotaPage: React.FC = () => {
 
     const parsed = parseClassAndJurusan(formData.kelas, formData.jurusan)
     const nisClean = formData.nis.trim() || null
+    const nama = formData.nama_lengkap.trim()
 
-    if (!formData.nama_lengkap.trim()) {
+    if (!nama) {
       setFormError('Nama lengkap wajib diisi.')
       return
     }
@@ -173,11 +173,12 @@ export const AnggotaPage: React.FC = () => {
         const uniqueCode = await getNextUniqueCode()
 
         // Insert anggota
+        const timestamp = new Date().toISOString()
         const { data: newAnggota, error: insErr } = await supabase
           .from('anggota')
           .insert({
             kode_qr: uniqueCode,
-            nama_lengkap: formData.nama_lengkap.trim(),
+            nama_lengkap: nama,
             kelas: parsed.kelas,
             jurusan: parsed.jurusan,
             nis: nisClean,
@@ -185,6 +186,7 @@ export const AnggotaPage: React.FC = () => {
             jabatan: formData.jabatan,
             status: formData.status,
             is_deleted: formData.status === 'Nonaktif',
+            created_at: timestamp,
           })
           .select()
           .single()
@@ -192,11 +194,19 @@ export const AnggotaPage: React.FC = () => {
         if (insErr) throw insErr
 
         // Insert barcode
-        await supabase.from('barcode').insert({
+        const { error: barcodeErr } = await supabase.from('barcode').insert({
           kode_unik: uniqueCode,
           qr_value: `NKKSMART|MEMBER|${uniqueCode}`,
           anggota_id: newAnggota.id,
+          created_at: timestamp,
         })
+        if (barcodeErr) {
+          // The browser client cannot wrap two table writes in one transaction.
+          // Remove the member row if its required barcode could not be created.
+          const { error: cleanupErr } = await supabase.from('anggota').delete().eq('id', newAnggota.id)
+          if (cleanupErr) console.error('Failed to roll back member after barcode insert error:', cleanupErr)
+          throw barcodeErr
+        }
 
         setIsAddModalOpen(false)
       } else if (isEditModalOpen) {
@@ -204,7 +214,7 @@ export const AnggotaPage: React.FC = () => {
         const { error: updErr } = await supabase
           .from('anggota')
           .update({
-            nama_lengkap: formData.nama_lengkap.trim(),
+            nama_lengkap: nama,
             kelas: parsed.kelas,
             jurusan: parsed.jurusan,
             nis: nisClean,
@@ -222,8 +232,10 @@ export const AnggotaPage: React.FC = () => {
 
       await fetchAnggota()
     } catch (err: unknown) {
-      console.error(err)
-      setFormError(err instanceof Error ? err.message : 'Terjadi kesalahan sistem')
+      console.error('Gagal menyimpan anggota:', err)
+      setFormError(err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
+        ? err.message
+        : 'Gagal menyimpan anggota. Periksa koneksi dan izin database, lalu coba lagi.')
     } finally {
       setIsSubmitting(false)
     }
@@ -235,15 +247,22 @@ export const AnggotaPage: React.FC = () => {
 
     try {
       // Soft-delete
-      await supabase
+      const { data, error } = await supabase
         .from('anggota')
         .update({ is_deleted: true, status: 'Nonaktif' })
         .eq('id', item.id)
+        .select('id')
+        .maybeSingle()
+
+      if (error) throw error
+      if (!data) throw new Error('Anggota tidak ditemukan atau akun tidak memiliki izin untuk menghapusnya.')
 
       await fetchAnggota()
     } catch (err) {
       console.error('Delete error:', err)
-      alert('Gagal menghapus anggota.')
+      alert(err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
+        ? `Gagal menghapus anggota: ${err.message}`
+        : 'Gagal menghapus anggota. Periksa koneksi dan izin database.')
     }
   }
 

@@ -363,8 +363,6 @@ export const DashboardPage: React.FC = () => {
         </div>
         <Link
           to="/admin/scan"
-          target="_blank"
-          rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-semibold shadow-md shadow-pink-900/30 transition"
         >
           <QrCode className="w-4 h-4" />

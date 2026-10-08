@@ -21,7 +21,6 @@ import { PendaftarPage } from './pages/PendaftarPage'
 import hiraganaCharacters from './data/hiragana.json'
 import katakanaCharacters from './data/katakana.json'
 import { AboutPage } from './pages/AboutPage'
-import { CoreTeamPage } from './pages/CoreTeamPage'
 import { GalleryPage } from './pages/GalleryPage'
 import { KanaLearningPage } from './pages/KanaLearningPage'
 import { KanaQuizPage } from './pages/KanaQuizPage'
@@ -37,7 +36,7 @@ const RouteRobots: React.FC = () => {
   const { pathname } = useLocation()
   useEffect(() => {
     let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]')
-    if (pathname === '/login' || pathname.startsWith('/admin')) {
+    if (pathname === '/login' || pathname === '/scan' || pathname.startsWith('/admin')) {
       if (!robots) {
         robots = document.createElement('meta')
         robots.name = 'robots'
@@ -70,7 +69,6 @@ export const App: React.FC = () => <QueryClientProvider client={queryClient}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/tentang" element={<AboutPage />} />
-        <Route path="/tim-inti" element={<CoreTeamPage />} />
         <Route path="/galeri" element={<GalleryPage />} />
         <Route path="/belajar" element={<LearningDashboardPage />} />
         <Route path="/belajar/materi/:id" element={<LearningMaterialPage />} />
@@ -88,9 +86,9 @@ export const App: React.FC = () => <QueryClientProvider client={queryClient}>
 
         {/* Dashboard admin pada aplikasi dan domain yang sama */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin/scan" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<DashboardPage />} />
-          <Route path="scan" element={<ScanPage />} />
           <Route path="anggota" element={<AnggotaPage />} />
           <Route path="pengurus" element={<PengurusPage />} />
           <Route path="pertemuan" element={<PertemuanPage />} />
@@ -106,7 +104,7 @@ export const App: React.FC = () => <QueryClientProvider client={queryClient}>
         </Route>
 
         {/* Alamat lama dashboard tetap diarahkan ke route baru */}
-        <Route path="/scan" element={<ScanPage />} />
+        <Route path="/scan" element={<Navigate to="/admin/scan" replace />} />
         <Route path="/anggota" element={<Navigate to="/admin/anggota" replace />} />
         <Route path="/pengurus" element={<Navigate to="/admin/pengurus" replace />} />
         <Route path="/pertemuan" element={<Navigate to="/admin/pertemuan" replace />} />

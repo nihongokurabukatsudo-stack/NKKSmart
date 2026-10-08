@@ -108,7 +108,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await supabase.auth.signOut()
           return { ok: false, error: 'Username atau password salah' }
         }
-        localStorage.setItem('nkk-had-admin-session', 'true')
         // Update last login
         await supabase
           .from('admins')
@@ -124,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const logout = async () => {
-    localStorage.removeItem('nkk-had-admin-session')
     try {
       await supabase.auth.signOut()
     } finally {

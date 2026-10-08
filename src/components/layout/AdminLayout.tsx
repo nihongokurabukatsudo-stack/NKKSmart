@@ -15,7 +15,7 @@ import {
   LogOut,
   Menu,
   X,
-  ExternalLink,
+  ArrowRight,
   Sun,
   Moon,
 } from 'lucide-react'
@@ -89,15 +89,13 @@ export const AdminLayout: React.FC = () => {
         <div className="p-3">
           <Link
             to="/admin/scan"
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white rounded-xl shadow-lg shadow-pink-900/30 text-sm font-semibold transition"
           >
             <div className="flex items-center gap-2">
               <QrCode className="w-4 h-4" />
               <span>Buka Kamera Scan</span>
             </div>
-            <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+            <ArrowRight className="w-3.5 h-3.5 opacity-80" />
           </Link>
         </div>
 

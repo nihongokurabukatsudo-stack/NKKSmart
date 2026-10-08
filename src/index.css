@@ -17,60 +17,45 @@ button,a { -webkit-tap-highlight-color:transparent }
 .admin-sidebar { background:var(--surface); border-color:var(--line) }
 .admin-main { max-width:1600px; width:100%; margin:0 auto }
 .surface-card { background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 24px #1018280a }
-.scan-page { height:auto; min-height:100dvh; color:#fff; background:#100d12; position:relative; isolation:isolate; overflow-x:hidden; overflow-y:auto; padding-bottom:env(safe-area-inset-bottom) }
-.scan-page > .flex-1 { flex:0 0 auto; }
-.scan-main { flex:0 0 auto; overflow:visible; touch-action:pan-y; }
-.scan-page:before { content:''; position:absolute; inset:-12px; z-index:-2; background:url('/assets/admin/background.jpg') center top/cover no-repeat; filter:brightness(.68); }
-.scan-page:after { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,#100d1220 0%,#100d126e 54%,#100d12df 100%) }
-.scan-glass { background:#171217cc; border:1px solid #ffffff30; backdrop-filter:blur(16px); box-shadow:0 20px 60px #08060850 }
-.scan-topbar { padding-top:max(.625rem,env(safe-area-inset-top)) }
-.scan-main { overscroll-behavior:contain; scrollbar-width:thin; }
-.scan-camera-window { height:clamp(210px,44dvh,410px); }
+.scan-page { min-height:100dvh; color:#fff; background:#09090b; overflow-x:hidden; padding-bottom:env(safe-area-inset-bottom) }
+.scan-page > .flex-1 { flex:1 1 auto; }
+.scan-topbar { padding-top:max(.75rem,env(safe-area-inset-top)); background:#09090b; }
+.scan-main { grid-template-areas:"camera meeting" "action location" "controls controls" "manual history"; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); align-content:start; align-items:start; overscroll-behavior:contain; scrollbar-width:thin; }
+.scan-camera-window { grid-area:camera; width:100%; height:auto; aspect-ratio:4/3; min-height:220px; max-height:min(58vh,600px); }
+.scan-camera-action { grid-area:action; }
+.scan-meeting-status { grid-area:meeting; min-height:96px; }
+.scan-geofence-status { grid-area:location; min-height:84px; }
+.scan-controls { grid-area:controls; }
+.scan-manual-trigger { grid-area:manual; }
+.scan-history-trigger { grid-area:history; }
+.scan-glass { background:#18181b; border:1px solid #3f3f46; box-shadow:0 20px 60px #0008 }
 .popup-card-enter { animation:popup-card-enter .38s cubic-bezier(.2,1.35,.45,1) both; }
 .popup-auto-progress { animation:popup-progress 2.5s linear both; }
 @keyframes popup-card-enter { from { opacity:0; transform:translateY(12px) scale(.92) } to { opacity:1; transform:translateY(0) scale(1) } }
 @keyframes popup-progress { from { transform:scaleX(1) } to { transform:scaleX(0) } }
 @media (prefers-reduced-motion:reduce) { .popup-card-enter,.popup-auto-progress { animation:none!important } }
-.scan-page.is-idle .scan-camera-window { background-color:#09080b55; }
-.scan-page.is-idle .scan-camera-window > div.absolute.z-10 { background:linear-gradient(180deg,#02061700 0%,#02061705 30%,#020617b8 100%); justify-content:flex-end; }
+.scan-page.is-idle .scan-camera-window { background-color:#09090b; }
 .scan-camera-window #qr-reader { position:absolute; inset:0; width:100%; height:100%; }
 .scan-camera-window #qr-reader video { width:100%!important; height:100%!important; object-fit:cover!important; }
 .scan-target-frame { max-width:min(72vw,300px); }
 .scan-sheet-trigger { min-height:48px; }
 .animate-scan { animation:scan-line 2.4s ease-in-out infinite; }
 @keyframes scan-line { 0%,100% { transform:translateY(0) } 50% { transform:translateY(100%) } }
-@media (max-width:639px) {
-  .scan-main { gap:.625rem; padding: .625rem .75rem max(.625rem,env(safe-area-inset-bottom)); }
-  .scan-meeting-status { min-height:46px; }
-  .scan-geofence-status { min-height:38px; }
-  .scan-meeting-status,.scan-geofence-status { background-image:none; background-color:#1512178c; }
-  .scan-camera-window { height:clamp(205px,33dvh,340px); border-radius:1.35rem; }
-  .scan-controls { min-height:60px; }
-  .scan-controls > :first-child { display:flex; flex:1 1 100%; width:100%; justify-content:flex-start; }
-  .scan-controls > :first-child > span { display:none; }
-  .scan-controls > :first-child > select { min-height:48px; font-size:16px; }
-  .scan-controls > :nth-child(2) { flex:1; min-width:0; }
-  .scan-controls > :last-child { width:auto; margin-left:0; }
-  .scan-controls > :last-child > button { min-height:48px; padding-inline:1rem; }
-  .scan-sheet-trigger { width:calc(50% - .3125rem); }
-  .scan-main { flex-direction:row; flex-wrap:wrap; align-content:flex-start; }
-  .scan-main > .scan-meeting-status,.scan-main > .scan-geofence-status,.scan-main > .scan-camera-window,.scan-main > .scan-controls { width:100%; }
-  .scan-main > .scan-geofence-status { order:3; }
-  .scan-main > .scan-camera-window { order:1; }
-  .scan-main > .scan-meeting-status { order:2; }
-  .scan-main > .scan-controls { order:4; }
-  .scan-main > .scan-sheet-trigger { order:5; }
+@media (max-width:959px) {
+  .scan-main { grid-template-areas:"camera" "action" "meeting" "location" "controls" "manual" "history"; grid-template-columns:minmax(0,1fr); gap:.75rem; padding:.75rem; }
+  .scan-camera-window { aspect-ratio:16/10; min-height:clamp(175px,28svh,250px); max-height:36svh; }
+  .scan-meeting-status,.scan-geofence-status { min-height:72px; }
+  .scan-controls { gap:.625rem; padding:.75rem; }
+  .scan-sheet-trigger { width:100%; }
 }
-@supports (background-image:image-set(url('/assets/admin/background.webp') type('image/webp'),url('/assets/admin/background.jpg') type('image/jpeg'))) {
-  .scan-page:before { background-image:image-set(url('/assets/admin/background.webp') type('image/webp'),url('/assets/admin/background.jpg') type('image/jpeg')); }
-}
-@media (min-width:900px) {
-  .scan-page:before { background:url('/assets/admin/background.jpg') center/cover no-repeat; filter:blur(14px) brightness(.28); transform:scale(1.04); }
-  .scan-page:after { background:linear-gradient(90deg,#100d1230 0%,#100d1266 38%,#100d12dc 54%,#100d12ef 100%),url('/assets/admin/background.jpg') left center/min(48vw,680px) auto no-repeat; }
-  .scan-camera-window { height:auto; aspect-ratio:4/3; }
-}
-@supports (background-image:image-set(url('/assets/admin/background.webp') type('image/webp'),url('/assets/admin/background.jpg') type('image/jpeg'))) {
-  @media (min-width:900px) { .scan-page:after { background-image:linear-gradient(90deg,#100d1230 0%,#100d1266 38%,#100d12dc 54%,#100d12ef 100%),image-set(url('/assets/admin/background.webp') type('image/webp'),url('/assets/admin/background.jpg') type('image/jpeg')); } }
+@media (max-width:420px) {
+  .scan-topbar { padding-inline:.625rem; }
+  .scan-topbar > div { gap:.375rem; }
+  .scan-topbar h1 { font-size:.78rem; }
+  .scan-topbar p { display:none; }
+  .scan-topbar > div > div:last-child { gap:.25rem; }
+  .scan-topbar span { padding:.35rem .45rem; font-size:.58rem; }
+  .scan-camera-window { min-height:165px; }
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important } }
 

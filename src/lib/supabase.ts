@@ -17,10 +17,13 @@ export const supabase = createClient(
   supabaseAnonKey || 'placeholder-key',
   {
     auth: {
+      // Keep the admin session within this browser tab so moving from the
+      // dashboard to the scanner (or refreshing it) does not ask for login again.
+      // sessionStorage is cleared when the tab is closed.
       persistSession: true,
+      storage: window.sessionStorage,
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
   }
 )
-
