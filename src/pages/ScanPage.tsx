@@ -123,11 +123,17 @@ export const ScanPage: React.FC = () => {
     return () => { window.removeEventListener('online', online); window.removeEventListener('offline', offline) }
   }, [])
 
+  // Preload the success artwork so it appears immediately after a valid scan.
+  useEffect(() => {
+    const artwork = new Image()
+    artwork.src = '/assets/admin/popup.png'
+  }, [])
+
   useEffect(() => {
     if (!popup.show) return
-    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), 3000)
+    const timer = window.setTimeout(() => setPopup((current) => ({ ...current, show: false })), popup.success ? 5000 : 4000)
     return () => window.clearTimeout(timer)
-  }, [popup.show, popup.message])
+  }, [popup.show, popup.message, popup.success])
 
   useEffect(() => {
     if (!popup.show) return
@@ -652,22 +658,47 @@ export const ScanPage: React.FC = () => {
         {historySheetOpen && <div className="fixed inset-0 z-[90] flex items-end justify-center bg-black/65 p-3 backdrop-blur-sm" onClick={() => setHistorySheetOpen(false)}><section role="dialog" aria-modal="true" aria-label="Riwayat scan" className="scan-glass max-h-[70dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]" onClick={(event) => event.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h2 className="font-bold"><History className="mr-2 inline h-5 w-5 text-pink-300"/>Riwayat scan</h2><button type="button" onClick={() => setHistorySheetOpen(false)} className="min-h-12 min-w-12 rounded-full border border-white/20">Tutup</button></div>{logs.length === 0 ? <p className="py-8 text-center text-sm text-slate-300">Belum ada scan yang dilakukan.</p> : <div className="space-y-2">{logs.map((log) => <div key={log.id} className={`flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/60 p-3 ${log.status === 'success' ? 'border-l-4 border-l-pink-500' : log.status === 'warning' ? 'border-l-4 border-l-rose-400' : 'border-l-4 border-l-rose-500'}`}><span className="min-w-0 text-sm text-white">{log.message}</span><time className="shrink-0 text-xs text-slate-300">{log.time}</time></div>)}</div>}</section></div>}
       </div>
 
-      {/* Non-blocking scan result notification */}
-      {popup.show && (
+      {/* Success confirmation with the original artwork; failures stay as readable alerts. */}
+      {popup.show && popup.success && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:p-6">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="scan-success-title"
+            aria-live="polite"
+            className="popup-card-enter relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-pink-400/40 bg-gradient-to-b from-zinc-900 via-slate-950 to-zinc-950 p-4 text-center text-white shadow-[0_24px_100px_rgba(236,72,153,.22)] sm:p-6"
+          >
+            <button type="button" aria-label="Tutup pemberitahuan" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/50 text-xl text-slate-200 transition hover:bg-white/10">×</button>
+            <div className="overflow-hidden rounded-2xl border border-pink-300/15 bg-[radial-gradient(ellipse_at_center,rgba(236,72,153,.16),transparent_70%)] px-3 pt-3 sm:px-6">
+              <img src="/assets/admin/popup.png" alt="Wokee! Absen masuk" className="mx-auto block max-h-[38dvh] w-full object-contain drop-shadow-[0_12px_30px_rgba(236,72,153,.22)]" />
+            </div>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200"><CheckCircle2 className="h-4 w-4"/>TERSIMPAN</div>
+            <h2 id="scan-success-title" className="mt-3 text-xl font-extrabold tracking-tight sm:text-2xl">Absensi Berhasil</h2>
+            <div className="mx-auto mt-4 max-w-sm rounded-2xl border border-white/10 bg-black/30 p-4 text-left">
+              <p className="break-words text-lg font-bold leading-snug text-pink-200 sm:text-xl">{popup.nama || 'Absensi berhasil'}</p>
+              {(popup.kelas || popup.jabatan) && <p className="mt-1 text-sm text-slate-300">{[popup.kelas, popup.jabatan].filter(Boolean).join(' · ')}</p>}
+              {popup.time && <p className="mt-3 text-sm font-semibold text-white">{popup.time}</p>}
+              {popup.meetingName && <p className="mt-2 border-t border-white/10 pt-2 text-sm text-slate-300">{popup.meetingName}</p>}
+            </div>
+            <button type="button" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="mt-4 min-h-12 w-full rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-5 text-sm font-bold text-white shadow-lg shadow-pink-950/30 transition hover:brightness-110 active:scale-[.99]">Selesai</button>
+            <div aria-hidden="true" className="popup-auto-progress absolute inset-x-0 bottom-0 h-1 origin-left rounded-b-3xl bg-pink-400" />
+          </section>
+        </div>
+      )}
+      {popup.show && !popup.success && (
         <div className="pointer-events-none fixed inset-x-3 top-[max(1rem,env(safe-area-inset-top))] z-[100] flex justify-center sm:inset-x-auto sm:right-5 sm:w-[min(26rem,calc(100vw-2.5rem))]">
           <section
-            role={popup.success ? 'status' : 'alert'}
-            aria-live={popup.success ? 'polite' : 'assertive'}
+            role="alert"
+            aria-live="assertive"
             aria-atomic="true"
-            className={`popup-card-enter pointer-events-auto relative w-full rounded-2xl border p-4 pr-12 text-left shadow-2xl ${popup.success ? 'border-pink-500/40 bg-slate-900 text-white' : popupWarning ? 'border-amber-400/40 bg-slate-900 text-white' : 'border-rose-500/40 bg-slate-900 text-white'}`}
+            className={`popup-card-enter pointer-events-auto relative w-full rounded-2xl border p-4 pr-12 text-left shadow-2xl ${popupWarning ? 'border-amber-400/40 bg-slate-900 text-white' : 'border-rose-500/40 bg-slate-900 text-white'}`}
           >
             <button aria-label="Tutup pemberitahuan" onClick={() => setPopup((current) => ({ ...current, show: false }))} className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full text-slate-300 hover:bg-white/10">×</button>
             <div className="flex items-start gap-3">
-              <span className={`mt-0.5 shrink-0 ${popup.success ? 'text-pink-300' : popupWarning ? 'text-amber-300' : 'text-rose-300'}`}>{popup.success ? <CheckCircle2 className="h-5 w-5"/> : <AlertTriangle className="h-5 w-5"/>}</span>
+              <span className={`mt-0.5 shrink-0 ${popupWarning ? 'text-amber-300' : 'text-rose-300'}`}>{popupWarning ? <AlertTriangle className="h-5 w-5"/> : <XCircle className="h-5 w-5"/>}</span>
               <div className="min-w-0">
-                <p className="font-bold">{popup.success ? 'Absensi berhasil' : popup.message}</p>
-                {popup.success && <p className="mt-1 break-words text-sm text-slate-200">{[popup.nama, popup.kelas, popup.jabatan, popup.time, popup.meetingName].filter(Boolean).join(' · ') || popup.message}</p>}
-                {!popup.success && popup.nama && <p className="mt-1 text-sm text-slate-300">{[popup.nama, popup.kelas].filter(Boolean).join(' · ')}</p>}
+                <p className="font-bold">{popup.message}</p>
+                {popup.nama && <p className="mt-1 text-sm text-slate-300">{[popup.nama, popup.kelas].filter(Boolean).join(' · ')}</p>}
               </div>
             </div>
           </section>
